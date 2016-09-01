@@ -64,7 +64,10 @@ case class JsonValidator(service: Service) {
   }
 
   private[this] def validateUnion(union: Union, js: JsObject): Seq[String] = {
-    Nil
+    (js \ "discriminator").asOpt[String] match {
+      case None => Nil
+      case Some(discriminator) => validate(discriminator, js)
+    }
   }
 
   /**
