@@ -16,19 +16,38 @@ class SampleSpec extends FunSpec with Matchers {
 
   it("1 required field") {
     val form = Json.obj()
-    validator.validate("attribute_form", form) should equal(Seq("Missing required field for attribute_form: 'name'"))
+    validator.validate("attribute_form", form) should equal(
+      Left(Seq("Missing required field for attribute_form: 'name'"))
+    )
   }
 
   it("multiple required fields") {
     val form = Json.obj()
-    validator.validate("application", form) should equal(Seq("Missing required fields for application: 'guid', 'organization', 'name', 'key', 'visibility', 'audit'"))
+    validator.validate("application", form) should equal(
+      Left(Seq("Missing required fields for application: 'guid', 'organization', 'name', 'key', 'visibility', 'audit'"))
+    )
   }
 
   it("invalid type") {
     val form = Json.obj(
       "name" -> Seq("Joe", "Jr")
     )
-    validator.validate("attribute_form", form) should equal(Seq("Field attribute_form.name must be a string and not an array"))
+    validator.validate("attribute_form", form) should equal(
+      Left(Seq("Field attribute_form.name must be a string and not an array"))
+    )
+  }
+
+  it("converts 'number' into a string where possible") {
+    val form = Json.obj(
+      "name" -> 123
+    )
+    validator.validate("attribute_form", form) should equal(
+      Right(
+        Json.obj(
+          "name" -> "123"
+        )
+      )
+    )
   }
 
 }

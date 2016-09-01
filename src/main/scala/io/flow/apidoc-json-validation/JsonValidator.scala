@@ -6,11 +6,17 @@ import scala.util.{Failure, Success, Try}
 
 case class JsonValidator(service: Service) {
 
-  def validate(typeName: String, js: JsValue): Seq[String] = {
+  /**
+    * Validates the incoming JsValue against the apidoc schema,
+    * returning either human friendly validation errors or a new
+    * JsValue with any conversions applied (e.g. strings to booleans,
+    * numbers to string, etc. as dictated by the schema).
+    */
+  def validate(typeName: String, js: JsValue): Either[Seq[String], JsValue] = {
     service.models.find(_.name == typeName) match {
       case Some(m) => {
         toObject(js) match {
-          case Left(errors) => errors
+          case Left(errors) => Left(errors)
           case Right(obj) => validateModel(m, obj)
         }
       }
@@ -19,13 +25,14 @@ case class JsonValidator(service: Service) {
         service.unions.find(_.name == typeName) match {
           case Some(u) => {
             toObject(js) match {
-              case Left(errors) => errors
+              case Left(errors) => Left(errors)
               case Right(obj) => validateUnion(u, obj)
             }
           }
             
           case None => {
-            Nil
+            // Could not find model; just return original js value
+            Right(js)
           }
         }
       }
@@ -39,7 +46,9 @@ case class JsonValidator(service: Service) {
     }
   }
 
-  private[this] def validateModel(model: Model, js: JsObject): Seq[String] = {
+  private[this] def validateModel(model: Model, js: JsObject): Either[Seq[String], JsValue] = {
+    var updated = Json.obj()
+
     val missingFields = model.fields.filter(_.required).filter { f =>
       (js \ f.name).toOption.isEmpty
     }.map(_.name).toList match {
@@ -55,17 +64,26 @@ case class JsonValidator(service: Service) {
         }
 
         case Some(f) => {
-          validateType(s"Field ${model.name}.${f.name}", f.`type`, value)
+          validateType(s"Field ${model.name}.${f.name}", f.`type`, value) match {
+            case Left(errors) => errors
+            case Right(value) => {
+              updated = updated ++ Json.obj(name -> value)
+              Nil
+            }
+          }
         }
       }
     }
 
-    missingFields ++ invalidTypes
+    (missingFields ++ invalidTypes).toList match {
+      case Nil => Right(js ++ updated)
+      case errors => Left(errors)
+    }
   }
 
-  private[this] def validateUnion(union: Union, js: JsObject): Seq[String] = {
+  private[this] def validateUnion(union: Union, js: JsObject): Either[Seq[String], JsValue] = {
     (js \ "discriminator").asOpt[String] match {
-      case None => Nil
+      case None => Right(js)
       case Some(discriminator) => validate(discriminator, js)
     }
   }
@@ -73,81 +91,81 @@ case class JsonValidator(service: Service) {
   /**
     * Right now just handles primitive types
     */
-  private[this] def validateType(prefix: String, typ: String, js: JsValue): Seq[String] = {
+  private[this] def validateType(prefix: String, typ: String, js: JsValue): Either[Seq[String], JsValue] = {
     typ match {
       case "string" => validateString(prefix, js)
       case "int" => validateInteger(prefix, js)
       case "long" => validateLong(prefix, js)
       case "boolean" => validateBoolean(prefix, js)
-      case other => Nil
+      case other => Right(js)
     }
   }
 
-  def validateString(prefix: String, js: JsValue): Seq[String] = {
+  def validateString(prefix: String, js: JsValue): Either[Seq[String], JsValue] = {
     js match {
-      case v: JsArray => Seq(s"$prefix must be a string and not an array")
-      case v: JsBoolean => Seq(s"$prefix must be a string and not a boolean")
-      case JsNull => Nil
-      case v: JsNumber => Seq(s"$prefix must be a string and not a number")
-      case v: JsObject => Seq(s"$prefix must be a string and not an object")
-      case v: JsString => Nil
+      case v: JsArray => Left(Seq(s"$prefix must be a string and not an array"))
+      case v: JsBoolean => Left(Seq(s"$prefix must be a string and not a boolean"))
+      case JsNull => Right(js)
+      case v: JsNumber => Right(JsString(v.value.toString))
+      case v: JsObject => Left(Seq(s"$prefix must be a string and not an object"))
+      case v: JsString => Right(js)
     }
   }
 
-  def validateInteger(prefix: String, js: JsValue): Seq[String] = {
+  def validateInteger(prefix: String, js: JsValue): Either[Seq[String], JsValue] = {
     js match {
-      case v: JsArray => Seq(s"$prefix must be a integer and not a array")
-      case v: JsBoolean => Seq(s"$prefix must be a integer and not a boolean")
-      case JsNull => Nil
+      case v: JsArray => Left(Seq(s"$prefix must be a integer and not a array"))
+      case v: JsBoolean => Left(Seq(s"$prefix must be a integer and not a boolean"))
+      case JsNull => Right(js)
       case v: JsNumber => v.asOpt[Int] match {
-        case None => Seq(s"$prefix must be a valid integer")
-        case Some(_) => Nil
+        case None => Left(Seq(s"$prefix must be a valid integer"))
+        case Some(_) => Right(js)
       }
-      case v: JsObject => Seq(s"$prefix must be a integer and not a object")
+      case v: JsObject => Left(Seq(s"$prefix must be a integer and not a object"))
       case v: JsString => {
         Try {
           v.value.toInt
         } match {
-          case Success(_) => Nil
-          case Failure(_) => Seq(s"$prefix must be a valid integer")
+          case Success(v) => Right(JsNumber(v))
+          case Failure(_) => Left(Seq(s"$prefix must be a valid integer"))
         }
       }
     }
   }
 
-  def validateLong(prefix: String, js: JsValue): Seq[String] = {
+  def validateLong(prefix: String, js: JsValue): Either[Seq[String], JsValue] = {
     js match {
-      case v: JsArray => Seq(s"$prefix must be a long and not a array")
-      case v: JsBoolean => Seq(s"$prefix must be a long and not a boolean")
-      case JsNull => Nil
-      case v: JsNumber => v.asOpt[Int] match {
-        case None => Seq(s"$prefix must be a valid long")
-        case Some(_) => Nil
+      case v: JsArray => Left(Seq(s"$prefix must be a long and not a array"))
+      case v: JsBoolean => Left(Seq(s"$prefix must be a long and not a boolean"))
+      case JsNull => Right(js)
+      case v: JsNumber => v.asOpt[Long] match {
+        case None => Left(Seq(s"$prefix must be a valid long"))
+        case Some(_) => Right(js)
       }
-      case v: JsObject => Seq(s"$prefix must be a long and not a object")
+      case v: JsObject => Left(Seq(s"$prefix must be a long and not a object"))
       case v: JsString => {
         Try {
-          v.value.toInt
+          v.value.toLong
         } match {
-          case Success(_) => Nil
-          case Failure(_) => Seq(s"$prefix must be a valid long")
+          case Success(v) => Right(JsNumber(v))
+          case Failure(_) => Left(Seq(s"$prefix must be a valid long"))
         }
       }
     }
   }
 
-  def validateBoolean(prefix: String, js: JsValue): Seq[String] = {
+  def validateBoolean(prefix: String, js: JsValue): Either[Seq[String], JsValue] = {
     js match {
-      case v: JsArray => Seq(s"$prefix must be a boolean and not a array")
-      case v: JsBoolean => Nil
-      case JsNull => Nil
-      case v: JsNumber => Seq(s"$prefix must be a boolean and not a number")
-      case v: JsObject => Seq(s"$prefix must be a boolean and not a object")
+      case v: JsArray => Left(Seq(s"$prefix must be a boolean and not a array"))
+      case v: JsBoolean => Right(js)
+      case JsNull => Right(js)
+      case v: JsNumber => Left(Seq(s"$prefix must be a boolean and not a number"))
+      case v: JsObject => Left(Seq(s"$prefix must be a boolean and not a object"))
       case v: JsString => {
         v.value.toLowerCase match {
-          case "t" | "true" => Nil
-          case "f" | "false" => Nil
-          case _ => Seq(s"$prefix must be a valid boolean")
+          case "t" | "true" => Right(JsBoolean(true))
+          case "f" | "false" => Right(JsBoolean(false))
+          case _ => Left(Seq(s"$prefix must be a valid boolean"))
         }
       }
     }
