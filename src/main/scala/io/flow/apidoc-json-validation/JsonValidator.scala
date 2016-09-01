@@ -88,6 +88,8 @@ case class JsonValidator(service: Service) {
     }
   }
 
+  private[this] val ArrayPattern = """^[+(.+)]""".r
+
   /**
     * Right now just handles primitive types
     */
@@ -97,6 +99,7 @@ case class JsonValidator(service: Service) {
       case "int" => validateInteger(prefix, js)
       case "long" => validateLong(prefix, js)
       case "boolean" => validateBoolean(prefix, js)
+      case ArrayPattern(_) => validateArray(prefix, js)
       case other => Right(js)
     }
   }
@@ -108,6 +111,17 @@ case class JsonValidator(service: Service) {
       case JsNull => Right(js)
       case v: JsNumber => Right(JsString(v.value.toString))
       case v: JsObject => Left(Seq(s"$prefix must be a string and not an object"))
+      case v: JsString => Right(js)
+    }
+  }
+
+  def validateArray(prefix: String, js: JsValue): Either[Seq[String], JsValue] = {
+    js match {
+      case v: JsArray => Right(js)
+      case v: JsBoolean => Left(Seq(s"$prefix must be an array and not a boolean"))
+      case JsNull => Right(js)
+      case v: JsNumber => Right(JsString(v.value.toString))
+      case v: JsObject => Left(Seq(s"$prefix must be an array and not an object"))
       case v: JsString => Right(js)
     }
   }
