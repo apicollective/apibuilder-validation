@@ -12,6 +12,8 @@ import play.api.libs.json._
   *  TypeLookup(service).forPath("POST", "/users")
   * 
   * => Some("user_form")
+  *
+  * This class is thread safe
   */
 case class TypeLookup(service: Service) {
 

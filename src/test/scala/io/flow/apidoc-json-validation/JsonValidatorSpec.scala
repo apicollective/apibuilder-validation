@@ -1,76 +1,137 @@
 package io.flow.lib.apidoc.json.validation
 
-import com.bryzek.apidoc.api.v0.models.AttributeForm
-import com.bryzek.apidoc.api.v0.models.json._
+import io.flow.v0.models.{Address, CardForm, EventType, WebhookForm}
+import io.flow.v0.models.json._
 import com.bryzek.apidoc.spec.v0.models.Service
 import com.bryzek.apidoc.spec.v0.models.json._
 import play.api.libs.json._
 import org.scalatest.{FunSpec, Matchers}
 
-class SampleSpec extends FunSpec with Matchers {
+class JsonValidatorSpec extends FunSpec with Matchers {
 
   lazy val service = {
-    val contents = scala.io.Source.fromFile("src/test/resources/apidoc-api-service.json", "UTF-8").getLines.mkString("\n")
+    val contents = scala.io.Source.fromFile("src/test/resources/flow-api-service.json", "UTF-8").getLines.mkString("\n")
     Json.parse(contents).as[Service]
   }
 
   lazy val validator = JsonValidator(service)
 
   it("1 required field") {
-    val form = Json.obj()
-    validator.validate("attribute_form", form) should equal(
-      Left(Seq("Missing required field for attribute_form: 'name'"))
+    validator.validate(
+      "webhook_form",
+      Json.obj("url" -> "https://test.flow.io")
+    ) should equal(
+      Left(Seq("Missing required field for type 'webhook_form': 'events'"))
     )
   }
 
   it("multiple required fields") {
-    val form = Json.obj()
-    validator.validate("application", form) should equal(
-      Left(Seq("Missing required fields for application: 'guid', 'organization', 'name', 'key', 'visibility', 'audit'"))
+    validator.validate(
+      "webhook_form",
+      Json.obj()
+    ) should equal(
+      Left(Seq("Missing required fields for type 'webhook_form': 'url', 'events'"))
     )
   }
 
   it("invalid type") {
     val form = Json.obj(
-      "name" -> Seq("Joe", "Jr")
+      "url" -> Seq("https://a.flow.io", "https://b.flow.io"),
+      "events" -> "*"
     )
-    validator.validate("attribute_form", form) should equal(
-      Left(Seq("Field attribute_form.name must be a string and not an array"))
-    )
-  }
-
-  it("converts 'number' into a string where possible") {
-    val form = Json.obj(
-      "name" -> 123
-    )
-    validator.validate("attribute_form", form) should equal(
-      Right(
-        Json.obj(
-          "name" -> "123"
+    validator.validate("webhook_form", form) should equal(
+      Left(
+        Seq(
+          "Type 'webhook_form' field 'url' must be a string and not an array",
+          "Type 'webhook_form' field 'events' of type '[event_type]': must be an array and not a string"
         )
       )
     )
   }
 
-  it("Json validation") {
+  it("converts 'number' into a string where possible") {
     val form = Json.obj(
-      "name" -> 123
+      "url" -> 123,
+      "events" -> Seq("*")
+    )
+    validator.validate("webhook_form", form) should equal(
+      Right(
+        Json.obj(
+          "url" -> "123",
+          "events" -> Seq("*")
+        )
+      )
+    )
+  }
+
+  it("converts types") {
+    val form = Json.obj(
+      "number" -> 123,
+      "expiration_month" -> "01",
+      "expiration_year" -> "2019",
+      "name" -> "Joe Smith"
     )
 
-    form.validate[AttributeForm] match {
-      case s: JsSuccess[AttributeForm] => sys.error("Expected form to NOT validate")
+    form.validate[CardForm] match {
+      case s: JsSuccess[CardForm] => sys.error("Expected form to NOT validate")
       case e: JsError => //
     }
 
-    val converted: JsValue = validator.validate("attribute_form", form).right.get
-    
-    converted.validate[AttributeForm] match {
-      case s: JsSuccess[AttributeForm] => {
+    val converted: JsValue = validator.validate("card_form", form).right.get
+
+    converted.validate[CardForm] match {
+      case s: JsSuccess[CardForm] => {
         val form = s.get
-        form.name should be("123")
+        form.number should be(Some("123"))
+        form.expirationMonth should be(1)
+        form.expirationYear should be(2019)
+        form.name should be("Joe Smith")
       }
-      case e: JsError => sys.error("Expected validation to succeed")
+      case e: JsError => {
+        sys.error(s"Expected validation to succeed but got: $e")
+      }
     }
   }
 
+  it("converted nested values in arrays") {
+    val form = Json.obj(
+      "url" -> JsString("https://test.flow.io"),
+      "events" -> JsArray(Seq(JsString("catalog_upserted"), JsNumber(123)))
+    )
+
+    form.validate[CardForm] match {
+      case s: JsSuccess[CardForm] => sys.error("Expected form to NOT validate")
+      case e: JsError => //
+    }
+
+    val converted: JsValue = validator.validate("webhook_form", form).right.get
+
+    converted.validate[WebhookForm] match {
+      case s: JsSuccess[WebhookForm] => {
+        val form = s.get
+        form.url should be("https://test.flow.io")
+        form.events should be(Seq(EventType.CatalogUpserted, EventType.UNDEFINED("123")))
+      }
+      case e: JsError => {
+        sys.error(s"Expected validation to succeed but got: $e")
+      }
+    }
+  }
+
+  it("validates array values") {
+    val form = Json.obj(
+      "url" -> JsString("https://test.flow.io"),
+      "events" -> JsArray(Seq(JsString("catalog_upserted"), Json.obj()))
+    )
+
+    form.validate[CardForm] match {
+      case s: JsSuccess[CardForm] => sys.error("Expected form to NOT validate")
+      case e: JsError => //
+    }
+
+    validator.validate("webhook_form", form).left.get should be(
+      Seq("Type 'webhook_form' field 'events' of type '[event_type]': element in position[1] must be a string and not an object")
+    )
+  }
+  
 }
