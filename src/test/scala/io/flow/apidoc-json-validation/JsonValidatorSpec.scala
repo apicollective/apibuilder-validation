@@ -1,6 +1,6 @@
 package io.flow.lib.apidoc.json.validation
 
-import io.flow.v0.models.{Address, CardForm, EventType, WebhookForm}
+import io.flow.v0.models.{Address, CardForm, EventType, ItemForm, WebhookForm}
 import io.flow.v0.models.json._
 import com.bryzek.apidoc.spec.v0.models.Service
 import com.bryzek.apidoc.spec.v0.models.json._
@@ -132,6 +132,44 @@ class JsonValidatorSpec extends FunSpec with Matchers {
     validator.validate("webhook_form", form).left.get should be(
       Seq("Type 'webhook_form' field 'events' of type '[event_type]': element in position[1] must be a string and not an object")
     )
+  }
+
+  it("validates maps") {
+    val form = Json.obj(
+      "number" -> "sku-1",
+      "name" -> "test",
+      "currency" -> "USD",
+      "price" -> 10,
+      "locale" -> "en_us",
+      "attributes" -> Json.obj(
+        "a" -> 1,
+        "b" -> true,
+        "c" -> "baz"
+      )
+    )
+
+    val js = validator.validate("item_form", form) match {
+      case Left(errors) => sys.error(errors.mkString(", "))
+      case Right(js) => js
+    }
+
+    js.validate[ItemForm] match {
+      case s: JsSuccess[ItemForm] => {
+        val i = s.get
+        i.attributes should be(
+          Some(
+            Map(
+              "a" -> "1",
+              "b" -> "true",
+              "c" -> "baz"
+            )
+          )
+        )
+      }
+      case e: JsError => {
+        sys.error(s"Expected validation to succeed but got: $e")
+      }
+    }
   }
   
 }

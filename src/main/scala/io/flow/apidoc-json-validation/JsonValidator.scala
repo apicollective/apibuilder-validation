@@ -48,8 +48,12 @@ case class JsonValidator(service: Service) {
               }
             
               case None => {
-                // Could not find model; just return original js value
-                Right(js)
+                // may be a primitive type like 'string'
+                validateType(
+                  prefix.getOrElse("Type '$typeName'"),
+                  typeName,
+                  js
+                )
               }
             }
           }
@@ -137,6 +141,7 @@ case class JsonValidator(service: Service) {
   }
 
   private[this] val ArrayPattern = """^\[(.+)\]$""".r
+  private[this] val ObjectPattern = """^map\[(.+)\]$""".r
 
   /**
     * Validates the JS Value based on the expected apidoc type.
@@ -148,6 +153,7 @@ case class JsonValidator(service: Service) {
       case "long" => validateLong(prefix, js)
       case "boolean" => validateBoolean(prefix, js)
       case ArrayPattern(internalType) => validateArray(prefix + s" of type '[$internalType]':", internalType, js)
+      case ObjectPattern(internalType) => validateObject(prefix + s" of type '[$internalType]':", internalType, js)
       case other => Right(js)
     }
   }
@@ -155,7 +161,7 @@ case class JsonValidator(service: Service) {
   def validateString(prefix: String, js: JsValue): Either[Seq[String], JsString] = {
     js match {
       case v: JsArray => Left(Seq(s"$prefix must be a string and not an array"))
-      case v: JsBoolean => Left(Seq(s"$prefix must be a string and not a boolean"))
+      case v: JsBoolean => Right(JsString(v.value.toString))
       case JsNull => Left(Seq(s"$prefix must be a string"))
       case v: JsNumber => Right(JsString(v.value.toString))
       case v: JsObject => Left(Seq(s"$prefix must be a string and not an object"))
@@ -179,6 +185,32 @@ case class JsonValidator(service: Service) {
       case v: JsNumber => Left(Seq(s"$prefix must be an array and not a number"))
       case v: JsObject => Left(Seq(s"$prefix must be an array and not an object"))
       case v: JsString => Left(Seq(s"$prefix must be an array and not a string"))
+    }
+  }
+
+  def validateObject(prefix: String, internalType: String, js: JsValue): Either[Seq[String], JsObject] = {
+    js match {
+      case v: JsArray => Left(Seq(s"$prefix must be an object and not an array"))
+      case v: JsBoolean => Left(Seq(s"$prefix must be an object and not a boolean"))
+      case JsNull => Left(Seq(s"$prefix must be an object"))
+      case v: JsNumber => Left(Seq(s"$prefix must be an object and not a number"))
+      case v: JsObject => {
+        val eithers: Seq[Either[Seq[String], JsObject]] = v.fields.map { case (name, el) =>
+          validate(internalType, el, Some(prefix + s" element[$name]")) match {
+            case Left(errors) => Left(errors)
+            case Right(js) => Right(Json.obj(name -> js))
+          }
+        }
+        eithers.forall(_.isRight) match {
+          case true => {
+            Right(
+              eithers.map(_.right.get).foldLeft(v) { case (a, b) => a ++ b }
+            )
+          }
+          case false => Left(eithers.filter(_.isLeft).flatMap(_.left.get))
+        }
+      }
+      case v: JsString => Left(Seq(s"$prefix must be an object and not a string"))
     }
   }
 
