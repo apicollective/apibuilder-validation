@@ -23,10 +23,9 @@ class JsonValidatorSpec extends FunSpec with Matchers {
     }
 
     val uri = new URL("http://apidoc.me/bryzek/apidoc-common/latest/service.json")
-    val service = JsonValidator(uri).right.getOrElse {
+    JsonValidator(uri).right.getOrElse {
       sys.error(s"Failed to load service from uri[$uri]")
     }
-    service.name should be("apidoc common")
   }
 
   it("1 required field") {

@@ -24,11 +24,11 @@ object JsonValidator {
     * Loads the apidoc service specification from the specified URI,
     * returning either a list of errors or the service itself.
     */
-  def apply(url: java.net.URL): Either[Seq[String], Service] = {
+  def apply(url: java.net.URL): Either[Seq[String], JsonValidator] = {
     import com.bryzek.apidoc.spec.v0.models.json._
     Try {
-      val contents = Source.fromURL(url).mkString
-      Json.parse(contents).as[Service]
+      val contents = Source.fromURL(url, "UTF-8").mkString
+      JsonValidator(Json.parse(contents).as[Service])
     } match {
       case Success(service) => Right(service)
       case Failure(ex) => Left(Seq(s"Error loading service from url[$url]: ${ex.getMessage}"))
