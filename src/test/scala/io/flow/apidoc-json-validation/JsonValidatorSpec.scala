@@ -1,6 +1,8 @@
 package io.flow.lib.apidoc.json.validation
 
-import com.bryzek.apidoc.spec.v0.models.{Contact, Service}
+import com.bryzek.apidoc.api.v0.models.AttributeForm
+import com.bryzek.apidoc.api.v0.models.json._
+import com.bryzek.apidoc.spec.v0.models.Service
 import com.bryzek.apidoc.spec.v0.models.json._
 import play.api.libs.json._
 import org.scalatest.{FunSpec, Matchers}
@@ -48,6 +50,27 @@ class SampleSpec extends FunSpec with Matchers {
         )
       )
     )
+  }
+
+  it("Json validation") {
+    val form = Json.obj(
+      "name" -> 123
+    )
+
+    form.validate[AttributeForm] match {
+      case s: JsSuccess[AttributeForm] => sys.error("Expected form to NOT validate")
+      case e: JsError => //
+    }
+
+    val converted: JsValue = validator.validate("attribute_form", form).right.get
+    
+    converted.validate[AttributeForm] match {
+      case s: JsSuccess[AttributeForm] => {
+        val form = s.get
+        form.name should be("123")
+      }
+      case e: JsError => sys.error("Expected validation to succeed")
+    }
   }
 
 }

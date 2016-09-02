@@ -4,3 +4,16 @@ code:
       version: latest
       generators:
         play_2_x_standalone_json: src/main/scala/io/flow/generated
+
+    apidoc-common:
+      version: latest
+      generators:
+        play_2_x_standalone_json: src/test/scala/io/flow/generated
+    apidoc-api:
+      version: latest
+      generators:
+        play_2_x_standalone_json: src/test/scala/io/flow/generated
+    apidoc-generator:
+      version: latest
+      generators:
+        play_2_x_standalone_json: src/test/scala/io/flow/generated
