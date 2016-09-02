@@ -2,12 +2,39 @@ package io.flow.lib.apidoc.json.validation
 
 import com.bryzek.apidoc.spec.v0.models.{Enum, Model, Service, Union}
 import play.api.libs.json._
+import scala.io.Source
 import scala.util.{Failure, Success, Try}
 
+/**
+  * We auto convert strings to booleans based on common, well known
+  * values from various frameworks. For example, the string 'true' or
+  * 't' will result in the boolean true - see TrueValues and
+  * FalseValues for all supported strings.
+  */
 object Booleans {
 
   val TrueValues = Seq("t", "true", "y", "yes", "on", "1", "trueclass")
   val FalseValues = Seq("f", "false", "n", "no", "off", "0", "falseclass")
+
+}
+
+object JsonValidator {
+
+  /**
+    * Loads the apidoc service specification from the specified URI,
+    * returning either a list of errors or the service itself.
+    */
+  def apply(url: java.net.URL): Either[Seq[String], Service] = {
+    import com.bryzek.apidoc.spec.v0.models.json._
+    Try {
+      val contents = Source.fromURL(url).mkString
+      Json.parse(contents).as[Service]
+    } match {
+      case Success(service) => Right(service)
+      case Failure(ex) => Left(Seq(s"Error loading service from url[$url]: ${ex.getMessage}"))
+    }
+  }
+  
 
 }
 

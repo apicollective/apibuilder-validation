@@ -1,9 +1,10 @@
 package io.flow.lib.apidoc.json.validation
 
-import io.flow.v0.models.{Address, CardForm, EventType, ItemForm, WebhookForm}
-import io.flow.v0.models.json._
 import com.bryzek.apidoc.spec.v0.models.Service
 import com.bryzek.apidoc.spec.v0.models.json._
+import io.flow.v0.models.{Address, CardForm, EventType, ItemForm, WebhookForm}
+import io.flow.v0.models.json._
+import java.net.URL
 import play.api.libs.json._
 import org.scalatest.{FunSpec, Matchers}
 
@@ -15,6 +16,18 @@ class JsonValidatorSpec extends FunSpec with Matchers {
   }
 
   lazy val validator = JsonValidator(service)
+
+  it("fromUrl") {
+    JsonValidator(new URL("file://non-existent-tmp")).left.getOrElse {
+      sys.error("Expected error from invalid url")
+    }
+
+    val uri = new URL("http://apidoc.me/bryzek/apidoc-common/latest/service.json")
+    val service = JsonValidator(uri).right.getOrElse {
+      sys.error(s"Failed to load service from uri[$uri]")
+    }
+    service.name should be("apidoc common")
+  }
 
   it("1 required field") {
     validator.validate(
