@@ -38,7 +38,7 @@ object JsonValidator {
 
 }
 
-case class JsonValidator(service: Service) {
+case class JsonValidator(val service: Service) {
 
   /**
     * Validates the incoming JsValue against the apidoc schema,
