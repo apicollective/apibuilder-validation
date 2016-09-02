@@ -172,4 +172,21 @@ class JsonValidatorSpec extends FunSpec with Matchers {
     }
   }
   
+  it("returns appropriate error messages from maps") {
+    val form = Json.obj(
+      "number" -> "sku-1",
+      "name" -> "test",
+      "currency" -> "USD",
+      "price" -> 10,
+      "locale" -> "en_us",
+      "attributes" -> Json.obj(
+        "a" -> Json.obj()
+      )
+    )
+
+    validator.validate("item_form", form) should be(
+      Left(Seq("Type 'item_form' field 'attributes' of type 'map[string]': element[a] must be a string and not an object"))
+    )
+  }
+  
 }

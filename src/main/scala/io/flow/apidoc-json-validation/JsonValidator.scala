@@ -153,7 +153,7 @@ case class JsonValidator(service: Service) {
       case "long" => validateLong(prefix, js)
       case "boolean" => validateBoolean(prefix, js)
       case ArrayPattern(internalType) => validateArray(prefix + s" of type '[$internalType]':", internalType, js)
-      case ObjectPattern(internalType) => validateObject(prefix + s" of type '[$internalType]':", internalType, js)
+      case ObjectPattern(internalType) => validateObject(prefix + s" of type 'map[$internalType]':", internalType, js)
       case other => Right(js)
     }
   }
