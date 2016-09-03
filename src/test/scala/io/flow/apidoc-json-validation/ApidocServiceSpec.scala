@@ -43,6 +43,6 @@ class ApidocServiceSpec extends FunSpec with Matchers {
       Left(Seq("Missing required field for type 'webhook_form': 'events'"))
     )
   }
-  
+ 
 
 }

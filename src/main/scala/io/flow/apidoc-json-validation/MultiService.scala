@@ -10,6 +10,10 @@ case class MultiService(
   services: Seq[ApidocService]
 ) {
 
+  def typeFromPath(method: String, path: String): Option[String] = {
+    services.flatMap(_.typeFromPath(method, path)).headOption
+  }
+  
   /**
     * Validates the js value across all services.
     */
