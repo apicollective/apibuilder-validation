@@ -7,10 +7,35 @@ import play.api.libs.json._
 import scala.io.Source
 import scala.util.{Failure, Success, Try}
 
+/**
+  * Wraps a single apidoc service, providing helpers to validate
+  * objects
+  */
 case class ApidocService(
   uri: String,
   service: Service
-)
+) {
+
+  private[this] val typeLookup = TypeLookup(service)
+  private[this] val validator = JsonValidator(service)
+
+  def typeFromPath(method: String, path: String): Option[String] = {
+    typeLookup.forPath(method, path)
+  }
+
+  def validate(method: String, path: String, js: JsValue): Either[Seq[String], JsValue] = {
+    typeFromPath(method, path) match {
+      case None => {
+        Right(js)
+      }
+
+      case Some(typ) => {
+        validator.validate(typ, js)
+      }
+    }
+  }
+
+}
 
 object ApidocService {
 
