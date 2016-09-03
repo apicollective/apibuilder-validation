@@ -166,7 +166,12 @@ case class JsonValidator(val service: Service) {
 
   def validateString(prefix: String, js: JsValue): Either[Seq[String], JsString] = {
     js match {
-      case v: JsArray => Left(Seq(s"$prefix must be a string and not an array"))
+      case v: JsArray => {
+        v.value.size match {
+          case 1 => validateString(prefix, v.value.head)
+          case _ => Left(Seq(s"$prefix must be a string and not an array"))
+        }
+      }
       case v: JsBoolean => Right(JsString(v.value.toString))
       case JsNull => Left(Seq(s"$prefix must be a string"))
       case v: JsNumber => Right(JsString(v.value.toString))
@@ -196,7 +201,12 @@ case class JsonValidator(val service: Service) {
 
   def validateObject(prefix: String, internalType: String, js: JsValue): Either[Seq[String], JsObject] = {
     js match {
-      case v: JsArray => Left(Seq(s"$prefix must be an object and not an array"))
+      case v: JsArray => {
+        v.value.size match {
+          case 1 => validateObject(prefix, internalType, v.value.head)
+          case _ => Left(Seq(s"$prefix must be an object and not an array"))
+        }
+      }
       case v: JsBoolean => Left(Seq(s"$prefix must be an object and not a boolean"))
       case JsNull => Left(Seq(s"$prefix must be an object"))
       case v: JsNumber => Left(Seq(s"$prefix must be an object and not a number"))
@@ -222,7 +232,12 @@ case class JsonValidator(val service: Service) {
 
   def validateInteger(prefix: String, js: JsValue): Either[Seq[String], JsNumber] = {
     js match {
-      case v: JsArray => Left(Seq(s"$prefix must be an integer and not a array"))
+      case v: JsArray => {
+        v.value.size match {
+          case 1 => validateInteger(prefix, v.value.head)
+          case _ => Left(Seq(s"$prefix must be an integer and not an array"))
+        }
+      }
       case v: JsBoolean => Left(Seq(s"$prefix must be an integer and not a boolean"))
       case JsNull => Left(Seq(s"$prefix must be an integer"))
       case v: JsNumber => v.asOpt[Int] match {
@@ -243,7 +258,12 @@ case class JsonValidator(val service: Service) {
 
   def validateLong(prefix: String, js: JsValue): Either[Seq[String], JsNumber] = {
     js match {
-      case v: JsArray => Left(Seq(s"$prefix must be a long and not a array"))
+      case v: JsArray => {
+        v.value.size match {
+          case 1 => validateLong(prefix, v.value.head)
+          case _ => Left(Seq(s"$prefix must be a long and not an array"))
+        }
+      }
       case v: JsBoolean => Left(Seq(s"$prefix must be a long and not a boolean"))
       case JsNull => Left(Seq(s"$prefix must be a long"))
       case v: JsNumber => v.asOpt[Long] match {
@@ -264,7 +284,12 @@ case class JsonValidator(val service: Service) {
 
   def validateBoolean(prefix: String, js: JsValue): Either[Seq[String], JsBoolean] = {
     js match {
-      case v: JsArray => Left(Seq(s"$prefix must be a boolean and not a array"))
+      case v: JsArray => {
+        v.value.size match {
+          case 1 => validateBoolean(prefix, v.value.head)
+          case _ => Left(Seq(s"$prefix must be a boolean and not an array"))
+        }
+      }
       case v: JsBoolean => Right(v)
       case JsNull => Left(Seq(s"$prefix must be a boolean"))
       case v: JsNumber => Left(Seq(s"$prefix must be a boolean and not a number"))
