@@ -140,9 +140,19 @@ case class JsonValidator(val service: Service) {
     js: JsObject,
     prefix: Option[String]
   ): Either[Seq[String], JsValue] = {
-    (js \ "discriminator").asOpt[String] match {
-      case None => Right(js)
-      case Some(discriminator) => validate(discriminator, js, prefix)
+    union.discriminator match {
+      case None => {
+        // Skip validation; not a use case at flow as there is no
+        // discriminator specified
+        Right(js)
+      }
+
+      case Some(discriminator) => {
+        (js \ discriminator).asOpt[String] match {
+          case None => Left(Seq("Union type '${union.name}' requires a field named '${discriminator}'"))
+          case Some(value) => validate(value, js, prefix)
+        }
+      }
     }
   }
 
