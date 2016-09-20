@@ -57,6 +57,14 @@ class FormDataSpec extends FunSpec with Matchers {
         "foo" -> Seq("bar")
       )
     )
+
+    // Now test with 'key' in different order
+    FormData.parseEncoded("key=val1&foo=bar&key=val2") should be(
+      Map(
+        "key" -> Seq("val1", "val2"),
+        "foo" -> Seq("bar")
+      )
+    )
   }
 
   describe("toJson") {
