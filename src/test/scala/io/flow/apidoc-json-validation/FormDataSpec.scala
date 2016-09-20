@@ -22,6 +22,51 @@ class FormDataSpec extends FunSpec with Matchers {
     )
   }
 
+  it("rewriteEncoded") {
+    FormData.rewriteEncoded("number[]=100379876543&number[]=WT65xSPLX-SPT-5") should be(
+      "number=100379876543&number=WT65xSPLX-SPT-5"
+    )
+
+    FormData.rewriteEncoded("user[name][first]=mike&user[name][last]=bryzek") should be(
+      "user[name][first]=mike&user[name][last]=bryzek"
+    )
+
+    FormData.rewriteEncoded("user[name][first][]=mike&user[name][first][]=maciej&user[name][last]=bryzek") should be(
+      "user[name][first]=mike&user[name][first]=maciej&user[name][last]=bryzek"
+    )
+  }
+
+  it("arrays with []") {
+    FormData.parseEncoded("number[]=1&number[]=2") should be(
+      Map("number[]" -> Seq("1", "2"))
+    )
+
+    FormData.toJson(FormData.parseEncoded("number[]=1&number[]=2")) should be(
+      Json.obj("number" -> Seq("1", "2"))
+    )
+  }
+
+  it("arrays") {
+    FormData.parseEncoded("key=val1&key=val2") should be(
+      Map("key" -> Seq("val1", "val2"))
+    )
+    
+    FormData.parseEncoded("key=val1&key=val2&foo=bar") should be(
+      Map(
+        "key" -> Seq("val1", "val2"),
+        "foo" -> Seq("bar")
+      )
+    )
+
+    // Now test with 'key' in different order
+    FormData.parseEncoded("key=val1&foo=bar&key=val2") should be(
+      Map(
+        "key" -> Seq("val1", "val2"),
+        "foo" -> Seq("bar")
+      )
+    )
+  }
+
   describe("toJson") {
 
     val data: Map[String, Seq[String]] = Map(
@@ -30,7 +75,7 @@ class FormDataSpec extends FunSpec with Matchers {
       "name[last]" -> Seq("roth"),
       "one[two][three][four]" -> Seq("haha"),
       "one[two][three][five]" -> Seq("wow"),
-      "arr[][arr2][]" -> Seq("fruit", "vegitables"),
+      "arr[][arr2][]" -> Seq("fruit", "vegetables"),
       "tags[]" -> Seq("foo", "bar"),
       "yikes" -> Seq("yes", "no")
     )
