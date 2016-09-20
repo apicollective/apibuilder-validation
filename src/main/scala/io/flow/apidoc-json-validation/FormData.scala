@@ -59,18 +59,16 @@ object FormData {
     keys.toList match {
       case Nil => enc
       case one :: rest => {
-        s"%s=%s".format(buildKey(rest, one), enc)
+        s"%s=%s".format(buildKey(one, rest), enc)
       }
     }
   }
 
   @scala.annotation.tailrec
-  private[this] def buildKey(values: Seq[String], result: String): String = {
+  private[this] def buildKey(result: String, values: Seq[String]): String = {
     values.toList match {
       case Nil => result
-      case one :: rest => {
-        buildKey(rest, s"$result[$one]")
-      }
+      case one :: rest => buildKey(s"$result[$one]", rest)
     }
   }
 
