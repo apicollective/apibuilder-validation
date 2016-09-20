@@ -31,7 +31,7 @@ object FormData {
     * Converts the specified js value into a url form encoded string,
     * recursively through all types.
     * 
-    * @oaram keys Keeps track of the top level keys we are parsing to
+    * @param keys Keeps track of the top level keys we are parsing to
     *        build up nested keys (e.g. user[first] for maps)
     */
   def toEncoded(js: JsValue, keys: Seq[String] = Nil): String = {
