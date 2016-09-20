@@ -75,7 +75,7 @@ object FormData {
   def parseEncoded(value: String): Map[String, Seq[String]] = {
     val data = scala.collection.mutable.Map[String, Seq[String]]()
     value.split("&").foreach { x =>
-      x.split("=").toList match {
+      x.split("=", 2).toList match {
         case key :: value :: Nil => {
           val values = data.get(key) match {
             case None => Seq(value)
