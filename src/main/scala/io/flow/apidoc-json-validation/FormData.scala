@@ -55,11 +55,10 @@ object FormData {
   }
 
   private[this] def encode(value: String, keys: Seq[String] = Nil): String = {
-    val enc = URLEncoder.encode(value, "UTF-8")
     keys.toList match {
-      case Nil => enc
+      case Nil => value
       case one :: rest => {
-        s"%s=%s".format(buildKey(one, rest), enc)
+        s"%s=%s".format(buildKey(one, rest), value)
       }
     }
   }

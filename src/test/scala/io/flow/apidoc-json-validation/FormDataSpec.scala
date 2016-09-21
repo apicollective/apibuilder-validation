@@ -20,6 +20,12 @@ class FormDataSpec extends FunSpec with Matchers {
         "foo" -> Seq("bar")
       )
     )
+
+    FormData.parseEncoded("q=category:shoes") should be(
+      Map(
+        "q" -> Seq("category:shoes")
+      )
+    )
   }
 
   it("rewriteEncoded") {
@@ -33,6 +39,10 @@ class FormDataSpec extends FunSpec with Matchers {
 
     FormData.rewriteEncoded("user[name][first][]=mike&user[name][first][]=maciej&user[name][last]=bryzek") should be(
       "user[name][first]=mike&user[name][first]=maciej&user[name][last]=bryzek"
+    )
+
+    FormData.rewriteEncoded("q=category:shoes") should be(
+      "q=category:shoes"
     )
   }
 
