@@ -92,12 +92,17 @@ object FormData {
   }
 
   def toJson(data: Map[String, Seq[String]]): JsObject = {
-    val nested = data.map{ case (key, value) =>
+    val nested = data.map{ case (key, values) =>
       key.split("\\[").foldRight(
-        if(key.contains("[]"))
-          Json.toJson(value)  //take seq for arrays
-        else
-          Json.toJson(value.headOption.getOrElse(""))
+        if(key.contains("[]")) {
+          Json.toJson(values)  //take seq for arrays
+        } else {
+          values match {
+            case Nil => Json.toJson("")
+            case one :: Nil => Json.toJson(one)
+            case multiple => Json.toJson(values)
+          }
+        }
       ){ case (newKey, v) =>
         val newVal = {
           val js = (v \ "").getOrElse(v)

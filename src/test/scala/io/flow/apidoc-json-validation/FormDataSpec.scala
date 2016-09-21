@@ -67,6 +67,17 @@ class FormDataSpec extends FunSpec with Matchers {
     )
   }
 
+  it("toJson parses multiple values") {
+    val data = Map("foo" -> Seq("a", "b"), "foo2" -> Seq("c"))
+    val js = FormData.toJson(data)
+
+    val foo: Seq[String] = (js \ "foo").as[JsArray].value.map(_.asInstanceOf[JsString].value)
+    foo should equal(Seq("a", "b"))
+
+    val foo2: String = (js \ "foo2").as[JsString].value
+    foo2 should equal("c")
+  }
+  
   describe("toJson") {
 
     val data: Map[String, Seq[String]] = Map(
@@ -120,9 +131,9 @@ class FormDataSpec extends FunSpec with Matchers {
       }
     }
 
-    it("takes first instance of non-array key") {
-      (FormData.toJson(data) \ "yikes").validate[String] match {
-        case JsSuccess(succ,_) => succ should be("yes")
+    it("multi valued arrays are lists") {
+      (FormData.toJson(data) \ "yikes").validate[Seq[String]] match {
+        case JsSuccess(succ,_) => succ should be(Seq("yes", "no"))
         case JsError(_) => assert(false)
       }
     }
