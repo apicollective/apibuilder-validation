@@ -55,7 +55,7 @@ case class JsonValidator(val service: Service) {
             
               case None => {
                 // may be a primitive type like 'string'
-                validateType(
+                validateApidocType(
                   prefix.getOrElse("Type '$typeName'"),
                   typeName,
                   js
@@ -111,10 +111,12 @@ case class JsonValidator(val service: Service) {
         }
 
         case Some(f) => {
-          validateType(
-            prefix.getOrElse(s"Type '${model.name}' field '${f.name}'"),
-            f.`type`,
-            value
+          validate(
+            typeName = f.`type`,
+            js = value,
+            prefix = Some(
+              prefix.getOrElse(s"Type '${model.name}' field '${f.name}'")
+            )
           ) match {
             case Left(errors) => {
               errors
@@ -162,7 +164,7 @@ case class JsonValidator(val service: Service) {
   /**
     * Validates the JS Value based on the expected apidoc type.
     */
-  private[this] def validateType(prefix: String, typ: String, js: JsValue): Either[Seq[String], JsValue] = {
+  private[this] def validateApidocType(prefix: String, typ: String, js: JsValue): Either[Seq[String], JsValue] = {
     typ match {
       case "string" => validateString(prefix, js)
       case "integer" => validateInteger(prefix, js)

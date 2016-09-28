@@ -64,6 +64,25 @@ class JsonValidatorSpec extends FunSpec with Matchers {
     )
   }
 
+  it("validates nested models") {
+    val form = Json.obj(
+      "number" -> 123,
+      "expiration_month" -> "01",
+      "expiration_year" -> "2019",
+      "name" -> "Joe Smith",
+      "address" -> Json.obj(
+        "streets" -> JsArray(Seq(JsString("1 main st"), JsNull))
+      )
+    )
+
+    validator.validate("card_form", form) match {
+      case Left(errors) => errors should equal(
+        Seq("Type 'card_form' field 'address' of type '[string]': element in position[1] must be a string and not null")
+      )
+      case Right(js) => sys.error("Expected form to NOT validate")
+    }
+  }
+
   it("converts types") {
     val form = Json.obj(
       "number" -> 123,
@@ -77,7 +96,10 @@ class JsonValidatorSpec extends FunSpec with Matchers {
       case e: JsError => //
     }
 
-    val converted: JsValue = validator.validate("card_form", form).right.get
+    val converted: JsValue = validator.validate("card_form", form) match {
+      case Left(errors) => sys.error(errors.mkString(", "))
+      case Right(js) => js
+    }
 
     converted.validate[CardForm] match {
       case s: JsSuccess[CardForm] => {
@@ -197,5 +219,5 @@ class JsonValidatorSpec extends FunSpec with Matchers {
       Left(Seq("Type 'item_form' field 'attributes' of type 'map[string]': element[a] must be a string and not an object"))
     )
   }
-  
+
 }
