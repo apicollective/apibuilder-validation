@@ -121,7 +121,13 @@ class JsonValidatorSpec extends FunSpec with Matchers {
   it("validates array values") {
     val form = Json.obj(
       "url" -> JsString("https://test.flow.io"),
-      "events" -> JsArray(Seq(JsString("catalog_upserted"), Json.obj()))
+      "events" -> JsArray(
+        Seq(
+          JsString("catalog_upserted"),
+          Json.obj(),
+          JsNull
+        )
+      )
     )
 
     form.validate[CardForm] match {
@@ -130,7 +136,10 @@ class JsonValidatorSpec extends FunSpec with Matchers {
     }
 
     validator.validate("webhook_form", form).left.get should be(
-      Seq("Type 'webhook_form' field 'events' of type '[event_type]': element in position[1] must be a string and not an object")
+      Seq(
+        "Type 'webhook_form' field 'events' of type '[event_type]': element in position[1] must be a string and not an object",
+        "Type 'webhook_form' field 'events' of type '[event_type]': element in position[2] must be a string and not null"
+      )
     )
   }
 

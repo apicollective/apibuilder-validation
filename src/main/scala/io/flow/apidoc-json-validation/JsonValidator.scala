@@ -183,7 +183,7 @@ case class JsonValidator(val service: Service) {
         }
       }
       case v: JsBoolean => Right(JsString(v.value.toString))
-      case JsNull => Left(Seq(s"$prefix must be a string"))
+      case JsNull => Left(Seq(s"$prefix must be a string and not null"))
       case v: JsNumber => Right(JsString(v.value.toString))
       case v: JsObject => Left(Seq(s"$prefix must be a string and not an object"))
       case v: JsString => Right(v)
@@ -202,7 +202,7 @@ case class JsonValidator(val service: Service) {
         }
       }
       case v: JsBoolean => Left(Seq(s"$prefix must be an array and not a boolean"))
-      case JsNull => Left(Seq(s"$prefix must be an array"))
+      case JsNull => Left(Seq(s"$prefix must be an array and not null"))
       case v: JsNumber => Left(Seq(s"$prefix must be an array and not a number"))
       case v: JsObject => Left(Seq(s"$prefix must be an array and not an object"))
       case v: JsString => Left(Seq(s"$prefix must be an array and not a string"))
@@ -218,7 +218,7 @@ case class JsonValidator(val service: Service) {
         }
       }
       case v: JsBoolean => Left(Seq(s"$prefix must be an object and not a boolean"))
-      case JsNull => Left(Seq(s"$prefix must be an object"))
+      case JsNull => Left(Seq(s"$prefix must be an object and not null"))
       case v: JsNumber => Left(Seq(s"$prefix must be an object and not a number"))
       case v: JsObject => {
         val eithers: Seq[Either[Seq[String], JsObject]] = v.fields.map { case (name, el) =>
@@ -249,7 +249,7 @@ case class JsonValidator(val service: Service) {
         }
       }
       case v: JsBoolean => Left(Seq(s"$prefix must be an integer and not a boolean"))
-      case JsNull => Left(Seq(s"$prefix must be an integer"))
+      case JsNull => Left(Seq(s"$prefix must be an integer and not null"))
       case v: JsNumber => v.asOpt[Int] match {
         case None => Left(Seq(s"$prefix must be a valid integer"))
         case Some(_) => Right(v)
@@ -275,7 +275,7 @@ case class JsonValidator(val service: Service) {
         }
       }
       case v: JsBoolean => Left(Seq(s"$prefix must be a long and not a boolean"))
-      case JsNull => Left(Seq(s"$prefix must be a long"))
+      case JsNull => Left(Seq(s"$prefix must be a long and not null"))
       case v: JsNumber => v.asOpt[Long] match {
         case None => Left(Seq(s"$prefix must be a valid long"))
         case Some(_) => Right(v)
@@ -301,7 +301,7 @@ case class JsonValidator(val service: Service) {
         }
       }
       case v: JsBoolean => Right(v)
-      case JsNull => Left(Seq(s"$prefix must be a boolean"))
+      case JsNull => Left(Seq(s"$prefix must be a boolean and not null"))
       case v: JsNumber => Left(Seq(s"$prefix must be a boolean and not a number"))
       case v: JsObject => Left(Seq(s"$prefix must be a boolean and not a object"))
       case v: JsString => {
