@@ -220,7 +220,7 @@ class JsonValidatorSpec extends FunSpec with Matchers {
     )
   }
 
-  it("Property validates null in place of array") {
+  it("Properly validates null in place of array") {
     val form = Json.obj(
       "number" -> 123,
       "expiration_month" -> "01",
@@ -239,7 +239,7 @@ class JsonValidatorSpec extends FunSpec with Matchers {
     }
   }
 
-  it("Property reports errors on js objects") {
+  it("Properly reports errors on js objects") {
     val form = Json.obj(
       "name" -> "",
       "email" -> "rob@flow.io",
