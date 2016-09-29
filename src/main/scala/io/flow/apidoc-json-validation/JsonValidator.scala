@@ -38,7 +38,7 @@ case class JsonValidator(val service: Service) {
       case None => {
         service.models.find(_.name == typeName) match {
           case Some(m) => {
-            toObject(js) match {
+            toObject(prefix.getOrElse("Body"), js) match {
               case Left(errors) => Left(errors)
               case Right(obj) => validateModel(m, obj, prefix)
             }
@@ -47,7 +47,7 @@ case class JsonValidator(val service: Service) {
           case None => {
             service.unions.find(_.name == typeName) match {
               case Some(u) => {
-                toObject(js) match {
+                toObject(prefix.getOrElse("Body"), js) match {
                   case Left(errors) => Left(errors)
                   case Right(obj) => validateUnion(u, obj, prefix)
                 }
@@ -68,11 +68,16 @@ case class JsonValidator(val service: Service) {
     }
   }
 
-
-  private[this] def toObject(js: JsValue): Either[Seq[String], JsObject] = {
+  private[this] def toObject(prefix: String, js: JsValue): Either[Seq[String], JsObject] = {
     js match {
-      case obj: JsObject => Right(obj)
-      case _ => Left(Seq(s"Expected a json object and not a '${js.getClass.getName}'"))
+      case v: JsArray => {
+        Left(Seq(s"$prefix must be an object and not an array"))
+      }
+      case v: JsBoolean => Left(Seq(s"$prefix must be an object and not a boolean"))
+      case JsNull => Left(Seq(s"$prefix must be an object and not null"))
+      case v: JsNumber => Left(Seq(s"$prefix must be an object and not a number"))
+      case v: JsObject => Right(v)
+      case v: JsString => Left(Seq(s"$prefix must be an object and not a string"))
     }
   }
 
