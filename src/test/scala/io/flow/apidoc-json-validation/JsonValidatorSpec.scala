@@ -220,4 +220,23 @@ class JsonValidatorSpec extends FunSpec with Matchers {
     )
   }
 
+  it("Property validates null in place of array") {
+    val form = Json.obj(
+      "number" -> 123,
+      "expiration_month" -> "01",
+      "expiration_year" -> "2019",
+      "name" -> "Joe Smith",
+      "address" -> Json.obj(
+        "streets" -> JsNull
+      )
+    )
+
+    validator.validate("card_form", form) match {
+      case Left(errors) => errors should equal(
+        Seq("Type 'card_form' field 'address' of type '[string]': must be an array and not null")
+      )
+      case Right(js) => sys.error("Expected form to NOT validate")
+    }
+  }
+
 }
