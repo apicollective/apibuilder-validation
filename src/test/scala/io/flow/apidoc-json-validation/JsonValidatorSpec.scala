@@ -239,4 +239,20 @@ class JsonValidatorSpec extends FunSpec with Matchers {
     }
   }
 
+  it("Property reports errors on js objects") {
+    val form = Json.obj(
+      "name" -> "",
+      "email" -> "rob@flow.io",
+      "organization" -> "demo",
+      "role" -> "member"
+    )
+
+    validator.validate("invitation_form", form) match {
+      case Left(errors) => errors should equal(
+        Seq("Type 'invitation_form' field 'name' must be an object and not a string")
+      )
+      case Right(js) => sys.error("Expected form to NOT validate")
+    }
+  }
+
 }
