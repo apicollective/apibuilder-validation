@@ -2,7 +2,7 @@ package io.flow.lib.apidoc.json.validation
 
 import com.bryzek.apidoc.spec.v0.models.Service
 import com.bryzek.apidoc.spec.v0.models.json._
-import io.flow.v0.models.{Address, CardForm, EventType, ItemForm, WebhookForm}
+import io.flow.v0.models.{Address, CardForm, EventType, HarmonizedItemForm, ItemForm, WebhookForm}
 import io.flow.v0.models.json._
 import play.api.libs.json._
 import org.scalatest.{FunSpec, Matchers}
@@ -43,7 +43,7 @@ class JsonValidatorSpec extends FunSpec with Matchers {
       Left(
         Seq(
           "Type 'webhook_form' field 'url' must be a string and not an array",
-          "Type 'webhook_form' field 'events' of type '[event_type]': must be an array and not a string"
+          "Type 'webhook_form' field 'events' of type '[string]': must be an array and not a string"
         )
       )
     )
@@ -64,6 +64,53 @@ class JsonValidatorSpec extends FunSpec with Matchers {
     )
   }
 
+  it("converts booleans where possible") {
+    (
+      Booleans.TrueValues.map(JsString(_)) ++ Seq(JsNumber(1))
+    ).foreach { v =>
+      val form = Json.obj(
+        "code" -> "match",
+        "name" -> v
+      )
+      validator.validate("avs", form) should equal(
+        Right(
+          Json.obj(
+            "code" -> "match",
+            "name" -> true
+          )
+        )
+      )
+    }
+
+    (
+      Booleans.FalseValues.map(JsString(_)) ++ Seq(JsNumber(0))
+    ).foreach { v =>
+      val form = Json.obj(
+        "code" -> "match",
+        "name" -> v
+      )
+      validator.validate("avs", form) should equal(
+        Right(
+          Json.obj(
+            "code" -> "match",
+            "name" -> false
+          )
+        )
+      )
+    }
+  }
+
+  it("validates enum values") {
+    val form = Json.obj(
+      "code" -> "bad"
+    )
+    validator.validate("avs", form) should equal(
+      Left(
+        Seq("Type 'avs' field 'code' invalid value 'bad'. Valid values for the enum 'avs_code' are: 'match', 'partial', 'unsupported', 'no_match'")
+      )
+    )
+  }
+  
   it("validates nested models") {
     val form = Json.obj(
       "number" -> 123,
@@ -82,6 +129,7 @@ class JsonValidatorSpec extends FunSpec with Matchers {
       case Right(js) => sys.error("Expected form to NOT validate")
     }
   }
+
 
   it("converts types") {
     val form = Json.obj(
@@ -117,22 +165,24 @@ class JsonValidatorSpec extends FunSpec with Matchers {
 
   it("converted nested values in arrays") {
     val form = Json.obj(
-      "url" -> JsString("https://test.flow.io"),
-      "events" -> JsArray(Seq(JsString("catalog_upserted"), JsNumber(123)))
+      "name" -> JsString("Test item"),
+      "number" -> JsString("sku-1"),
+      "categories" -> JsArray(Seq(JsString("a"), JsNumber(123)))
     )
 
-    form.validate[CardForm] match {
-      case s: JsSuccess[CardForm] => sys.error("Expected form to NOT validate")
+    form.validate[HarmonizedItemForm] match {
+      case s: JsSuccess[HarmonizedItemForm] => sys.error("Expected form to NOT validate")
       case e: JsError => //
     }
 
-    val converted: JsValue = validator.validate("webhook_form", form).right.get
+    val converted: JsValue = validator.validate("harmonized_item_form", form).right.get
 
-    converted.validate[WebhookForm] match {
-      case s: JsSuccess[WebhookForm] => {
+    converted.validate[HarmonizedItemForm] match {
+      case s: JsSuccess[HarmonizedItemForm] => {
         val form = s.get
-        form.url should be("https://test.flow.io")
-        form.events should be(Seq(EventType.CatalogUpserted, EventType.UNDEFINED("123")))
+        form.name should be("Test item")
+        form.number should be("sku-1")
+        form.categories should be(Some(Seq("a", "123")))
       }
       case e: JsError => {
         sys.error(s"Expected validation to succeed but got: $e")
@@ -142,25 +192,26 @@ class JsonValidatorSpec extends FunSpec with Matchers {
 
   it("validates array values") {
     val form = Json.obj(
-      "url" -> JsString("https://test.flow.io"),
-      "events" -> JsArray(
+      "name" -> JsString("Test item"),
+      "number" -> JsString("sku-1"),
+      "categories" -> JsArray(
         Seq(
-          JsString("catalog_upserted"),
+          JsString("furniture"),
           Json.obj(),
           JsNull
         )
       )
     )
 
-    form.validate[CardForm] match {
-      case s: JsSuccess[CardForm] => sys.error("Expected form to NOT validate")
+    form.validate[HarmonizedItemForm] match {
+      case s: JsSuccess[HarmonizedItemForm] => sys.error("Expected form to NOT validate")
       case e: JsError => //
     }
 
-    validator.validate("webhook_form", form).left.get should be(
+    validator.validate("harmonized_item_form", form).left.get should be(
       Seq(
-        "Type 'webhook_form' field 'events' of type '[event_type]': element in position[1] must be a string and not an object",
-        "Type 'webhook_form' field 'events' of type '[event_type]': element in position[2] must be a string and not null"
+        "Type 'harmonized_item_form' field 'categories' of type '[string]': element in position[1] must be a string and not an object",
+        "Type 'harmonized_item_form' field 'categories' of type '[string]': element in position[2] must be a string and not null"
       )
     )
   }

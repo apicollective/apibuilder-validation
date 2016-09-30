@@ -32,7 +32,7 @@ case class JsonValidator(val service: Service) {
   ): Either[Seq[String], JsValue] = {
     service.enums.find(_.name == typeName) match {
       case Some(e) => {
-        validateEnum(e, js, prefix)
+        validateEnum(prefix.getOrElse("Body"), e, js)
       }
 
       case None => {
@@ -82,14 +82,26 @@ case class JsonValidator(val service: Service) {
   }
 
   private[this] def validateEnum(
+    prefix: String,
     enum: Enum,
-    js: JsValue,
-    prefix: Option[String]
+    js: JsValue
   ): Either[Seq[String], JsValue] = {
-    validateString(prefix.getOrElse(s"Enum '${enum.name}'"), js) match {
+    validateString(prefix, js) match {
       case Left(errors) => Left(errors)
-      case Right(value) => {
-        Right(value)
+      case Right(jsString) => {
+        val incomingValue = jsString.value.trim
+        val valid = enum.values.map(_.name)
+        valid.find { _.toLowerCase.trim == incomingValue.toLowerCase } match {
+          case None => {
+            Left(
+              Seq(
+                s"$prefix invalid value '${incomingValue}'. Valid values for the enum '${enum.name}' are: " +
+                  valid.mkString("'", "', '", "'")
+              )
+            )
+          }
+          case Some(validValue) => Right(JsString(validValue))
+        }
       }
     }
   }
@@ -156,7 +168,7 @@ case class JsonValidator(val service: Service) {
 
       case Some(discriminator) => {
         (js \ discriminator).asOpt[String] match {
-          case None => Left(Seq("Union type '${union.name}' requires a field named '${discriminator}'"))
+          case None => Left(Seq(s"Union type '${union.name}' requires a field named '${discriminator}'"))
           case Some(value) => validate(value, js, prefix)
         }
       }
@@ -309,7 +321,17 @@ case class JsonValidator(val service: Service) {
       }
       case v: JsBoolean => Right(v)
       case JsNull => Left(Seq(s"$prefix must be a boolean and not null"))
-      case v: JsNumber => Left(Seq(s"$prefix must be a boolean and not a number"))
+      case v: JsNumber => {
+        Booleans.TrueValues.contains(v.value.toString) match {
+          case true => Right(JsBoolean(true))
+          case false => {
+            Booleans.FalseValues.contains(v.value.toString) match {
+              case true => Right(JsBoolean(false))
+              case false => Left(Seq(s"$prefix must be a boolean and not a number"))
+            }
+          }
+        }
+      }
       case v: JsObject => Left(Seq(s"$prefix must be a boolean and not a object"))
       case v: JsString => {
         Booleans.TrueValues.contains(v.value.toLowerCase) match {
