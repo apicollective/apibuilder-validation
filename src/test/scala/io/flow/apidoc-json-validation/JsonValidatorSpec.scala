@@ -64,6 +64,42 @@ class JsonValidatorSpec extends FunSpec with Matchers {
     )
   }
 
+  it("converts booleans where possible") {
+    (
+      Booleans.TrueValues.map(JsString(_)) ++ Seq(JsNumber(1))
+    ).foreach { v =>
+      val form = Json.obj(
+        "code" -> "match",
+        "name" -> v
+      )
+      validator.validate("avs", form) should equal(
+        Right(
+          Json.obj(
+            "code" -> "match",
+            "name" -> true
+          )
+        )
+      )
+    }
+
+    (
+      Booleans.FalseValues.map(JsString(_)) ++ Seq(JsNumber(0))
+    ).foreach { v =>
+      val form = Json.obj(
+        "code" -> "match",
+        "name" -> v
+      )
+      validator.validate("avs", form) should equal(
+        Right(
+          Json.obj(
+            "code" -> "match",
+            "name" -> false
+          )
+        )
+      )
+    }
+  }
+
   it("validates nested models") {
     val form = Json.obj(
       "number" -> 123,
@@ -82,6 +118,7 @@ class JsonValidatorSpec extends FunSpec with Matchers {
       case Right(js) => sys.error("Expected form to NOT validate")
     }
   }
+
 
   it("converts types") {
     val form = Json.obj(

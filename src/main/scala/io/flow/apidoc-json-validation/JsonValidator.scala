@@ -156,7 +156,7 @@ case class JsonValidator(val service: Service) {
 
       case Some(discriminator) => {
         (js \ discriminator).asOpt[String] match {
-          case None => Left(Seq("Union type '${union.name}' requires a field named '${discriminator}'"))
+          case None => Left(Seq(s"Union type '${union.name}' requires a field named '${discriminator}'"))
           case Some(value) => validate(value, js, prefix)
         }
       }
@@ -309,7 +309,17 @@ case class JsonValidator(val service: Service) {
       }
       case v: JsBoolean => Right(v)
       case JsNull => Left(Seq(s"$prefix must be a boolean and not null"))
-      case v: JsNumber => Left(Seq(s"$prefix must be a boolean and not a number"))
+      case v: JsNumber => {
+        Booleans.TrueValues.contains(v.value.toString) match {
+          case true => Right(JsBoolean(true))
+          case false => {
+            Booleans.FalseValues.contains(v.value.toString) match {
+              case true => Right(JsBoolean(false))
+              case false => Left(Seq(s"$prefix must be a boolean and not a number"))
+            }
+          }
+        }
+      }
       case v: JsObject => Left(Seq(s"$prefix must be a boolean and not a object"))
       case v: JsString => {
         Booleans.TrueValues.contains(v.value.toLowerCase) match {
