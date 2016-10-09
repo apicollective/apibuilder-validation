@@ -14,8 +14,9 @@ class MultiServiceSpec extends FunSpec with Matchers {
       "http://apidoc.me/flow/api/latest/service.json",
       "http://apidoc.me/bryzek/apidoc-api/latest/service.json"
     )
-  ).right.getOrElse {
-    sys.error("Failed to load")
+  ) match {
+    case Left(errors) => sys.error(s"Failed to load: $errors")
+    case Right(s) => s
   }
 
   it("loads multiple services") {

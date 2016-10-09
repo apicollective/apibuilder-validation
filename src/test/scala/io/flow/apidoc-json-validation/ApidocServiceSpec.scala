@@ -23,9 +23,11 @@ class ApidocServiceSpec extends FunSpec with Matchers {
     }
 
     val url = "http://apidoc.me/bryzek/apidoc-common/latest/service.json"
-    ApidocService.fromUrl(url).right.getOrElse {
-      sys.error(s"Failed to load service from url[$url]")
-    }.service.name should be("apidoc common")
+    val service = ApidocService.fromUrl(url) match {
+      case Left(errors) => sys.error(s"Failed to load service from url[$url]: $errors")
+      case Right(s) => s
+    }
+    service.name should be("apidoc common")
   }
 
   it("typeFromPath") {
