@@ -20,7 +20,7 @@ val multi = MultiService.fromUrls(
   case Right(m) => m
 }
 
-// If there is an error, return a very nice, human frientdy error message
+// If there is an error, return a very nice, human friendly error message
 multi.validate(
   "POST",
   "/:organization/webhooks",
