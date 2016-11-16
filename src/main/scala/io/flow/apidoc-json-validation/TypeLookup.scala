@@ -14,7 +14,7 @@ import play.api.libs.json._
   * => Some("user_form")
   *
   * This class is thread safe
-  */
+  **/
 case class TypeLookup(service: Service) {
 
   private[this] val cache = Map[String, String](
