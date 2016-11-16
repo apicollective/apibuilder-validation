@@ -68,4 +68,20 @@ class MultiServiceSpec extends FunSpec with Matchers {
     (js \ "expiration_year").as[JsNumber].value should be(2017)
     (js \ "cvv").as[JsString].value should be("123")
   }
+
+  it("simple number example") {
+    val form = Json.obj(
+      "url" -> 123,
+      "events" -> 456
+    )
+
+    val js = multi.validate(
+      "POST",
+      "/:organization/webhooks",
+      Json.toJson(form)
+    ).right.get
+
+    (js \ "url").as[JsString].value should be("123")
+    (js \ "events").as[JsArray].value should be(Seq("456"))
+  }
 }
