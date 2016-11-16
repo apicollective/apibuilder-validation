@@ -220,11 +220,11 @@ case class JsonValidator(val service: Service) {
           case false => Left(eithers.filter(_.isLeft).flatMap(_.left.get))
         }
       }
-      case v: JsBoolean => Left(Seq(s"$prefix must be an array and not a boolean"))
+      case v: JsBoolean => Right(JsArray(Seq(v)))
       case JsNull => Left(Seq(s"$prefix must be an array and not null"))
-      case v: JsNumber => Left(Seq(s"$prefix must be an array and not a number"))
-      case v: JsObject => Left(Seq(s"$prefix must be an array and not an object"))
-      case v: JsString => Left(Seq(s"$prefix must be an array and not a string"))
+      case v: JsNumber => Right(JsArray(Seq(v)))
+      case v: JsObject => Right(JsArray(Seq(v)))
+      case v: JsString => Right(JsArray(Seq(v)))
     }
   }
 

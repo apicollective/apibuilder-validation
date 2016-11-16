@@ -37,13 +37,27 @@ class JsonValidatorSpec extends FunSpec with Matchers {
   it("invalid type") {
     val form = Json.obj(
       "url" -> Seq("https://a.flow.io", "https://b.flow.io"),
-      "events" -> "*"
+      "events" -> Seq("*")
     )
     validator.validate("webhook_form", form) should equal(
       Left(
         Seq(
-          "Type 'webhook_form' field 'url' must be a string and not an array",
-          "Type 'webhook_form' field 'events' of type '[string]': must be an array and not a string"
+          "Type 'webhook_form' field 'url' must be a string and not an array"
+        )
+      )
+    )
+  }
+
+  it("Upcasts singletons to arrays") {
+    val form = Json.obj(
+      "url" -> "https://a.flow.io",
+      "events" -> "*"
+    )
+    validator.validate("webhook_form", form) should equal(
+      Right(
+        Json.obj(
+          "url" -> "https://a.flow.io",
+          "events" -> Seq("*")
         )
       )
     )
