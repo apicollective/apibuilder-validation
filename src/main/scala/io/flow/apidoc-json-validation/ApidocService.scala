@@ -12,7 +12,6 @@ import scala.util.{Failure, Success, Try}
   * objects
   */
 case class ApidocService(
-  uri: String,
   service: Service
 ) {
 
@@ -48,13 +47,17 @@ object ApidocService {
       Source.fromURL(new URL(url),  "UTF-8").mkString
     } match {
       case Success(contents) => {
-        Json.parse(contents).validate[Service] match {
-          case s: JsSuccess[Service] => Right(ApidocService(url, s.get))
-          case e: JsError => Left(Seq(s"Error parsing service from url[$url]: $e"))
-        }
+        toService(contents)
       }
       case Failure(ex) => Left(Seq(s"Error downloading url[$url]: ${ex.getMessage}"))
     }
   }
 
+  def toService(contents: String): Either[Seq[String], ApidocService] = {
+    Json.parse(contents).validate[Service] match {
+      case s: JsSuccess[Service] => Right(ApidocService(s.get))
+      case e: JsError => Left(Seq(s"Error parsing service: $e"))
+    }
+  }
+  
 }

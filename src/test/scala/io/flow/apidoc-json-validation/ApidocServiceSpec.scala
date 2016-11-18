@@ -9,22 +9,25 @@ import org.scalatest.{FunSpec, Matchers}
 
 class ApidocServiceSpec extends FunSpec with Matchers {
 
-  lazy val service = {
-    val contents = scala.io.Source.fromFile("src/test/resources/flow-api-service.json", "UTF-8").getLines.mkString("\n")
-    ApidocService(
-      "test",
-      Json.parse(contents).as[Service]
-    )
+  def readFile(name: String): String = {
+    scala.io.Source.fromFile("src/test/resources/" + name, "UTF-8").getLines.mkString("\n")
   }
+
+  def readUrl(url: String): String = {
+    val path = url.toLowerCase.stripPrefix("http://").stripPrefix("https://").split("/").toList.mkString("/")
+    println("path: " + path)
+    readFile(path)
+  }
+
+  lazy val service = ApidocService.toService(readFile("flow-api-service.json")).right.get
 
   it("fromUrl") {
     ApidocService.fromUrl("file://non-existent-tmp").left.getOrElse {
       sys.error("Expected error from invalid url")
     }
 
-    val url = "http://apidoc.me/bryzek/apidoc-common/latest/service.json"
-    val result = ApidocService.fromUrl(url) match {
-      case Left(errors) => sys.error(s"Failed to load service from url[$url]: $errors")
+    val result = ApidocService.toService(readFile("apidoc-common-service.json")) match {
+      case Left(errors) => sys.error(s"Failed to load service: $errors")
       case Right(s) => s
     }
     result.service.name should be("apidoc common")

@@ -9,29 +9,32 @@ import org.scalatest.{FunSpec, Matchers}
 
 class MultiServiceSpec extends FunSpec with Matchers {
 
-  lazy val multi = MultiService.fromUrls(
-    Seq(
-      "http://apidoc.me/flow/api/latest/service.json",
-      "http://apidoc.me/bryzek/apidoc-api/latest/service.json"
-    )
-  ) match {
-    case Left(errors) => sys.error(s"Failed to load: $errors")
-    case Right(s) => s
+  lazy val multi = {
+    val base = "file://" + new java.io.File(".").getAbsolutePath()
+    MultiService.fromUrls(
+      Seq(
+        s"$base/src/test/resources/flow-api-service.json",
+        s"$base/src/test/resources/apidoc-api-service.json"
+      )
+    )match {
+      case Left(errors) => sys.error(s"Failed to load: $errors")
+      case Right(s) => s
+    }
   }
 
   it("loads multiple services") {
-    multi.services.map(_.service.name) should be(Seq("API", "apidoc api"))
+    multi.services.map(_.service.name) should equal(Seq("API", "apidoc api"))
   }
 
   it("typeFromPath") {
-    multi.typeFromPath("POST", "/foo") should be(None)
+    multi.typeFromPath("POST", "/foo") should equal(None)
 
     // resources from flow api
-    multi.typeFromPath("POST", "/users") should be(Some("user_form"))
-    multi.typeFromPath("POST", "/:organization/webhooks") should be(Some("webhook_form"))
+    multi.typeFromPath("POST", "/users") should equal(Some("user_form"))
+    multi.typeFromPath("POST", "/:organization/webhooks") should equal(Some("webhook_form"))
 
     // resources from apidoc api
-    multi.typeFromPath("POST", "/:orgKey") should be(Some("application_form"))
+    multi.typeFromPath("POST", "/:orgKey") should equal(Some("application_form"))
   }
 
   it("validate") {
@@ -63,10 +66,10 @@ class MultiServiceSpec extends FunSpec with Matchers {
       Json.toJson(form)
     ).right.get
 
-    (js \ "name").as[JsString].value should be("John%20Doe")
-    (js \ "expiration_month").as[JsNumber].value should be(12)
-    (js \ "expiration_year").as[JsNumber].value should be(2017)
-    (js \ "cvv").as[JsString].value should be("123")
+    (js \ "name").as[JsString].value should equal("John%20Doe")
+    (js \ "expiration_month").as[JsNumber].value should equal(12)
+    (js \ "expiration_year").as[JsNumber].value should equal(2017)
+    (js \ "cvv").as[JsString].value should equal("123")
   }
 
   it("simple number example") {
@@ -81,7 +84,7 @@ class MultiServiceSpec extends FunSpec with Matchers {
       Json.toJson(form)
     ).right.get
 
-    (js \ "url").as[JsString].value should be("123")
-    (js \ "events").as[JsArray].value should be(Seq("456"))
+    (js \ "url").as[JsString].value should equal("123")
+    (js \ "events").as[JsArray] should equal(JsArray(Seq(JsString("456"))))
   }
 }
