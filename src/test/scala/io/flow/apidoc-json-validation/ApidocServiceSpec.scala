@@ -13,12 +13,6 @@ class ApidocServiceSpec extends FunSpec with Matchers {
     scala.io.Source.fromFile("src/test/resources/" + name, "UTF-8").getLines.mkString("\n")
   }
 
-  def readUrl(url: String): String = {
-    val path = url.toLowerCase.stripPrefix("http://").stripPrefix("https://").split("/").toList.mkString("/")
-    println("path: " + path)
-    readFile(path)
-  }
-
   lazy val service = ApidocService.toService(readFile("flow-api-service.json")).right.get
 
   it("fromUrl") {
