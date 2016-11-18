@@ -220,11 +220,11 @@ case class JsonValidator(val service: Service) {
           case false => Left(eithers.filter(_.isLeft).flatMap(_.left.get))
         }
       }
-      case v: JsBoolean => Right(JsArray(Seq(v)))
       case JsNull => Left(Seq(s"$prefix must be an array and not null"))
-      case v: JsNumber => Right(JsArray(Seq(v)))
-      case v: JsObject => Right(JsArray(Seq(v)))
-      case v: JsString => Right(JsArray(Seq(v)))
+      case v => validate(internalType, v, Some(prefix + s" element in position[0]")) match {
+        case Left(errors) => Left(errors)
+        case Right(t) => Right(JsArray(Seq(t)))
+      }
     }
   }
 
