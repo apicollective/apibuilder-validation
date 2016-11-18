@@ -128,6 +128,7 @@ class JsonValidatorSpec extends FunSpec with Matchers {
   it("validates nested models") {
     val form = Json.obj(
       "number" -> 123,
+      "cvv" -> 456,
       "expiration_month" -> "01",
       "expiration_year" -> "2019",
       "name" -> "Joe Smith",
@@ -148,6 +149,7 @@ class JsonValidatorSpec extends FunSpec with Matchers {
   it("converts types") {
     val form = Json.obj(
       "number" -> 123,
+      "cvv" -> Seq("456"),
       "expiration_month" -> "01",
       "expiration_year" -> "2019",
       "name" -> "Joe Smith"
@@ -167,6 +169,7 @@ class JsonValidatorSpec extends FunSpec with Matchers {
       case s: JsSuccess[CardForm] => {
         val form = s.get
         form.number should be(Some("123"))
+        form.cvv should be(Some("456"))
         form.expirationMonth should be(1)
         form.expirationYear should be(2019)
         form.name should be("Joe Smith")
@@ -288,6 +291,7 @@ class JsonValidatorSpec extends FunSpec with Matchers {
   it("Properly validates null in place of array") {
     val form = Json.obj(
       "number" -> 123,
+      "cvv" -> 456,
       "expiration_month" -> "01",
       "expiration_year" -> "2019",
       "name" -> "Joe Smith",
