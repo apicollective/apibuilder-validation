@@ -30,7 +30,7 @@ case class ApidocService(
       case None => {
         methods.keys.toList match {
           case Nil => {
-            Left(Seq(s"HTTP method $method not supported for path $path"))
+            Right(js)
           }
 
           case available => {
