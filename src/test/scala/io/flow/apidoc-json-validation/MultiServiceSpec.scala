@@ -27,14 +27,14 @@ class MultiServiceSpec extends FunSpec with Matchers {
   }
 
   it("typeFromPath") {
-    multi.typeFromPath("POST", "/foo") should equal(None)
+    multi.bodyTypeFromPath("POST", "/foo") should equal(None)
 
     // resources from flow api
-    multi.typeFromPath("POST", "/users") should equal(Some("user_form"))
-    multi.typeFromPath("POST", "/:organization/webhooks") should equal(Some("webhook_form"))
+    multi.bodyTypeFromPath("POST", "/users") should equal(Some("user_form"))
+    multi.bodyTypeFromPath("POST", "/:organization/webhooks") should equal(Some("webhook_form"))
 
     // resources from apidoc api
-    multi.typeFromPath("POST", "/:orgKey") should equal(Some("application_form"))
+    multi.bodyTypeFromPath("POST", "/:orgKey") should equal(Some("application_form"))
   }
 
   it("validate") {
