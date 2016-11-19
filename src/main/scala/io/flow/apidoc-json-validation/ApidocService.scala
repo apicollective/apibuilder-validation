@@ -21,7 +21,7 @@ case class ApidocService(
   private[this] val validator = JsonValidator(service)
 
   def typeFromPath(method: String, path: String): Option[String] = {
-    typeLookup.typeFromPath(method = method, path = path)
+    typeLookup.bodyTypeFromPath(method = method, path = path)
   }
 
   def validate(method: String, path: String, js: JsValue): Either[Seq[String], JsValue] = {

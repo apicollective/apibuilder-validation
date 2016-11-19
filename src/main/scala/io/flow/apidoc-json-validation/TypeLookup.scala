@@ -32,10 +32,16 @@ case class TypeLookup(service: Service) {
     }.toMap
   }
 
-  def typeFromPath(method: String, path: String): Option[String] = {
+  /**
+    * If the specified method, path require a body, returns the type of the body
+    */
+  def bodyTypeFromPath(method: String, path: String): Option[String] = {
     operationsByMethod(path).get(Method(method)).flatMap(_.body.map(_.`type`))
   }
 
+  /**
+    * Returns a map of the operations available for the specified path. Keys are the HTTP Methods.
+    */
   def operationsByMethod(path: String): Map[Method, Operation] = {
     byPaths.get(path).getOrElse(Map.empty)
   }
