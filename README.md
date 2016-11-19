@@ -20,8 +20,10 @@ val multi = MultiService.fromUrls(
   case Right(m) => m
 }
 
-// If there is an error, return a very nice, human friendly error message
-multi.validate(
+// If there is an error, return a very nice, human friendly error message.
+// Otherwise 'upcast' the json object to one that matches the expectations
+// set by the specification.
+multi.upcast(
   "POST",
   "/:organization/webhooks",
   Json.obj("url" -> "https://test.flow.io")
@@ -30,7 +32,7 @@ multi.validate(
 )
 
 // This js value will handle standard js type conversions (e.g. boolean -> string)
-val js = multi.validate(
+val js = multi.upcast(
   "POST",
   "/:organization/webhooks",
   Json.obj("url" -> "https://test.flow.io", "events" -> ["catalog_upserted"])

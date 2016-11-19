@@ -1,6 +1,6 @@
 package io.flow.lib.apidoc.json.validation
 
-import com.bryzek.apidoc.spec.v0.models.Service
+import com.bryzek.apidoc.spec.v0.models.{Method, Service}
 import com.bryzek.apidoc.spec.v0.models.json._
 import io.flow.v0.models.{Address, CardForm, EventType, ItemForm, WebhookForm}
 import io.flow.v0.models.json._
@@ -28,13 +28,24 @@ class ApidocServiceSpec extends FunSpec with Matchers {
   }
 
   it("typeFromPath") {
-    service.typeFromPath("POST", "/foo") should be(None)
-    service.typeFromPath("POST", "/users") should be(Some("user_form"))
-    service.typeFromPath("POST", "/:organization/webhooks") should be(Some("webhook_form"))
+    service.bodyTypeFromPath("POST", "/foo") should be(None)
+    service.bodyTypeFromPath("POST", "/users") should be(Some("user_form"))
+    service.bodyTypeFromPath("POST", "/:organization/webhooks") should be(Some("webhook_form"))
+  }
+
+  it("unknown path") {
+    service.operationsByMethod("/other").get(Method.Options) should be(None)
+  }
+
+  it("resolves for known paths") {
+    service.bodyTypeFromPath("POST", "/users") should be(Some("user_form"))
+    service.bodyTypeFromPath("post", "/:organization/orders") should be(Some("order_form"))
+    service.bodyTypeFromPath("PUT", "/:organization/orders/:number") should be(Some("order_put_form"))
+    service.bodyTypeFromPath("DELETE", "/:organization/orders/:number") should be(None)
   }
 
   it("offers validation error w/ verb replacement") {
-    service.validate(
+    service.upcast(
       "OPTIONS",
       "/:organization/webhooks",
       Json.obj("url" -> "https://test.flow.io", "events" -> "*")
@@ -44,7 +55,7 @@ class ApidocServiceSpec extends FunSpec with Matchers {
   }
 
   it("validate") {
-    service.validate(
+    service.upcast(
       "POST",
       "/:organization/webhooks",
       Json.obj("url" -> "https://test.flow.io")

@@ -39,7 +39,7 @@ class MultiServiceSpec extends FunSpec with Matchers {
 
   it("validate") {
     // path from flow api
-    multi.validate(
+    multi.upcast(
       "POST",
       "/:organization/webhooks",
       Json.obj("url" -> "https://test.flow.io")
@@ -48,7 +48,7 @@ class MultiServiceSpec extends FunSpec with Matchers {
     )
 
     // path from apidoc api
-    multi.validate(
+    multi.upcast(
       "POST",
       "/:orgKey",
       Json.obj("url" -> "https://test.flow.io")
@@ -60,7 +60,7 @@ class MultiServiceSpec extends FunSpec with Matchers {
   it("url query example") {
     val form = FormData.parseEncoded("name=John%20Doe&expiration_month=12&expiration_year=2017&cvv=123&cipher=VnHzBw%2BbaGrKZL0fimklhKupHJeowxK2Mqa9LbECCnb3R%2FxIgS1vr0sFg2mUGsXR7bsNV61UURB91VrWr19V1g%3D%3D&challenge%5Btext%5D=Flow&challenge%5Bcipher%5D=df2BQZykhnTfIVIX6Vg9yjUmyEprz3dLmUYU0O8GeyCZ0t3pn1nXSP7DRDfsZAASwtNupqyYx3G4W%2BmGlWQreg%3D%3D&callback=__flowjsonp0&method=post")
 
-    val js = multi.validate(
+    val js = multi.upcast(
       "POST",
       "/:organization/cards",
       Json.toJson(form)
@@ -78,7 +78,7 @@ class MultiServiceSpec extends FunSpec with Matchers {
       "events" -> 456
     )
 
-    val js = multi.validate(
+    val js = multi.upcast(
       "POST",
       "/:organization/webhooks",
       Json.toJson(form)

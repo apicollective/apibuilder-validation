@@ -1,6 +1,6 @@
 package io.flow.lib.apidoc.json.validation
 
-import com.bryzek.apidoc.spec.v0.models.{Method, Service}
+import com.bryzek.apidoc.spec.v0.models.{Method, Operation, Service}
 import com.bryzek.apidoc.spec.v0.models.json._
 import java.net.URL
 
@@ -17,15 +17,50 @@ case class ApidocService(
   service: Service
 ) {
 
-  private[this] val typeLookup = TypeLookup(service)
   private[this] val validator = JsonValidator(service)
 
-  def typeFromPath(method: String, path: String): Option[String] = {
-    typeLookup.bodyTypeFromPath(method = method, path = path)
+  private[this] val byPaths: Map[String, Map[Method, Operation]] = {
+    val tmp = scala.collection.mutable.Map[String, scala.collection.mutable.Map[Method, Operation]]()
+    service.resources.flatMap(_.operations).map { op =>
+      val m = tmp.get(op.path).getOrElse {
+        val map = scala.collection.mutable.Map[Method, Operation]()
+        tmp += op.path -> map
+        map
+      }
+      m += op.method -> op
+    }
+    tmp.map {
+      case (path, methods) => (path -> methods.toMap)
+    }.toMap
   }
 
-  def validate(method: String, path: String, js: JsValue): Either[Seq[String], JsValue] = {
-    val methods = typeLookup.operationsByMethod(path)
+  /**
+    * If the specified method, path require a body, returns the type of the body
+    */
+  def bodyTypeFromPath(method: String, path: String): Option[String] = {
+    operation(method, path).flatMap(_.body.map(_.`type`))
+  }
+
+  /**
+    * Returns a map of the operations available for the specified path. Keys are the HTTP Methods.
+    */
+  def operationsByMethod(path: String): Map[Method, Operation] = {
+    byPaths.get(path).getOrElse(Map.empty)
+  }
+
+  def isDefined(path: String): Boolean = {
+    byPaths.isDefinedAt(path)
+  }
+
+  /**
+    * Returns the operation associated with the specified method and path, if any
+    */
+  def operation(method: String, path: String): Option[Operation] = {
+    operationsByMethod(path).get(Method(method))
+  }
+
+  def upcast(method: String, path: String, js: JsValue): Either[Seq[String], JsValue] = {
+    val methods = operationsByMethod(path)
     methods.get(Method(method)) match {
       case None => {
         methods.keys.toList match {
@@ -44,6 +79,26 @@ case class ApidocService(
           case None => Right(js)
           case Some(typ) => validator.validate(typ, js)
         }
+      }
+    }
+  }
+
+  def validate(method: String, path: String): Either[Seq[String], Operation] = {
+    val methods = operationsByMethod(path)
+    methods.get(Method(method)) match {
+      case None => {
+        methods.keys.toList match {
+          case Nil => {
+            Left(Seq(s"Unknown HTTP path $path"))
+          }
+
+          case available => {
+            Left(Seq(s"HTTP method $method not supported for path $path - Available methods: " + available.map(_.toString).mkString(", ")))
+          }
+        }
+      }
+      case Some(op) => {
+        Right(op)
       }
     }
   }
