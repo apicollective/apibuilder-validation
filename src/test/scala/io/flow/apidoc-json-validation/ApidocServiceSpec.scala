@@ -33,6 +33,16 @@ class ApidocServiceSpec extends FunSpec with Matchers {
     service.typeFromPath("POST", "/:organization/webhooks") should be(Some("webhook_form"))
   }
 
+  it("offers validation error w/ verb replacement") {
+    service.validate(
+      "OPTIONS",
+      "/:organization/webhooks",
+      Json.obj("url" -> "https://test.flow.io", "events" -> "*")
+    ) should equal(
+      Left(Seq("HTTP method OPTIONS not supported for path /:organization/webhooks - Available methods: GET, POST"))
+    )
+  }
+
   it("validate") {
     service.validate(
       "POST",
@@ -42,6 +52,5 @@ class ApidocServiceSpec extends FunSpec with Matchers {
       Left(Seq("Missing required field for type 'webhook_form': 'events'"))
     )
   }
- 
 
 }
