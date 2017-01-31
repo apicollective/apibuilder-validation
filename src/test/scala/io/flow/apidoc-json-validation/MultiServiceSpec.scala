@@ -26,7 +26,7 @@ class MultiServiceSpec extends FunSpec with Matchers {
     multi.services.map(_.service.name) should equal(Seq("API", "apidoc api"))
   }
 
-  it("typeFromPath") {
+  it("bodyTypeFromPath") {
     multi.bodyTypeFromPath("POST", "/foo") should equal(None)
 
     // resources from flow api
@@ -37,6 +37,12 @@ class MultiServiceSpec extends FunSpec with Matchers {
     multi.bodyTypeFromPath("POST", "/:orgKey") should equal(Some("application_form"))
   }
 
+  it("parametersFromPath") {
+    multi.parametersFromPath("POST", "/foo") should be(None)
+    multi.parametersFromPath("POST", "/users") should be(Some(Nil))
+    multi.parametersFromPath("GET", "/users").get.map(_.name) should be(Seq("id", "email", "status", "limit", "offset", "sort"))
+  }
+  
   it("validate") {
     // path from flow api
     multi.upcast(

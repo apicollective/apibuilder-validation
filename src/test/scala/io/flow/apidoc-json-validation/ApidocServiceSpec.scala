@@ -1,9 +1,6 @@
 package io.flow.lib.apidoc.json.validation
 
-import com.bryzek.apidoc.spec.v0.models.{Method, Service}
-import com.bryzek.apidoc.spec.v0.models.json._
-import io.flow.v0.models.{Address, CardForm, EventType, ItemForm, WebhookForm}
-import io.flow.v0.models.json._
+import com.bryzek.apidoc.spec.v0.models.Method
 import play.api.libs.json._
 import org.scalatest.{FunSpec, Matchers}
 
@@ -13,7 +10,7 @@ class ApidocServiceSpec extends FunSpec with Matchers {
     scala.io.Source.fromFile("src/test/resources/" + name, "UTF-8").getLines.mkString("\n")
   }
 
-  lazy val service = ApidocService.toService(readFile("flow-api-service.json")).right.get
+  private[this] lazy val service = ApidocService.toService(readFile("flow-api-service.json")).right.get
 
   it("fromUrl") {
     ApidocService.fromUrl("file://non-existent-tmp").left.getOrElse {
@@ -27,10 +24,16 @@ class ApidocServiceSpec extends FunSpec with Matchers {
     result.service.name should be("apidoc common")
   }
 
-  it("typeFromPath") {
+  it("bodyTypeFromPath") {
     service.bodyTypeFromPath("POST", "/foo") should be(None)
     service.bodyTypeFromPath("POST", "/users") should be(Some("user_form"))
     service.bodyTypeFromPath("POST", "/:organization/webhooks") should be(Some("webhook_form"))
+  }
+
+  it("parametersFromPath") {
+    service.parametersFromPath("POST", "/foo") should be(None)
+    service.parametersFromPath("POST", "/users") should be(Some(Nil))
+    service.parametersFromPath("GET", "/users").get.map(_.name) should be(Seq("id", "email", "status", "limit", "offset", "sort"))
   }
 
   it("unknown path") {

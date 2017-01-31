@@ -1,6 +1,6 @@
 package io.flow.lib.apidoc.json.validation
 
-import com.bryzek.apidoc.spec.v0.models.{Operation, Service}
+import com.bryzek.apidoc.spec.v0.models.{Operation, Parameter, Service}
 import play.api.libs.json._
 
 /**
@@ -13,10 +13,17 @@ case class MultiService(
 ) {
 
   /**
-    * If the specified method, path require a body, returns the type of the body
+    * If the specified method & path requires a body, returns the type of the body
     */
   def bodyTypeFromPath(method: String, path: String): Option[String] = {
     services.flatMap(_.bodyTypeFromPath(method, path)).headOption
+  }
+
+  /**
+    * For the given method & path, returns a list of the defined parameters
+    */
+  def parametersFromPath(method: String, path: String): Option[Seq[Parameter]] = {
+    services.flatMap(_.parametersFromPath(method, path)).headOption
   }
 
   /**
@@ -58,7 +65,7 @@ object MultiService {
     * returning either a list of errors or an instance of MultiService
     */
   def fromUrls(urls: Seq[String]): Either[Seq[String], MultiService] = {
-    val eithers = urls.map { ApidocService.fromUrl(_) }
+    val eithers = urls.map { ApidocService.fromUrl }
     eithers.forall(_.isRight) match {
       case true => {
         Right(
@@ -69,7 +76,7 @@ object MultiService {
       }
 
       case false => {
-        Left(eithers.map(_.left.getOrElse(Nil)).flatten)
+        Left(eithers.flatMap(_.left.getOrElse(Nil)))
       }
     }
   }
