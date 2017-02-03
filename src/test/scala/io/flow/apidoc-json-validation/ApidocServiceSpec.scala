@@ -72,9 +72,9 @@ class ApidocServiceSpec extends FunSpec with Matchers {
     service.upcast(
       "POST",
       "/:organization/authorizations",
-      Json.obj("discriminator" -> "foo")
+      Json.obj("discriminator" -> "authorization_form")
     ) should equal(
-      Left(Seq("Invalid discriminator 'foo' for union type 'authorization_form': must be one of 'direct_authorization_form', 'merchant_of_record_authorization_form'"))
+      Left(Seq("Invalid discriminator 'authorization_form' for union type 'authorization_form': must be one of 'direct_authorization_form', 'merchant_of_record_authorization_form'"))
     )
   }
 
