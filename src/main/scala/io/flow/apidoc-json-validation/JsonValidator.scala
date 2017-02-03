@@ -168,11 +168,16 @@ case class JsonValidator(val service: Service) {
 
       case Some(discriminator) => {
         (js \ discriminator).asOpt[String] match {
-          case None => Left(Seq(s"Union type '${union.name}' requires a field named '${discriminator}'"))
+          case None => Left(Seq(s"Union type '${union.name}' requires a field named '$discriminator'"))
           case Some(value) => {
             union.types.find(_.`type` == value) match {
-              case None => Left(Seq(s"Invalid discriminator '$value' for union type '${union.name}': must be one of " + union.types.map(_.`type`).mkString("'", "', '", "'")))
-              case Some(_) => validate(value, js, prefix)
+              case None => {
+                Left(Seq(s"Invalid discriminator '$value' for union type '${union.name}': must be one of " + union.types.map(_.`type`).mkString("'", "', '", "'")))
+              }
+              case Some(_) => {
+                assert(value != union.name, s"Specific union type name cannot match name of the union itself - else we'd recurse infinitely")
+                validate(value, js, prefix)
+              }
             }
           }
         }
