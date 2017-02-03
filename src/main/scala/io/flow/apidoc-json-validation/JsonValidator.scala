@@ -169,10 +169,7 @@ case class JsonValidator(val service: Service) {
       case Some(discriminator) => {
         (js \ discriminator).asOpt[String] match {
           case None => Left(Seq(s"Union type '${union.name}' requires a field named '${discriminator}'"))
-          case Some(value) => {
-            // validate(value, js, prefix)
-            Right(js)
-          }
+          case Some(value) => validate(value, js, prefix)
         }
       }
     }
