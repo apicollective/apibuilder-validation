@@ -44,6 +44,7 @@ class ApidocServiceSpec extends FunSpec with Matchers {
     service.bodyTypeFromPath("POST", "/users") should be(Some("user_form"))
     service.bodyTypeFromPath("post", "/:organization/orders") should be(Some("order_form"))
     service.bodyTypeFromPath("PUT", "/:organization/orders/:number") should be(Some("order_put_form"))
+    service.bodyTypeFromPath("POST", "/:organization/authorizations") should be(Some("authorization_form"))
     service.bodyTypeFromPath("DELETE", "/:organization/orders/:number") should be(None)
   }
 
@@ -64,6 +65,16 @@ class ApidocServiceSpec extends FunSpec with Matchers {
       Json.obj("url" -> "https://test.flow.io")
     ) should equal(
       Left(Seq("Missing required field for type 'webhook_form': 'events'"))
+    )
+  }
+
+    it("validate union type discriminator") {
+    service.upcast(
+      "POST",
+      "/:organization/authorizations",
+      Json.obj("discriminator" -> "authorization_form")
+    ) should equal(
+      Left(Seq("Invalid discriminator[authorization_form] must be one of 'direct_authorization_form' or 'merchant_of_record_authorization_form'"))
     )
   }
 
