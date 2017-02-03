@@ -171,7 +171,7 @@ case class JsonValidator(val service: Service) {
           case None => Left(Seq(s"Union type '${union.name}' requires a field named '${discriminator}'"))
           case Some(value) => {
             union.types.find(_.`type` == value) match {
-              case None => Left(Seq("Invalid discriminator[authorization_form] must be one of " + union.types.map(_.`type`).mkString("'", "' or '", "'")))
+              case None => Left(Seq(s"Invalid discriminator '$value' for union type '${union.name}': must be one of " + union.types.map(_.`type`).mkString("'", "', '", "'")))
               case Some(_) => validate(value, js, prefix)
             }
           }
