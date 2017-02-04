@@ -56,7 +56,7 @@ case class JsonValidator(val service: Service) {
               case None => {
                 // may be a primitive type like 'string'
                 validateApidocType(
-                  prefix.getOrElse("Type '$typeName'"),
+                  prefix.getOrElse(s"Type '$typeName'"),
                   typeName,
                   js
                 )
