@@ -80,7 +80,7 @@ class JsonValidatorSpec extends FunSpec with Matchers {
 
   it("converts booleans where possible") {
     (
-      Booleans.TrueValues.map(JsString(_)) ++ Seq(JsNumber(1))
+      Booleans.TrueValues.map(JsString) ++ Seq(JsNumber(1))
     ).foreach { v =>
       val form = Json.obj(
         "code" -> "match",
@@ -97,7 +97,7 @@ class JsonValidatorSpec extends FunSpec with Matchers {
     }
 
     (
-      Booleans.FalseValues.map(JsString(_)) ++ Seq(JsNumber(0))
+      Booleans.FalseValues.map(JsString) ++ Seq(JsNumber(0))
     ).foreach { v =>
       val form = Json.obj(
         "code" -> "match",
@@ -311,7 +311,7 @@ class JsonValidatorSpec extends FunSpec with Matchers {
   it("Properly reports errors on js objects") {
     val form = Json.obj(
       "name" -> "",
-      "email" -> "rob@flow.io",
+      "email" -> "test-user@test.flow.io",
       "organization" -> "demo",
       "role" -> "member"
     )
@@ -324,4 +324,40 @@ class JsonValidatorSpec extends FunSpec with Matchers {
     }
   }
 
+  it("converts array of length 1 into a single value") {
+    // This supports a use case from python libraries that send single values w/ array syntax (e.g. number[]=1)
+    val form = Json.obj(
+      "order_number" -> Seq[String]("123"),
+      "token" -> "blah",
+      "discriminator" -> "merchant_of_record_authorization_form"
+    )
+
+    validator.validate("merchant_of_record_authorization_form", form) match {
+      case Left(errors) => sys.error(s"Error validating form: $errors")
+      case Right(js) => {
+        js should equal(
+          Json.obj(
+            "order_number" -> "123",
+            "token" -> "blah",
+            "discriminator" -> "merchant_of_record_authorization_form"
+          )
+        )
+      }
+    }
+  }
+
+  it("reports errors when expecting a single value and presented with an array of length > 1") {
+    val form = Json.obj(
+      "order_number" -> Seq[String]("123", "456"),
+      "token" -> "blah",
+      "discriminator" -> "merchant_of_record_authorization_form"
+    )
+
+    validator.validate("merchant_of_record_authorization_form", form) match {
+      case Left(errors) => errors should equal(
+        Seq("Type 'merchant_of_record_authorization_form' field 'order_number' must be a string and not an array")
+      )
+      case Right(_) => sys.error("Expected validation error")
+    }
+  }
 }
