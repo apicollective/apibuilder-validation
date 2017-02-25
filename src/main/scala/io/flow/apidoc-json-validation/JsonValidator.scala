@@ -5,6 +5,7 @@ import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import play.api.libs.json._
 import scala.util.{Failure, Success, Try}
+import org.joda.time.format.ISODateTimeFormat
 
 /**
   * We auto convert strings to booleans based on common, well known
@@ -417,14 +418,9 @@ case class JsonValidator(val service: Service) {
       case v: JsObject => Left(Seq(s"$prefix must be a valid ISO 8601 date and not a object"))
       case v: JsString => {
         Try {
-          // Check that the provided value is strictly in yyyy-MM-dd format
-          if(v.value == DateTimeFormat.forPattern("yyyy-MM-dd").print(DateTime.parse(v.value))) {
-            v.value
-          } else {
-            sys.error(s"${v.value} is not in the proper format")
-          }
+          ISODateTimeFormat.yearMonthDay.parseLocalDate(v.value)
         } match {
-          case Success(v) => Right(JsString(v.toString))
+          case Success(_) => Right(JsString(v.value.toString))
           case Failure(_) => Left(Seq(s"$prefix must be a valid ISO 8601 date"))
         }
       }
@@ -445,9 +441,9 @@ case class JsonValidator(val service: Service) {
       case v: JsObject => Left(Seq(s"$prefix must be a valid ISO 8601 datetime and not a object"))
       case v: JsString => {
         Try {
-          DateTime.parse(v.value)
+          ISODateTimeFormat.dateTimeParser.parseDateTime(v.value)
         } match {
-          case Success(v) => Right(JsString(v.toString))
+          case Success(_) => Right(JsString(v.value.toString))
           case Failure(_) => Left(Seq(s"$prefix must be a valid ISO 8601 datetime"))
         }
       }

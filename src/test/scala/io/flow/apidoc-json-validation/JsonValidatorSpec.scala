@@ -113,15 +113,21 @@ class JsonValidatorSpec extends FunSpec with Matchers {
   }
 
   it("validates an ISO 8601 date (yyyy-MM-dd)") {
-    validator.validate("date-iso8601", JsString("2017-02-24")).right.get.as[String] should equal("2017-02-24")
+    validator.validate("date-iso8601", JsString("2017-01-01")).right.get.as[String] should equal("2017-01-01")
+    validator.validate("date-iso8601", JsString("2017-1-01")).right.get.as[String] should equal("2017-1-01")
+    validator.validate("date-iso8601", JsString("2017-01-1")).right.get.as[String] should equal("2017-01-1")
+    validator.validate("date-iso8601", JsString("2017-1-1")).right.get.as[String] should equal("2017-1-1")
     validator.validate("date-iso8601", JsString("invalid")) should equal(Left(List("Type 'date-iso8601' must be a valid ISO 8601 date")))
     // Tests that the format must be yyyy-MM-dd
     validator.validate("date-iso8601", JsString((new DateTime(2017, 2, 24, 0, 0, 0)).toString)) should equal(Left(List("Type 'date-iso8601' must be a valid ISO 8601 date")))
   }
 
   it("validates an ISO 8601 datetime") {
-    val dt = (new DateTime(2017, 2, 24, 0, 0, 0)).toString
-    validator.validate("date-time-iso8601", JsString("2017-02-24")).right.get.as[String] should equal(dt)
+    val dt = (new DateTime(2017, 1, 1, 0, 0, 0)).toString
+    validator.validate("date-time-iso8601", JsString("2017-01-01")).right.get.as[String] should equal("2017-01-01")
+    validator.validate("date-time-iso8601", JsString("2017-1-01")).right.get.as[String] should equal("2017-1-01")
+    validator.validate("date-time-iso8601", JsString("2017-01-1")).right.get.as[String] should equal("2017-01-1")
+    validator.validate("date-time-iso8601", JsString("2017-1-1")).right.get.as[String] should equal("2017-1-1")
     validator.validate("date-time-iso8601", JsString(dt)).right.get.as[String] should equal(dt)
     validator.validate("date-time-iso8601", JsString("invalid")) should equal(Left(List("Type 'date-time-iso8601' must be a valid ISO 8601 datetime")))
   }
