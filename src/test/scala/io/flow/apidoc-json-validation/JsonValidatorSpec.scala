@@ -5,6 +5,7 @@ import com.bryzek.apidoc.spec.v0.models.json._
 import io.flow.v0.models.{Address, CardForm, EventType, HarmonizedItemForm, ItemForm, WebhookForm}
 import io.flow.v0.models.json._
 import play.api.libs.json._
+import org.joda.time.DateTime
 import org.scalatest.{FunSpec, Matchers}
 
 class JsonValidatorSpec extends FunSpec with Matchers {
@@ -63,7 +64,7 @@ class JsonValidatorSpec extends FunSpec with Matchers {
     )
   }
 
-  it("converts 'number' into a string where possible") {
+  it("converts 'number' into a string where possible when number is an int") {
     val form = Json.obj(
       "url" -> 123,
       "events" -> Seq("*")
@@ -76,6 +77,59 @@ class JsonValidatorSpec extends FunSpec with Matchers {
         )
       )
     )
+  }
+
+  it("converts 'number' into a string where possible when number is a double") {
+    val form = Json.obj(
+      "url" -> 123.45,
+      "events" -> Seq("*")
+    )
+    validator.validate("webhook_form", form) should equal(
+      Right(
+        Json.obj(
+          "url" -> "123.45",
+          "events" -> Seq("*")
+        )
+      )
+    )
+  }
+
+  it("validates a double") {
+    validator.validate("double", Json.parse("123.45")).right.get.as[Double] should equal(123.45)
+    validator.validate("double", Json.parse("123")).right.get.as[Double] should equal(123)
+    validator.validate("double", JsString(" ")) should equal(Left(List("Type 'double' must be a valid double")))
+  }
+
+  it("validates a decimal") {
+    validator.validate("decimal", Json.parse("123.45")).right.get.as[BigDecimal] should equal(123.45)
+    validator.validate("decimal", Json.parse("123")).right.get.as[BigDecimal] should equal(123)
+    validator.validate("decimal", JsString(" ")) should equal(Left(List("Type 'decimal' must be a valid decimal")))
+  }
+
+  it("validates a UUID") {
+    val uuid = java.util.UUID.randomUUID
+    validator.validate("uuid", JsString(uuid.toString)).right.get.as[java.util.UUID] should equal(uuid)
+    validator.validate("uuid", JsString(" ")) should equal(Left(List("Type 'uuid' must be a valid UUID")))
+  }
+
+  it("validates an ISO 8601 date (yyyy-MM-dd)") {
+    validator.validate("date-iso8601", JsString("2017-01-01")).right.get.as[String] should equal("2017-01-01")
+    validator.validate("date-iso8601", JsString("2017-1-01")).right.get.as[String] should equal("2017-1-01")
+    validator.validate("date-iso8601", JsString("2017-01-1")).right.get.as[String] should equal("2017-01-1")
+    validator.validate("date-iso8601", JsString("2017-1-1")).right.get.as[String] should equal("2017-1-1")
+    validator.validate("date-iso8601", JsString("invalid")) should equal(Left(List("Type 'date-iso8601' must be a valid ISO 8601 date")))
+    // Tests that the format must be yyyy-MM-dd
+    validator.validate("date-iso8601", JsString((new DateTime(2017, 2, 24, 0, 0, 0)).toString)) should equal(Left(List("Type 'date-iso8601' must be a valid ISO 8601 date")))
+  }
+
+  it("validates an ISO 8601 datetime") {
+    val dt = (new DateTime(2017, 1, 1, 0, 0, 0)).toString
+    validator.validate("date-time-iso8601", JsString("2017-01-01")).right.get.as[String] should equal("2017-01-01")
+    validator.validate("date-time-iso8601", JsString("2017-1-01")).right.get.as[String] should equal("2017-1-01")
+    validator.validate("date-time-iso8601", JsString("2017-01-1")).right.get.as[String] should equal("2017-01-1")
+    validator.validate("date-time-iso8601", JsString("2017-1-1")).right.get.as[String] should equal("2017-1-1")
+    validator.validate("date-time-iso8601", JsString(dt)).right.get.as[String] should equal(dt)
+    validator.validate("date-time-iso8601", JsString("invalid")) should equal(Left(List("Type 'date-time-iso8601' must be a valid ISO 8601 datetime")))
   }
 
   it("converts booleans where possible") {

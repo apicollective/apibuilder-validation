@@ -1,6 +1,7 @@
 package io.flow.lib.apidoc.json.validation
 
 import com.bryzek.apidoc.spec.v0.models.{Enum, Model, Service, Union}
+import org.joda.time.format.ISODateTimeFormat
 import play.api.libs.json._
 import scala.util.{Failure, Success, Try}
 
@@ -192,11 +193,16 @@ case class JsonValidator(val service: Service) {
     * Validates the JS Value based on the expected apidoc type.
     */
   private[this] def validateApidocType(prefix: String, typ: String, js: JsValue): Either[Seq[String], JsValue] = {
-    typ match {
+    typ.trim.toLowerCase match {
       case "string" => validateString(prefix, js)
       case "integer" => validateInteger(prefix, js)
       case "long" => validateLong(prefix, js)
       case "boolean" => validateBoolean(prefix, js)
+      case "double" => validateDouble(prefix, js)
+      case "decimal" => validateDecimal(prefix, js)
+      case "uuid" => validateUuid(prefix, js)
+      case "date-iso8601" => validateDateIso8601(prefix, js)
+      case "date-time-iso8601" => validateDateTimeIso8601(prefix, js)
       case ArrayPattern(internalType) => validateArray(prefix + s" of type '[$internalType]':", internalType, js)
       case ObjectPattern(internalType) => validateObject(prefix + s" of type 'map[$internalType]':", internalType, js)
       case other => Right(js)
@@ -283,13 +289,65 @@ case class JsonValidator(val service: Service) {
         case None => Left(Seq(s"$prefix must be a valid integer"))
         case Some(_) => Right(v)
       }
-      case v: JsObject => Left(Seq(s"$prefix must be an integer and not a object"))
+      case v: JsObject => Left(Seq(s"$prefix must be an integer and not an object"))
       case v: JsString => {
         Try {
           v.value.toInt
         } match {
           case Success(v) => Right(JsNumber(v))
           case Failure(_) => Left(Seq(s"$prefix must be a valid integer"))
+        }
+      }
+    }
+  }
+
+  def validateDouble(prefix: String, js: JsValue): Either[Seq[String], JsNumber] = {
+    js match {
+      case v: JsArray => {
+        v.value.size match {
+          case 1 => validateDouble(prefix, v.value.head)
+          case _ => Left(Seq(s"$prefix must be a double and not an array"))
+        }
+      }
+      case v: JsBoolean => Left(Seq(s"$prefix must be a double and not a boolean"))
+      case JsNull => Left(Seq(s"$prefix must be a double and not null"))
+      case v: JsNumber => v.asOpt[Double] match {
+        case None => Left(Seq(s"$prefix must be a valid double"))
+        case Some(_) => Right(v)
+      }
+      case v: JsObject => Left(Seq(s"$prefix must be a double and not an object"))
+      case v: JsString => {
+        Try {
+          v.value.toDouble
+        } match {
+          case Success(v) => Right(JsNumber(v))
+          case Failure(_) => Left(Seq(s"$prefix must be a valid double"))
+        }
+      }
+    }
+  }
+
+  def validateDecimal(prefix: String, js: JsValue): Either[Seq[String], JsNumber] = {
+    js match {
+      case v: JsArray => {
+        v.value.size match {
+          case 1 => validateDecimal(prefix, v.value.head)
+          case _ => Left(Seq(s"$prefix must be a decimal and not an array"))
+        }
+      }
+      case v: JsBoolean => Left(Seq(s"$prefix must be a decimal and not a boolean"))
+      case JsNull => Left(Seq(s"$prefix must be a decimal and not null"))
+      case v: JsNumber => v.asOpt[BigDecimal] match {
+        case None => Left(Seq(s"$prefix must be a valid decimal"))
+        case Some(_) => Right(v)
+      }
+      case v: JsObject => Left(Seq(s"$prefix must be a decimal and not an object"))
+      case v: JsString => {
+        Try {
+          BigDecimal.apply(v.value)
+        } match {
+          case Success(v) => Right(JsNumber(v))
+          case Failure(_) => Left(Seq(s"$prefix must be a valid decimal"))
         }
       }
     }
@@ -309,7 +367,7 @@ case class JsonValidator(val service: Service) {
         case None => Left(Seq(s"$prefix must be a valid long"))
         case Some(_) => Right(v)
       }
-      case v: JsObject => Left(Seq(s"$prefix must be a long and not a object"))
+      case v: JsObject => Left(Seq(s"$prefix must be a long and not an object"))
       case v: JsString => {
         Try {
           v.value.toLong
@@ -320,6 +378,76 @@ case class JsonValidator(val service: Service) {
       }
     }
   }
+
+  def validateUuid(prefix: String, js: JsValue): Either[Seq[String], JsString] = {
+    js match {
+      case v: JsArray => {
+        v.value.size match {
+          case 1 => validateUuid(prefix, v.value.head)
+          case _ => Left(Seq(s"$prefix must be a UUID and not an array"))
+        }
+      }
+      case v: JsBoolean => Left(Seq(s"$prefix must be a UUID and not a boolean"))
+      case JsNull => Left(Seq(s"$prefix must be a UUID and not null"))
+      case v: JsNumber => Left(Seq(s"$prefix must be a UUID and not a number"))
+      case v: JsObject => Left(Seq(s"$prefix must be a UUID and not an object"))
+      case v: JsString => {
+        Try {
+          java.util.UUID.fromString(v.value)
+        } match {
+          case Success(v) => Right(JsString(v.toString))
+          case Failure(_) => Left(Seq(s"$prefix must be a valid UUID"))
+        }
+      }
+    }
+  }
+
+  def validateDateIso8601(prefix: String, js: JsValue): Either[Seq[String], JsString] = {
+    js match {
+      case v: JsArray => {
+        v.value.size match {
+          case 1 => validateDateIso8601(prefix, v.value.head)
+          case _ => Left(Seq(s"$prefix must be a valid ISO 8601 date and not an array"))
+        }
+      }
+      case v: JsBoolean => Left(Seq(s"$prefix must be a valid ISO 8601 date and not a boolean"))
+      case JsNull => Left(Seq(s"$prefix must be a valid ISO 8601 date and not null"))
+      case v: JsNumber => Left(Seq(s"$prefix must be a valid ISO 8601 date and not a number"))
+      case v: JsObject => Left(Seq(s"$prefix must be a valid ISO 8601 date and not an object"))
+      case v: JsString => {
+        Try {
+          ISODateTimeFormat.yearMonthDay.parseLocalDate(v.value)
+        } match {
+          case Success(_) => Right(JsString(v.value.toString))
+          case Failure(_) => Left(Seq(s"$prefix must be a valid ISO 8601 date"))
+        }
+      }
+    }
+  }
+
+  def validateDateTimeIso8601(prefix: String, js: JsValue): Either[Seq[String], JsString] = {
+    js match {
+      case v: JsArray => {
+        v.value.size match {
+          case 1 => validateDateTimeIso8601(prefix, v.value.head)
+          case _ => Left(Seq(s"$prefix must be a valid ISO 8601 datetime and not an array"))
+        }
+      }
+      case v: JsBoolean => Left(Seq(s"$prefix must be a valid ISO 8601 datetime and not a boolean"))
+      case JsNull => Left(Seq(s"$prefix must be a valid ISO 8601 datetime and not null"))
+      case v: JsNumber => Left(Seq(s"$prefix must be a valid ISO 8601 datetime and not a number"))
+      case v: JsObject => Left(Seq(s"$prefix must be a valid ISO 8601 datetime and not an object"))
+      case v: JsString => {
+        Try {
+          ISODateTimeFormat.dateTimeParser.parseDateTime(v.value)
+        } match {
+          case Success(_) => Right(JsString(v.value.toString))
+          case Failure(_) => Left(Seq(s"$prefix must be a valid ISO 8601 datetime"))
+        }
+      }
+    }
+  }
+
 
   def validateBoolean(prefix: String, js: JsValue): Either[Seq[String], JsBoolean] = {
     js match {
@@ -342,7 +470,7 @@ case class JsonValidator(val service: Service) {
           }
         }
       }
-      case v: JsObject => Left(Seq(s"$prefix must be a boolean and not a object"))
+      case v: JsObject => Left(Seq(s"$prefix must be a boolean and not an object"))
       case v: JsString => {
         Booleans.TrueValues.contains(v.value.toLowerCase) match {
           case true => Right(JsBoolean(true))
