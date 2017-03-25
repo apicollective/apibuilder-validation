@@ -96,7 +96,7 @@ case class ApidocService(
       case None => {
         methods.keys.toList match {
           case Nil => {
-            Left(Seq(s"Unknown HTTP path $path"))
+            Left(Seq(s"Unknown HTTP Method $method for $path"))
           }
 
           case available => {
