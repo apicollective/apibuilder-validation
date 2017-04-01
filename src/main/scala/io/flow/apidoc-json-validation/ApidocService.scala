@@ -52,11 +52,45 @@ case class ApidocService(
     * Returns a map of the operations available for the specified path. Keys are the HTTP Methods.
     */
   def operationsByMethod(path: String): Map[Method, Operation] = {
-    byPaths.get(path).getOrElse(Map.empty)
+    byPaths.getOrElse(path, Map.empty)
   }
 
-  def isDefined(path: String): Boolean = {
+  def isDefinedAt(method: String, path: String): Boolean = {
+    validate(method, path).isRight
+  }
+
+  def isPathDefinedAt(path: String): Boolean = {
     byPaths.isDefinedAt(path)
+  }
+  /**
+    * If the provided method and path are known, returns the associated
+    * operation. Otherwise returns an appropriate error message.
+    */
+  def validate(method: String, path: String): Either[Seq[String], Operation] = {
+    Method(method) match {
+      case Method.UNDEFINED(_) => {
+        Left(Seq(s"HTTP method '$method' is invalid. Must be one of: " + Method.all.map(_.toString).mkString(", ")))
+      }
+
+      case m => {
+        val methods = operationsByMethod(path)
+        methods.get(m) match {
+          case Some(op) => Right(op)
+
+          case None => {
+            methods.keys.toList match {
+              case Nil => {
+                Left(Seq(s"HTTP path $path is not defined"))
+              }
+
+              case available => {
+                Left(Seq(s"HTTP method '$method' not supported for path $path - Available methods: " + available.map(_.toString).mkString(", ")))
+              }
+            }
+          }
+        }
+      }
+    }
   }
 
   /**
@@ -67,45 +101,13 @@ case class ApidocService(
   }
 
   def upcast(method: String, path: String, js: JsValue): Either[Seq[String], JsValue] = {
-    val methods = operationsByMethod(path)
-    methods.get(Method(method)) match {
-      case None => {
-        methods.keys.toList match {
-          case Nil => {
-            Right(js)
-          }
-
-          case available => {
-            Left(Seq(s"HTTP method $method not supported for path $path - Available methods: " + available.map(_.toString).mkString(", ")))
-          }
-        }
-      }
-
-      case Some(op) => {
+    validate(method = method, path = path) match {
+      case Left(errors) => Left(errors)
+      case Right(op) => {
         op.body.map(_.`type`) match {
           case None => Right(js)
           case Some(typ) => validator.validate(typ, js)
         }
-      }
-    }
-  }
-
-  def validate(method: String, path: String): Either[Seq[String], Operation] = {
-    val methods = operationsByMethod(path)
-    methods.get(Method(method)) match {
-      case None => {
-        methods.keys.toList match {
-          case Nil => {
-            Left(Seq(s"Unknown HTTP Method $method for $path"))
-          }
-
-          case available => {
-            Left(Seq(s"HTTP method $method not supported for path $path - Available methods: " + available.map(_.toString).mkString(", ")))
-          }
-        }
-      }
-      case Some(op) => {
-        Right(op)
       }
     }
   }

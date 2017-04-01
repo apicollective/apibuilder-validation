@@ -54,7 +54,7 @@ class ApidocServiceSpec extends FunSpec with Matchers {
       "/:organization/webhooks",
       Json.obj("url" -> "https://test.flow.io", "events" -> "*")
     ) should equal(
-      Left(Seq("HTTP method OPTIONS not supported for path /:organization/webhooks - Available methods: GET, POST"))
+      Left(Seq("HTTP method 'OPTIONS' not supported for path /:organization/webhooks - Available methods: GET, POST"))
     )
   }
 

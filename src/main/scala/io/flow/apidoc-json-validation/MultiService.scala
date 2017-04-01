@@ -1,6 +1,6 @@
 package io.flow.lib.apidoc.json.validation
 
-import com.bryzek.apidoc.spec.v0.models.{Operation, Parameter, Service}
+import com.bryzek.apidoc.spec.v0.models.{Method, Operation, Parameter, Service}
 import play.api.libs.json._
 
 /**
@@ -16,14 +16,20 @@ case class MultiService(
     * If the specified method & path requires a body, returns the type of the body
     */
   def bodyTypeFromPath(method: String, path: String): Option[String] = {
-    services.flatMap(_.bodyTypeFromPath(method, path)).headOption
+    resolveService(method, path) match {
+      case Left(_) => None
+      case Right(service) => service.bodyTypeFromPath(method, path)
+    }
   }
 
   /**
     * For the given method & path, returns a list of the defined parameters
     */
   def parametersFromPath(method: String, path: String): Option[Seq[Parameter]] = {
-    services.flatMap(_.parametersFromPath(method, path)).headOption
+    resolveService(method, path) match {
+      case Left(_) => None
+      case Right(service) => service.parametersFromPath(method, path)
+    }
   }
 
   /**
@@ -31,12 +37,9 @@ case class MultiService(
     * match the request method/path as needed.
     */
   def upcast(method: String, path: String, js: JsValue): Either[Seq[String], JsValue] = {
-    val start: Either[Seq[String], JsValue] = Right(js)
-    services.foldLeft(start) { case (result, service) =>
-      result match {
-        case Left(errors) => Left(errors)
-        case Right(v) => service.upcast(method, path, v)
-      }
+    resolveService(method, path) match {
+      case Left(errors) => Left(errors)
+      case Right(service) => service.upcast(method, path,js)
     }
   }
 
@@ -46,12 +49,30 @@ case class MultiService(
     * list of errors.
     */
   def validate(method: String, path: String): Either[Seq[String], Operation] = {
-    services.find(_.isDefined(path)) match {
+    resolveService(method, path) match {
+      case Left(errors) => Left(errors)
+      case Right(service) => service.validate(method, path)
+    }
+  }
+
+  /**
+    * resolve the apidoc service defined at the provided method, path.
+    * if no service, return a nice error message. Otherwise invoke
+    * the provided function on the apidoc service.
+    */
+  private[this] def resolveService(method: String, path: String): Either[Seq[String], ApidocService] = {
+    services.find { s =>
+      s.isDefinedAt(method = method, path = path)
+    } match {
+      case Some(s) => Right(s)
       case None => {
-        Left(Seq(s"Unknown HTTP path $path"))
-      }
-      case Some(s) => {
-        s.validate(method, path)
+        services.find(_.isPathDefinedAt(path)) match {
+          case None => Left(Seq("HTTP '$method' $path is not defined"))
+          case Some(s) => s.validate(method, path) match {
+            case Left(errors) => Left(errors)
+            case Right(_) => Right(s)
+          }
+        }
       }
     }
   }
@@ -66,18 +87,14 @@ object MultiService {
     */
   def fromUrls(urls: Seq[String]): Either[Seq[String], MultiService] = {
     val eithers = urls.map { ApidocService.fromUrl }
-    eithers.forall(_.isRight) match {
-      case true => {
-        Right(
-          MultiService(
-            services = eithers.map(_.right.get)
-          )
+    if (eithers.forall(_.isRight)) {
+      Right(
+        MultiService(
+          services = eithers.map(_.right.get)
         )
-      }
-
-      case false => {
-        Left(eithers.flatMap(_.left.getOrElse(Nil)))
-      }
+      )
+    } else {
+      Left(eithers.flatMap(_.left.getOrElse(Nil)))
     }
   }
 
