@@ -1,6 +1,6 @@
 package io.flow.lib.apidoc.json.validation
 
-import com.bryzek.apidoc.spec.v0.models.{Operation, Parameter, Service}
+import com.bryzek.apidoc.spec.v0.models.{Method, Operation, Parameter, Service}
 import play.api.libs.json._
 
 /**
@@ -46,12 +46,16 @@ case class MultiService(
     * list of errors.
     */
   def validate(method: String, path: String): Either[Seq[String], Operation] = {
-    services.find(_.isDefined(path)) match {
-      case None => {
-        Left(Seq(s"Unknown HTTP path $path"))
-      }
-      case Some(s) => {
-        s.validate(method, path)
+println("STARTING VALIDATION")
+    val validations = services.map(_.validate(method, path))
+    validations.foreach { v =>
+      println(v)
+    }
+
+    validations.find(_.isRight) match {
+      case Some(validation) => Right(validation.right.get)
+      case None => validations.find(_.isLeft).getOrElse {
+        Left(Seq(s"HTTP $method $path is not defined"))
       }
     }
   }
@@ -66,18 +70,14 @@ object MultiService {
     */
   def fromUrls(urls: Seq[String]): Either[Seq[String], MultiService] = {
     val eithers = urls.map { ApidocService.fromUrl }
-    eithers.forall(_.isRight) match {
-      case true => {
-        Right(
-          MultiService(
-            services = eithers.map(_.right.get)
-          )
+    if (eithers.forall(_.isRight)) {
+      Right(
+        MultiService(
+          services = eithers.map(_.right.get)
         )
-      }
-
-      case false => {
-        Left(eithers.flatMap(_.left.getOrElse(Nil)))
-      }
+      )
+    } else {
+      Left(eithers.flatMap(_.left.getOrElse(Nil)))
     }
   }
 
