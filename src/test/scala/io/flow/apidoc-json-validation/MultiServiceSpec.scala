@@ -1,16 +1,12 @@
 package io.flow.lib.apidoc.json.validation
 
-import com.bryzek.apidoc.spec.v0.models.Service
-import com.bryzek.apidoc.spec.v0.models.json._
-import io.flow.v0.models.{Address, CardForm, EventType, ItemForm, WebhookForm}
-import io.flow.v0.models.json._
 import play.api.libs.json._
 import org.scalatest.{FunSpec, Matchers}
 
 class MultiServiceSpec extends FunSpec with Matchers {
 
-  lazy val multi = {
-    val base = "file://" + new java.io.File(".").getAbsolutePath()
+  private[this] lazy val multi = {
+    val base = "file://" + new java.io.File(".").getAbsolutePath
     MultiService.fromUrls(
       Seq(
         s"$base/src/test/resources/flow-api-service.json",

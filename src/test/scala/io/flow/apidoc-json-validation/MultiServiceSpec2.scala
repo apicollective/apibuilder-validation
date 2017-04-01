@@ -1,21 +1,38 @@
 package io.flow.lib.apidoc.json.validation
 
+import com.bryzek.apidoc.spec.v0.models.Method
 import play.api.libs.json._
 import org.scalatest.{FunSpec, Matchers}
 
 class MultiServiceSpec2 extends FunSpec with Matchers {
 
-  lazy val multi = {
-    val base = "file://" + new java.io.File(".").getAbsolutePath()
+  private[this] lazy val multi = {
+    val base = "file://" + new java.io.File(".").getAbsolutePath
     MultiService.fromUrls(
       Seq(
         s"$base/src/test/resources/multi/api.service.json",
         s"$base/src/test/resources/multi/api-internal.service.json"
       )
-    )match {
+    ) match {
       case Left(errors) => sys.error(s"Failed to load: $errors")
       case Right(s) => s
     }
+  }
+
+  it("validates unknown operations") {
+    multi.validate("FOO", "/:organization/payments") should equal(
+      Left(Seq("HTTP method 'FOO' is invalid. Must be one of: " + Method.all.map(_.toString).mkString(", ")))
+    )
+
+    multi.validate("OPTIONS", "/:organization/payments") should equal(
+      Left(Seq("HTTP method 'OPTIONS' not supported for path /:organization/payments - Available methods: GET, POST"))
+    )
+  }
+
+  it("validates unknown paths") {
+    multi.validate("GET", "/foo") should equal(
+      Left(Seq("HTTP 'GET /foo' is not defined"))
+    )
   }
 
   it("resolves body when path exists in both services") {
