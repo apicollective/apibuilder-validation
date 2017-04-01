@@ -55,6 +55,13 @@ case class ApidocService(
     byPaths.getOrElse(path, Map.empty)
   }
 
+  def isDefinedAt(method: String, path: String): Boolean = {
+    validate(method, path).isRight
+  }
+
+  def isPathDefinedAt(path: String): Boolean = {
+    byPaths.isDefinedAt(path)
+  }
   /**
     * If the provided method and path are known, returns the associated
     * operation. Otherwise returns an appropriate error message.

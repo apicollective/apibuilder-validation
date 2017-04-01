@@ -1,9 +1,5 @@
 package io.flow.lib.apidoc.json.validation
 
-import com.bryzek.apidoc.spec.v0.models.Service
-import com.bryzek.apidoc.spec.v0.models.json._
-import io.flow.v0.models.{Address, CardForm, EventType, ItemForm, WebhookForm}
-import io.flow.v0.models.json._
 import play.api.libs.json._
 import org.scalatest.{FunSpec, Matchers}
 
@@ -25,8 +21,22 @@ class MultiServiceSpec2 extends FunSpec with Matchers {
   it("resolves body when path exists in both services") {
     multi.bodyTypeFromPath("POST", "/:organization/payments") should equal(Some("payment_form"))
   }
-  
-  it("validated when path exists in both services") {
+
+  /**
+    * This test has two services that define methods like:
+    *
+    * Service1:
+    *   - GET /:organization/payments
+    *   - POST /:organization/payments
+    *
+    * Service2:
+    *   - GET /:organization/payments
+    *
+    * We are testing that we can correctly resolve the POST, fixing a bug where
+    * we were propagating the fact that service2 does not define POST through the
+    * validation methods (vs. correctly resolving service 1)
+    */
+  it("validates when path exists in both services with different available methods") {
     multi.upcast(
       "POST",
       "/:organization/payments",
@@ -37,8 +47,8 @@ class MultiServiceSpec2 extends FunSpec with Matchers {
         "amount" -> 1.00,
         "currency" -> "CAD"
       )
-    ) should equal(
-      Left(Seq("Missing required field for type 'webhook_form': 'events'"))
-    )
+    ).right.getOrElse {
+      sys.error("Failed to validate payment_form")
+    }
   }
 }
