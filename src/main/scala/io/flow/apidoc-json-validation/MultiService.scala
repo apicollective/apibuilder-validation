@@ -67,7 +67,10 @@ case class MultiService(
       case Some(s) => Right(s)
       case None => {
         services.find(_.isPathDefinedAt(path)) match {
-          case None => Left(Seq(s"HTTP '$method $path' is not defined"))
+          case None => {
+            Left(Seq(s"HTTP path '$path' is not defined"))
+          }
+
           case Some(s) => s.validate(method, path) match {
             case Left(errors) => Left(errors)
             case Right(_) => Right(s)

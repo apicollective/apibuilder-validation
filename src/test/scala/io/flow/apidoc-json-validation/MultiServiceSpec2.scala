@@ -31,7 +31,7 @@ class MultiServiceSpec2 extends FunSpec with Matchers {
 
   it("validates unknown paths") {
     multi.validate("GET", "/foo") should equal(
-      Left(Seq("HTTP 'GET /foo' is not defined"))
+      Left(Seq("HTTP path '/foo' is not defined"))
     )
   }
 
