@@ -91,4 +91,20 @@ class ApidocServiceSpec extends FunSpec with Matchers {
     )
   }
 
+  it("validate form data") {
+    val jsval = Json.obj(
+      "order_number" -> Seq[String]("123"),
+      "token" -> "blah",
+      "discriminator" -> "merchant_of_record_authorization_form"
+    )
+
+    service.upcast(
+      "POST",
+      "/:organization/authorizations",
+      jsval
+    ) should equal(
+      Left(Seq("Type 'merchant_of_record_authorization_form' field 'order_number' must be a string and not an array"))
+    )
+  }
+
 }

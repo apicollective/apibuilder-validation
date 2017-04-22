@@ -211,12 +211,7 @@ case class JsonValidator(val service: Service) {
 
   def validateString(prefix: String, js: JsValue): Either[Seq[String], JsString] = {
     js match {
-      case v: JsArray => {
-        v.value.size match {
-          case 1 => validateString(prefix, v.value.head)
-          case _ => Left(Seq(s"$prefix must be a string and not an array"))
-        }
-      }
+      case v: JsArray => Left(Seq(s"$prefix must be a string and not an array"))
       case v: JsBoolean => Right(JsString(v.value.toString))
       case JsNull => Left(Seq(s"$prefix must be a string and not null"))
       case v: JsNumber => Right(JsString(v.value.toString))
