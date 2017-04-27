@@ -46,6 +46,7 @@ class ApidocServiceSpec extends FunSpec with Matchers {
     service.bodyTypeFromPath("PUT", "/:organization/orders/:number") should be(Some("order_put_form"))
     service.bodyTypeFromPath("POST", "/:organization/authorizations") should be(Some("authorization_form"))
     service.bodyTypeFromPath("DELETE", "/:organization/orders/:number") should be(None)
+    service.bodyTypeFromPath("POST", "/shopify/carts/:id/add") should be(Some("shopify_cart_add_form"))
   }
 
   it("offers validation error w/ verb replacement") {
