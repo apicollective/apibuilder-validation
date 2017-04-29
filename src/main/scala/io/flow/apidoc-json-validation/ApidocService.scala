@@ -30,7 +30,10 @@ case class ApidocService(
       m += op.method -> op
     }
     tmp.map {
-      case (path, methods) => PathParser.parse(path).canonical -> methods.toMap
+      case (path, methods) => {
+        println(s"path => ${PathParser.parse(path)}")
+        PathParser.parse(path).canonical -> methods.toMap
+      }
     }.toMap
   }
 
@@ -53,7 +56,7 @@ case class ApidocService(
     * Returns a map of the operations available for the specified path. Keys are the HTTP Methods.
     */
   def operationsByMethod(path: String): Map[Method, Operation] = {
-    byPaths.getOrElse(path, Map.empty)
+    byPaths.getOrElse(PathParser.parse(path).canonical, Map.empty)
   }
 
   def isDefinedAt(method: String, path: String): Boolean = {

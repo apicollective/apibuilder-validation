@@ -31,6 +31,10 @@ class PathParserSpec extends FunSpec with Matchers {
       ParsedPath("/users/:var", "/users/:id", Seq("id"))
     )
 
+    PathParser.parse("/users/:id/show") should be(
+      ParsedPath("/users/:var/show", "/users/:id/show", Seq("id"))
+    )
+
     PathParser.parse("/users/:guid") should be(
       ParsedPath("/users/:var", "/users/:guid", Seq("guid"))
     )
