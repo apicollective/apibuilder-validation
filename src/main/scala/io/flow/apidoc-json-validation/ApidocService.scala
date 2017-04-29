@@ -21,19 +21,20 @@ case class ApidocService(
 
   private[this] val byPaths: Map[String, Map[Method, Operation]] = {
     val tmp = scala.collection.mutable.Map[String, scala.collection.mutable.Map[Method, Operation]]()
+
     service.resources.flatMap(_.operations).map { op =>
-      val m = tmp.get(op.path).getOrElse {
+      val canonicalPath = PathParser.parse(op.path).canonical
+
+      val m = tmp.get(canonicalPath).getOrElse {
         val map = scala.collection.mutable.Map[Method, Operation]()
-        tmp += op.path -> map
+        tmp += canonicalPath -> map
         map
       }
+
       m += op.method -> op
     }
     tmp.map {
-      case (path, methods) => {
-        println(s"path => ${PathParser.parse(path)}")
-        PathParser.parse(path).canonical -> methods.toMap
-      }
+      case (canonicalPath, methods) => canonicalPath -> methods.toMap
     }.toMap
   }
 
@@ -41,7 +42,6 @@ case class ApidocService(
     * If the specified method, path require a body, returns the type of the body
     */
   def bodyTypeFromPath(method: String, path: String): Option[String] = {
-    println(s"operation(method, path): ${operation(method, path)}")
     operation(method, path).flatMap(_.body.map(_.`type`))
   }
 
@@ -101,7 +101,6 @@ case class ApidocService(
     * Returns the operation associated with the specified method and path, if any
     */
   def operation(method: String, path: String): Option[Operation] = {
-    println(s"PATH: $path => ${operationsByMethod(path)}")
     operationsByMethod(path).get(Method(method))
   }
 
