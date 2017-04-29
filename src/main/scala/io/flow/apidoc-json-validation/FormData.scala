@@ -1,6 +1,5 @@
 package io.flow.lib.apidoc.json.validation
 
-import java.net.URLEncoder
 import play.api.libs.json._
 
 /**

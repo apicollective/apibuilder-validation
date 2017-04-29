@@ -21,16 +21,20 @@ case class ApidocService(
 
   private[this] val byPaths: Map[String, Map[Method, Operation]] = {
     val tmp = scala.collection.mutable.Map[String, scala.collection.mutable.Map[Method, Operation]]()
+
     service.resources.flatMap(_.operations).map { op =>
-      val m = tmp.get(op.path).getOrElse {
+      val canonicalPath = PathParser.parse(op.path).canonical
+
+      val m = tmp.get(canonicalPath).getOrElse {
         val map = scala.collection.mutable.Map[Method, Operation]()
-        tmp += op.path -> map
+        tmp += canonicalPath -> map
         map
       }
+
       m += op.method -> op
     }
     tmp.map {
-      case (path, methods) => (path -> methods.toMap)
+      case (canonicalPath, methods) => canonicalPath -> methods.toMap
     }.toMap
   }
 
@@ -52,7 +56,7 @@ case class ApidocService(
     * Returns a map of the operations available for the specified path. Keys are the HTTP Methods.
     */
   def operationsByMethod(path: String): Map[Method, Operation] = {
-    byPaths.getOrElse(path, Map.empty)
+    byPaths.getOrElse(PathParser.parse(path).canonical, Map.empty)
   }
 
   def isDefinedAt(method: String, path: String): Boolean = {
@@ -60,7 +64,7 @@ case class ApidocService(
   }
 
   def isPathDefinedAt(path: String): Boolean = {
-    byPaths.isDefinedAt(path)
+    byPaths.isDefinedAt(PathParser.parse(path).canonical)
   }
   /**
     * If the provided method and path are known, returns the associated

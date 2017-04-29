@@ -46,6 +46,12 @@ class ApidocServiceSpec extends FunSpec with Matchers {
     service.bodyTypeFromPath("PUT", "/:organization/orders/:number") should be(Some("order_put_form"))
     service.bodyTypeFromPath("POST", "/:organization/authorizations") should be(Some("authorization_form"))
     service.bodyTypeFromPath("DELETE", "/:organization/orders/:number") should be(None)
+    service.bodyTypeFromPath("PUT", "/sessions/:session") should be(Some("session_put_form"))
+  }
+
+  it("resolves for known paths w/ variable substitution") {
+    service.bodyTypeFromPath("post", "/:org/orders") should be(Some("order_form"))
+    service.bodyTypeFromPath("PUT", "/sessions/:id") should be(Some("session_put_form"))
   }
 
   it("offers validation error w/ verb replacement") {
@@ -74,7 +80,7 @@ class ApidocServiceSpec extends FunSpec with Matchers {
       "/:organization/authorizations",
       Json.obj("discriminator" -> "authorization_form")
     ) should equal(
-      Left(Seq("Invalid discriminator 'authorization_form' for union type 'authorization_form': must be one of 'direct_authorization_form', 'merchant_of_record_authorization_form'"))
+      Left(Seq("Invalid discriminator 'authorization_form' for union type 'authorization_form': must be one of 'direct_authorization_form', 'merchant_of_record_authorization_form', 'paypal_authorization_form'"))
     )
   }
 
