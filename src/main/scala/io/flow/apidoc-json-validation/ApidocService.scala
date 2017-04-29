@@ -64,7 +64,7 @@ case class ApidocService(
   }
 
   def isPathDefinedAt(path: String): Boolean = {
-    byPaths.isDefinedAt(path)
+    byPaths.isDefinedAt(PathParser.parse(path).canonical)
   }
   /**
     * If the provided method and path are known, returns the associated
