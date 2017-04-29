@@ -30,7 +30,7 @@ case class ApidocService(
       m += op.method -> op
     }
     tmp.map {
-      case (path, methods) => (path -> methods.toMap)
+      case (path, methods) => PathParser.parse(path).canonical -> methods.toMap
     }.toMap
   }
 
@@ -38,6 +38,7 @@ case class ApidocService(
     * If the specified method, path require a body, returns the type of the body
     */
   def bodyTypeFromPath(method: String, path: String): Option[String] = {
+    println(s"operation(method, path): ${operation(method, path)}")
     operation(method, path).flatMap(_.body.map(_.`type`))
   }
 
@@ -97,6 +98,7 @@ case class ApidocService(
     * Returns the operation associated with the specified method and path, if any
     */
   def operation(method: String, path: String): Option[Operation] = {
+    println(s"PATH: $path => ${operationsByMethod(path)}")
     operationsByMethod(path).get(Method(method))
   }
 
