@@ -1,0 +1,75 @@
+id=USR-929393
+name[first]=Dillan
+name[last]=McIvern
+tags[]=manager
+tags[]=employee
+tags[]=Europe
+locations[0][street1]=399 Park Avenue
+locations[0][street2]=
+locations[0][city]=New York
+locations[0][state]=New York
+locations[0][postal_code]=10016
+locations[0][access][]=full
+locations[1][street1]=1100 Avenue of the Americas
+locations[1][street2]=Floor 12
+locations[1][city]=New York
+locations[1][state]=New York
+locations[1][postal_code]=10023
+locations[1][access][]=parking
+locations[1][access][]=P3
+locations[1][access][]=floor_12
+locations[1][access][]=floor_13
+mayhem[0][key]=value
+mayhem[0][anotherKey]=32343
+mayhem[0][deep][0][out]=of
+mayhem[0][deep][0][control][0][object][last]=one
+mayhem[0][deep][0][control][0][object][array][]=1
+mayhem[0][deep][0][control][0][object][array][]=2
+mayhem[0][deep][0][control][0][object][array][]=3
+mayhem[0][deep][0][control][0][object][array][]=4
+
+{
+  "id": "USR-929393",
+  "name": {
+    "first": "Dillan",
+    "last": "McIvern"
+  },
+  "tags": ["manager", "employee", "Europe"],
+  "locations": [
+    {
+      "street1": "399 Park Avenue",
+      "street2": null,
+      "city": "New York",
+      "state": "New York",
+      "postal_code": "10016",
+      "access": ["full"]
+    },
+    {
+      "street1": "1100 Avenue of the Americas",
+      "street2": "Floor 12",
+      "city": "New York",
+      "state": "New York",
+      "postal_code": "10023",
+      "access": ["parking", "P3", "floor_12", "floor_13"]
+    }
+  ],
+  "mayhem": [
+    {
+      "key": "value",
+      "anotherKey": 32343,
+      "deep": [
+        {
+          "out": "of",
+          "control": [
+            {
+              "object": {
+                "last": "one",
+                "array": [1, 2, 3, 4]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

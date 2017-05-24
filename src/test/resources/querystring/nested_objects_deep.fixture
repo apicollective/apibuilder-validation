@@ -1,0 +1,23 @@
+number=FKZ-231231
+attributes[material]=leather
+attributes[color]=red
+price[amount]=23.55
+price[currency]=CAN
+price[base][amount]=22.22
+price[base][currency]=USD
+
+{
+  "number": "FKZ-231231",
+  "attributes": {
+    "material": "leather",
+    "color": "red"
+  },
+  "price": {
+    "amount": 23.55,
+    "currency": "CAN",
+    "base": {
+      "amount": 22.22,
+      "currency": "USD"
+    }
+  }
+}
