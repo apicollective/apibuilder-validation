@@ -1,5 +1,7 @@
 package io.flow.lib.apidoc.json.validation
 
+import java.net.URLDecoder
+
 import play.api.libs.json._
 
 /**
@@ -7,6 +9,8 @@ import play.api.libs.json._
   * object. Makes best guesses on types.
   */
 object FormData {
+
+  private[this] val Encoding: String = "UTF-8"
 
   /**
     * Given a url encoded string, parses it and then reformats as url
@@ -74,13 +78,15 @@ object FormData {
     val data = scala.collection.mutable.Map[String, Seq[String]]()
     value.split("&").foreach { x =>
       x.split("=", 2).toList match {
-        case key :: value :: Nil => {
+        case key :: rest => {
+          val decodedValue = URLDecoder.decode(rest.headOption.getOrElse(""), Encoding)
           val values = data.get(key) match {
-            case None => Seq(value)
-            case Some(existing) => existing ++ Seq(value)
+            case None => Seq(decodedValue)
+            case Some(existing) => existing ++ Seq(decodedValue)
           }
-          data += (key -> values)
+          data += URLDecoder.decode(key, Encoding) -> values
         }
+
         case _ => {
           // Ignore
         }

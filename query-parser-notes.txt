@@ -1,0 +1,50 @@
+{
+	“name”: “chris”
+}
+name=chris
+
+
+
+
+{
+	“name”: {
+	    "first": "chris”,
+	    "last: "hicks"
+    }
+}
+name[first]=chris&name[last]=hicks
+
+{
+	“friends”: [“christian”, "nathan"]
+}
+friends=christian&friends=nathan (? should we support)
+friends[]=christian&friends[]=nathan
+friends[0]=christian&friends[1]=nathan
+
+
+
+{
+	“friends”: [
+	    {
+	        "name": “christian”
+	    },
+	    {
+	        "name": “nathan”
+	    }
+    ]
+}
+friends[0][name]=christian&friends[1][name]=nathan
+
+
+{
+	“friends”: [
+	    {
+	        "name": “christian”,
+	        "parents": ["joe"]
+	    },
+	    {
+	        "name": “nathan”
+	    }
+    ]
+}
+friends[0][name]=christian&friends[0][parents][]=joe&friends[1][name]=nathan
