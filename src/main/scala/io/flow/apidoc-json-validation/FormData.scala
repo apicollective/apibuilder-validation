@@ -78,7 +78,7 @@ object FormData {
     val data = scala.collection.mutable.Map[String, Seq[String]]()
     value.split("&").foreach { x =>
       x.split("=", 2).toList match {
-        case key :: rest => {
+        case key :: rest if key.nonEmpty => {
           val decodedValue = URLDecoder.decode(rest.headOption.getOrElse(""), Encoding)
           val values = data.get(key) match {
             case None => Seq(decodedValue)
@@ -104,7 +104,7 @@ object FormData {
           values match {
             case Nil => Json.toJson("")
             case one :: Nil => Json.toJson(one)
-            case multiple => Json.toJson(values)
+            case _ => Json.toJson(values)
           }
         }
       ){ case (newKey, v) =>
