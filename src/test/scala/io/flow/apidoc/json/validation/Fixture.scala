@@ -8,8 +8,7 @@ case class Fixture(params: Seq[(String, String)], expected: JsValue)
 object Fixture {
 
   def load(file: File): Fixture = {
-    val contents = scala.io.Source.fromFile(file).getLines.mkString("")
-    contents.split("\n\n").toList match {
+    scala.io.Source.fromFile(file).getLines.mkString("\n").split("\n\n").toList match {
       case definition :: expected :: Nil => {
         Fixture(
           params = parseParameters(file, definition),
@@ -20,14 +19,14 @@ object Fixture {
     }
   }
 
-  def parseParameters(file: File, value: String): Seq[(String, String)] = {
+  private[this] def parseParameters(file: File, value: String): Seq[(String, String)] = {
     value.split("\n").map(_.trim).filter(_.nonEmpty).map { v =>
       v.split("=").toList match {
+        case k :: Nil => (k, "")
         case k :: v :: Nil => (k, v)
         case _ => sys.error(s"File[$file] Could not parse parameter declaration: $v")
       }
     }
-    Nil
   }
 
 }

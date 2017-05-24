@@ -10,15 +10,17 @@ import org.scalatest.{FunSpec, Matchers}
 class PaypalOrderConversionsSpec extends FunSpec with Matchers {
 
   private[this] val Dir: File = {
-    val d = new File("test/resources/querystring")
+    val d = new File("src/test/resources/querystring")
     assert(d.exists(), s"Dir[$d] does not exist")
     d
   }
 
-  it(examples") {
-    for ( file <- Dir.listFiles if file.getName.endsWith(".fixutre") ) {
+  it("examples") {
+    val files = Dir.listFiles.filter(_.getName.endsWith(".fixture"))
+    files.nonEmpty should be(true)
+    files.foreach { file =>
       val fixture = Fixture.load(file)
-      println(s"Fixture: $fixture")
+      println(s"${file.getName}: $fixture")
     }
   }
 }
