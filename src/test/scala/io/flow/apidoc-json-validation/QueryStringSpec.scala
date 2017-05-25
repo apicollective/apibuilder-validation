@@ -14,7 +14,7 @@ class QueryStringSpec extends FunSpec with Matchers {
   }
 
   it("examples") {
-    val files = Dir.listFiles.filter(_.getName.endsWith(".fixture"))
+    val files = Dir.listFiles.filter(_.getName.endsWith(".fixture")).filter(_.getName == "mayhem.fixture")
     files.nonEmpty should be(true)
     files.foreach { file =>
       val fixture = Fixture.load(file)
@@ -41,8 +41,6 @@ class QueryStringSpec extends FunSpec with Matchers {
         println(Json.prettyPrint(parsed))
 
         sys.error(s"$Dir/${file.getName}: ${fixture.rawQueryString} - JsValue did not match expected")
-      } else {
-        println(s"${file.getName}: ${fixture.rawQueryString} - JsValue MATCHED!!!!")
       }
     }
   }

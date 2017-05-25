@@ -132,19 +132,20 @@ object FormData {
         toJson(
           keys.tail,
           data,
-          deepMerge(finalObject, thisObject)
+          mergeObjects(finalObject, thisObject)
         )
       }
     }
   }
 
-  private[this] def deepMerge(existingObject: JsObject, otherObject: JsObject): JsObject = {
+  // Based on play deepMerge method, but also merges values of underlying arrays
+  private[this] def mergeObjects(existingObject: JsObject, otherObject: JsObject): JsObject = {
     val result = existingObject.value ++ otherObject.value.map {
       case (otherKey, otherValue) =>
         val maybeExistingValue = existingObject.value.get(otherKey)
 
         val newValue = (maybeExistingValue, otherValue) match {
-          case (Some(e: JsObject), o: JsObject) => deepMerge(e, o)
+          case (Some(e: JsObject), o: JsObject) => mergeObjects(e, o)
           case (Some(e: JsArray), o: JsArray) => mergeArrays(e, o)
           case _ => otherValue
         }
@@ -165,10 +166,15 @@ object FormData {
     val length = Seq(one.value.length, two.value.length).max
     JsArray(
       0.until(length).map { i =>
-        one.value.lift(i).filter(_ != JsNull).getOrElse {
-          two.value.lift(i).getOrElse {
-            JsNull
+        (one.value.lift(i).filter(_ != JsNull), two.value.lift(i).filter(_ != JsNull)) match {
+          case (Some(a), None) => a
+          case (None, Some(b)) => b
+          case (Some(a), Some(b)) => (a, b) match {
+            case (o1: JsObject, o2: JsObject) => mergeObjects(o1, o2)
+            case (o1: JsArray, o2: JsArray) => mergeArrays(o1, o2)
+            case _ => a
           }
+          case (None, None) => JsNull
         }
       }
     )
