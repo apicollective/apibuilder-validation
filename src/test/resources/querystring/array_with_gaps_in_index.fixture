@@ -1,0 +1,8 @@
+# Document what happens with nulls to fill in gaps in an array
+
+id[0]=0
+id[2]=2
+
+{
+  "id": [0, null, 2]
+}
