@@ -4,6 +4,9 @@ import java.net.URLDecoder
 
 import play.api.libs.json._
 
+import scala.annotation.tailrec
+import scala.util.{Failure, Success, Try}
+
 /**
   * Convert any url form encoded params (query or body) to a Json
   * object. Makes best guesses on types.
@@ -15,12 +18,12 @@ object FormData {
   /**
     * Given a url encoded string, parses it and then reformats as url
     * encoded. Main use case is to turn things like:
-    * 
-    *     number[]=100379876543&number[]=WT65xSPLX-SPT-5
-    * 
+    *
+    * number[]=100379876543&number[]=WT65xSPLX-SPT-5
+    *
     * into
-    * 
-    *     number=100379876543&number=WT65xSPLX-SPT-5
+    *
+    * number=100379876543&number=WT65xSPLX-SPT-5
     */
   def rewriteEncoded(value: String): String = {
     toEncoded(
@@ -33,9 +36,9 @@ object FormData {
   /**
     * Converts the specified js value into a url form encoded string,
     * recursively through all types.
-    * 
+    *
     * @param keys Keeps track of the top level keys we are parsing to
-    *        build up nested keys (e.g. user[first] for maps)
+    *             build up nested keys (e.g. user[first] for maps)
     */
   def toEncoded(js: JsValue, keys: Seq[String] = Nil): String = {
     js match {
@@ -96,45 +99,110 @@ object FormData {
   }
 
   def toJson(data: Map[String, Seq[String]]): JsObject = {
-    val nested = data.map{ case (key, values) =>
-      key.split("\\[").foldRight(
-        if(key.contains("[]")) {
-          Json.toJson(values)  //take seq for arrays
+    toJson(data.keys.toSeq, data)
+  }
+
+  @tailrec
+  private[this] def toJson(
+    keys: Seq[String],
+    data: Map[String, Seq[String]],
+    finalObject: JsObject = Json.obj()
+  ): JsObject = {
+    println(s"toJson: keys[${keys.mkString(", ")}] finalObject: $finalObject")
+
+    keys.headOption match {
+      case None => {
+        finalObject
+      }
+
+      case Some(key) => {
+        val jsValue = data(key) match {
+          case Nil => JsNull
+          case one :: Nil => toJsPrimitive(one)
+          case multiple => JsArray(multiple.map(toJsPrimitive))
+        }
+
+        val i = key.lastIndexOf('[')
+        val thisObject = if (i < 0) {
+          Json.obj(key -> jsValue)
         } else {
-          values match {
-            case Nil => Json.toJson("")
-            case one :: Nil => Json.toJson(one)
-            case _ => Json.toJson(values)
-          }
-        }
-      ){ case (newKey, v) =>
-        val newVal = {
-          val js = (v \ "").getOrElse(v)
-
-          //convert '{key: val}' to '[{key: val}]' if previous key specifies array type, otherwise nothing
-          if (newKey == "]") {
-            if (!js.toString.startsWith("[")) {
-              val s = (v \ "").getOrElse(v).toString.
-                replaceFirst("\\{", "[{").
-                reverse.
-                replaceFirst("\\}", "]}").
-                reverse
-
-              Json.toJson(Json.parse(s))
-            } else {
-              js
-            }
-
-          } else {
-            js
-          }
+          toJsonObject(key, jsValue)
         }
 
-        Json.obj(newKey.replace("]", "") -> newVal)
+        toJson(
+          keys.tail,
+          data,
+          finalObject.deepMerge(thisObject)
+        )
       }
     }
+  }
 
-    nested.foldLeft(Json.obj()){ case (a, b) => a.deepMerge(b.as[JsObject]) }
+  private[this] val EndsWithIndexInBrackets = """^(.+)\[(\d+)\]$""".r
+  private[this] val EndsWithEmptyBrackets = """^(.+)\[\]$""".r
+  private[this] val EndsWithFieldNameInBrackets = """^(.+)\[(.+)\]$""".r
+
+  // Given input of:
+  //   locations[0][city] => Paris
+  // Produce
+  // { "locations": [
+  //     { "city": "Paris" }
+  //   ]
+  // }
+  @tailrec
+  private[this] def toJsonObject(key: String, value: JsValue): JsObject = {
+    println(s"toJsonObject key[$key] value: $value")
+
+    key match {
+      case EndsWithIndexInBrackets(prefix, index) => {
+        println(s"TODO: prefix[$prefix] index[$index]")
+        toJsonObject(prefix, JsArray(Seq(value)))
+      }
+
+      case EndsWithEmptyBrackets(prefix) => {
+        value match {
+          case _: JsArray => toJsonObject(prefix, value)
+          case _ => toJsonObject(prefix, JsArray(Seq(value)))
+        }
+      }
+
+      case EndsWithFieldNameInBrackets(prefix, name) => {
+        toJsonObject(prefix, Json.obj(name -> value))
+      }
+
+      case _ => {
+        Json.obj(key -> value)
+      }
+    }
+  }
+
+  private[this] def toJsPrimitive(value: String): JsValue = {
+    value match {
+      case "true" => JsBoolean(true)
+      case "false" => JsBoolean(false)
+      case other => {
+        toNumber(other) match {
+          case Some(v) => JsNumber(v)
+          case None => JsString(other)
+        }
+      }
+    }
+  }
+
+  private[this] val AcceptableRegexp = """^\-?[0-9]+$""".r
+
+  def toNumber(value: String): Option[BigDecimal] = {
+    value match {
+      case AcceptableRegexp() => {
+        Try {
+          BigDecimal(value)
+        } match {
+          case Success(num) => Some(num)
+          case Failure(_) => None
+        }
+      }
+      case _ => None
+    }
   }
 
 }

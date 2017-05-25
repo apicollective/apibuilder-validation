@@ -5,6 +5,15 @@ import play.api.libs.json._
 
 class FormDataSpec extends FunSpec with Matchers {
 
+  it("toNumber") {
+    FormData.toNumber("") should be(None)
+    FormData.toNumber("a") should be(None)
+    FormData.toNumber("1") should be(Some(1))
+    FormData.toNumber("-1") should be(Some(-1))
+    FormData.toNumber("1999") should be(Some(1999))
+    FormData.toNumber("-1999") should be(Some(-1999))
+  }
+
   it("parseEncoded") {
     FormData.parseEncoded("") should be(
       Map()
@@ -52,7 +61,7 @@ class FormDataSpec extends FunSpec with Matchers {
     )
 
     FormData.toJson(FormData.parseEncoded("number[]=1&number[]=2")) should be(
-      Json.obj("number" -> Seq("1", "2"))
+      Json.obj("number" -> Seq(1, 2))
     )
   }
 

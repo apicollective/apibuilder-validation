@@ -220,7 +220,7 @@ case class JsonValidator(val service: Service) {
       case v: JsBoolean => Right(JsString(v.value.toString))
       case JsNull => Left(Seq(s"$prefix must be a string and not null"))
       case v: JsNumber => Right(JsString(v.value.toString))
-      case v: JsObject => Left(Seq(s"$prefix must be a string and not an object"))
+      case _: JsObject => Left(Seq(s"$prefix must be a string and not an object"))
       case v: JsString => Right(v)
     }
   }
@@ -252,9 +252,9 @@ case class JsonValidator(val service: Service) {
           case _ => Left(Seq(s"$prefix must be an object and not an array"))
         }
       }
-      case v: JsBoolean => Left(Seq(s"$prefix must be an object and not a boolean"))
+      case _: JsBoolean => Left(Seq(s"$prefix must be an object and not a boolean"))
       case JsNull => Left(Seq(s"$prefix must be an object and not null"))
-      case v: JsNumber => Left(Seq(s"$prefix must be an object and not a number"))
+      case _: JsNumber => Left(Seq(s"$prefix must be an object and not a number"))
       case v: JsObject => {
         val eithers: Seq[Either[Seq[String], JsObject]] = v.fields.map { case (name, el) =>
           validate(internalType, el, Some(prefix + s" element[$name]")) match {
