@@ -164,10 +164,11 @@ object FormData {
   private[this] def mergeArrays(one: JsArray, two: JsArray): JsArray = {
     val length = Seq(one.value.length, two.value.length).max
     JsArray(
-      0.until(length).flatMap { i =>
-        Seq(one.value.lift(i), two.value.lift(i)).flatten.toList match {
-          case Nil => Seq(JsNull)
-          case matching => matching
+      0.until(length).map { i =>
+        one.value.lift(i).filter(_ != JsNull).getOrElse {
+          two.value.lift(i).getOrElse {
+            JsNull
+          }
         }
       }
     )
@@ -190,8 +191,14 @@ object FormData {
 
     key match {
       case EndsWithIndexInBrackets(prefix, index) => {
-        // println(s"TODO: prefix[$prefix] index[$index]")
-        toJsonObject(prefix, JsArray(Seq(value)))
+        // Fill in JsNull up to our desired index to preserve the explicit
+        // element order in the arrays
+        toJsonObject(
+          prefix,
+          JsArray(
+            0.until(index.toInt).map { _ => JsNull } ++ Seq(value)
+          )
+        )
       }
 
       case EndsWithEmptyBrackets(prefix) => {
