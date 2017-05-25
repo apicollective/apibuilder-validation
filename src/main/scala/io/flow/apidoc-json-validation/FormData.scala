@@ -77,6 +77,18 @@ object FormData {
     }
   }
 
+  /**
+    * Parses a url encoded string into a Json Object
+    */
+  def parseEncodedToJsObject(value: String): JsObject = {
+    FormData.toJson(
+      FormData.parseEncoded(value)
+    )
+  }
+
+  /**
+    * Parses a url encoded string into a map
+    */
   def parseEncoded(value: String): Map[String, Seq[String]] = {
     val data = scala.collection.mutable.Map[String, Seq[String]]()
     value.split("&").foreach { x =>

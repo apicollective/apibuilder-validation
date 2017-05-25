@@ -18,9 +18,7 @@ class QueryStringSpec extends FunSpec with Matchers {
     files.nonEmpty should be(true)
     files.foreach { file =>
       val fixture = Fixture.load(file)
-      val parsed = FormData.toJson(
-        FormData.parseEncoded(fixture.rawQueryString)
-      )
+      val parsed = FormData.parseEncodedToJsObject(fixture.rawQueryString)
 
       if (parsed != fixture.expected) {
         println("")
