@@ -38,10 +38,10 @@ mayhem[0][deep][0][control][0][object][array][]=4
   "locations": [
     {
       "street1": "399 Park Avenue",
-      "street2": null,
+      "street2": "",
       "city": "New York",
       "state": "New York",
-      "postal_code": "10016",
+      "postal_code": 10016,
       "access": ["full"]
     },
     {
@@ -49,7 +49,7 @@ mayhem[0][deep][0][control][0][object][array][]=4
       "street2": "Floor 12",
       "city": "New York",
       "state": "New York",
-      "postal_code": "10023",
+      "postal_code": 10023,
       "access": ["parking", "P3", "floor_12", "floor_13"]
     }
   ],

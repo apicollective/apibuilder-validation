@@ -14,12 +14,12 @@ selected[]=2388383
   "items": [
     {
       "number": "ITM-23423",
-      "price": 3.44,
+      "price": "3.44",
       "quantity": 1
     },
     {
       "number": "ITM-23423",
-      "price": 23.99,
+      "price": "23.99",
       "quantity": 4
     }
   ],

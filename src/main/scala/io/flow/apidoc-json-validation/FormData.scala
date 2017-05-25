@@ -108,8 +108,6 @@ object FormData {
     data: Map[String, Seq[String]],
     finalObject: JsObject = Json.obj()
   ): JsObject = {
-    println(s"toJson: keys[${keys.mkString(", ")}] finalObject: $finalObject")
-
     keys.headOption match {
       case None => {
         finalObject

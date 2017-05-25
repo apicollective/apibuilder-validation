@@ -14,7 +14,7 @@ class QueryStringSpec extends FunSpec with Matchers {
   }
 
   it("examples") {
-    val files = Dir.listFiles.filter(_.getName.endsWith(".fixture")).filter(_.getName == "mayhem.fixture")
+    val files = Dir.listFiles.filter(_.getName.endsWith(".fixture"))
     files.nonEmpty should be(true)
     files.foreach { file =>
       val fixture = Fixture.load(file)
