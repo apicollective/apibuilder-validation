@@ -132,10 +132,27 @@ object FormData {
         toJson(
           keys.tail,
           data,
-          finalObject.deepMerge(thisObject)
+          deepMerge(finalObject, thisObject)
         )
       }
     }
+  }
+
+  def deepMerge(existing: JsObject, other: JsObject): JsObject = {
+    def merge(existingObject: JsObject, otherObject: JsObject): JsObject = {
+      val result = existingObject.value ++ otherObject.value.map {
+        case (otherKey, otherValue) =>
+          val maybeExistingValue = existingObject.value.get(otherKey)
+
+          val newValue = (maybeExistingValue, otherValue) match {
+            case (Some(e: JsObject), o: JsObject) => merge(e, o)
+            case _ => otherValue
+          }
+          otherKey -> newValue
+      }
+      JsObject(result)
+    }
+    merge(existing, other)
   }
 
   private[this] val EndsWithIndexInBrackets = """^(.+)\[(\d+)\]$""".r
