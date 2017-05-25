@@ -16,7 +16,9 @@ case class Fixture(params: Seq[(String, String)], expected: JsValue) {
 object Fixture {
 
   def load(file: File): Fixture = {
-    scala.io.Source.fromFile(file).getLines.mkString("\n").split("\n\n").toList match {
+    scala.io.Source.fromFile(file).getLines.mkString("\n").
+      split("\n").filter { l => !l.startsWith("#") }.mkString("\n").
+      trim.split("\n\n").toList match {
       case definition :: expected :: Nil => {
         Fixture(
           params = parseParameters(file, definition),

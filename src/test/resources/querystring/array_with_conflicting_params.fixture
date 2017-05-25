@@ -1,3 +1,6 @@
+# Document what happens when we have conflicting array params
+#  - favor indexed ones
+
 id[0]=9823938
 id[1]=4634663
 id[]=2342344
