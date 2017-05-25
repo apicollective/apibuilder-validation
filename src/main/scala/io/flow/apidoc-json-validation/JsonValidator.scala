@@ -205,7 +205,7 @@ case class JsonValidator(val service: Service) {
       case "date-time-iso8601" => validateDateTimeIso8601(prefix, js)
       case ArrayPattern(internalType) => validateArray(prefix + s" of type '[$internalType]':", internalType, js)
       case ObjectPattern(internalType) => validateObject(prefix + s" of type 'map[$internalType]':", internalType, js)
-      case other => Right(js)
+      case _ => Right(js)
     }
   }
 
