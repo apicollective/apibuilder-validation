@@ -94,7 +94,11 @@ object FormData {
     value.split("&").foreach { x =>
       x.split("=", 2).toList match {
         case key :: rest if key.nonEmpty => {
-          val decodedValue = URLDecoder.decode(rest.headOption.getOrElse(""), Encoding)
+          val decodedValue = rest.headOption.getOrElse("") match {
+            case "" => null
+            case v => URLDecoder.decode(v, Encoding)
+          }
+
           val values = data.get(key) match {
             case None => Seq(decodedValue)
             case Some(existing) => existing ++ Seq(decodedValue)

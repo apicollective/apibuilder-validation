@@ -7,7 +7,7 @@ location=
   "id": "ID-342344",
   "name": {
     "first": "John",
-    "last": ""
+    "last": null
   },
-  "location": ""
+  "location": null
 }
