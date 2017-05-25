@@ -1,0 +1,27 @@
+number=ORD-34234
+items[0][number]=ITM-23423
+items[0][price]=3.44
+items[0][quantity]=1
+items[1][number]=ITM-23423
+items[1][price]=23.99
+items[1][quantity]=4
+selected[]=84747474
+selected[]=383838383
+selected[]=2388383
+
+{
+  "number": "ORD-34234",
+  "items": [
+    {
+      "number": "ITM-23423",
+      "price": "3.44",
+      "quantity": 1
+    },
+    {
+      "number": "ITM-23423",
+      "price": "23.99",
+      "quantity": 4
+    }
+  ],
+  "selected": [84747474, 383838383, 2388383]
+}

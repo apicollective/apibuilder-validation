@@ -68,7 +68,7 @@ class MultiServiceSpec extends FunSpec with Matchers {
       Json.toJson(form)
     ).right.get
 
-    (js \ "name").as[JsString].value should equal("John%20Doe")
+    (js \ "name").as[JsString].value should equal("John Doe")
     (js \ "expiration_month").as[JsNumber].value should equal(12)
     (js \ "expiration_year").as[JsNumber].value should equal(2017)
     (js \ "cvv").as[JsString].value should equal("123")
