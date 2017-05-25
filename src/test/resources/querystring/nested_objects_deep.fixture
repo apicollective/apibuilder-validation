@@ -13,10 +13,10 @@ price[base][currency]=USD
     "color": "red"
   },
   "price": {
-    "amount": 23.55,
+    "amount": "23.55",
     "currency": "CAN",
     "base": {
-      "amount": 22.22,
+      "amount": "22.22",
       "currency": "USD"
     }
   }

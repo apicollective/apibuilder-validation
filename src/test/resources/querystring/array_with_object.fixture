@@ -1,0 +1,13 @@
+locations[1][city]=New York
+locations[0][city]=San Francisco
+
+{
+  "locations": [
+    {
+      "city": "San Francisco"
+    },
+    {
+      "city": "New York"
+    }
+  ]
+}

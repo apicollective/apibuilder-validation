@@ -138,21 +138,39 @@ object FormData {
     }
   }
 
-  def deepMerge(existing: JsObject, other: JsObject): JsObject = {
-    def merge(existingObject: JsObject, otherObject: JsObject): JsObject = {
-      val result = existingObject.value ++ otherObject.value.map {
-        case (otherKey, otherValue) =>
-          val maybeExistingValue = existingObject.value.get(otherKey)
+  private[this] def deepMerge(existingObject: JsObject, otherObject: JsObject): JsObject = {
+    val result = existingObject.value ++ otherObject.value.map {
+      case (otherKey, otherValue) =>
+        val maybeExistingValue = existingObject.value.get(otherKey)
 
-          val newValue = (maybeExistingValue, otherValue) match {
-            case (Some(e: JsObject), o: JsObject) => merge(e, o)
-            case _ => otherValue
-          }
-          otherKey -> newValue
-      }
-      JsObject(result)
+        val newValue = (maybeExistingValue, otherValue) match {
+          case (Some(e: JsObject), o: JsObject) => deepMerge(e, o)
+          case (Some(e: JsArray), o: JsArray) => mergeArrays(e, o)
+          case _ => otherValue
+        }
+
+        otherKey -> newValue
     }
-    merge(existing, other)
+    JsObject(result)
+  }
+
+  /**
+    * Merge two arrays, preserving order where possible. Use case is for
+    * when we have two arrays sparsely populated, e.g:
+    *   one: [1]
+    *   two: [null, 2]
+    * in this case we return [1, 2]
+    */
+  private[this] def mergeArrays(one: JsArray, two: JsArray): JsArray = {
+    val length = Seq(one.value.length, two.value.length).max
+    JsArray(
+      0.until(length).flatMap { i =>
+        Seq(one.value.lift(i), two.value.lift(i)).flatten.toList match {
+          case Nil => Seq(JsNull)
+          case matching => matching
+        }
+      }
+    )
   }
 
   private[this] val EndsWithIndexInBrackets = """^(.+)\[(\d+)\]$""".r
@@ -168,11 +186,11 @@ object FormData {
   // }
   @tailrec
   private[this] def toJsonObject(key: String, value: JsValue): JsObject = {
-    println(s"toJsonObject key[$key] value: $value")
+    // println(s"toJsonObject key[$key] value: $value")
 
     key match {
       case EndsWithIndexInBrackets(prefix, index) => {
-        println(s"TODO: prefix[$prefix] index[$index]")
+        // println(s"TODO: prefix[$prefix] index[$index]")
         toJsonObject(prefix, JsArray(Seq(value)))
       }
 
