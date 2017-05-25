@@ -3,7 +3,7 @@ package io.flow.lib.apidoc.json.validation
 import java.io.File
 
 import org.scalatest.{FunSpec, Matchers}
-import play.api.libs.json.Json
+import play.api.libs.json.{JsObject, Json}
 
 class QueryStringSpec extends FunSpec with Matchers {
 
@@ -20,7 +20,7 @@ class QueryStringSpec extends FunSpec with Matchers {
       val fixture = Fixture.load(file)
       val parsed = FormData.parseEncodedToJsObject(fixture.rawQueryString)
 
-      if (parsed != fixture.expected) {
+      if (!parsed.canEqual(fixture.expected)) {
         println("")
         println("parseEncoded")
         println("----------------------------------------")
@@ -37,6 +37,18 @@ class QueryStringSpec extends FunSpec with Matchers {
         println("PARSED")
         println("----------------------------------------")
         println(Json.prettyPrint(parsed))
+
+        println("")
+        println("Top level field differences")
+        println("----------------------------------------")
+        val keys = fixture.expected.keys ++ parsed.keys
+        keys.foreach { k =>
+          val a = fixture.expected \ k
+          val b = parsed \ k
+          if (a != b) {
+            println(s" - ${k}")
+          }
+        }
 
         sys.error(s"$Dir/${file.getName}: ${fixture.rawQueryString} - JsValue did not match expected")
       }

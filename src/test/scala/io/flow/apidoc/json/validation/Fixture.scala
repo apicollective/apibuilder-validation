@@ -5,7 +5,7 @@ import java.net.URLEncoder
 
 import play.api.libs.json.{JsObject, JsValue, Json}
 
-case class Fixture(params: Seq[(String, String)], expected: JsValue) {
+case class Fixture(params: Seq[(String, String)], expected: JsObject) {
 
   def rawQueryString: String = {
     params.map { case (k,v) => s"$k=" + URLEncoder.encode(v, "UTF-8") }.mkString("&")

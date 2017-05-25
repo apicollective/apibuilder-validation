@@ -38,7 +38,7 @@ mayhem[0][deep][0][control][0][object][array][]=4
   "locations": [
     {
       "street1": "399 Park Avenue",
-      "street2": "",
+      "street2": null,
       "city": "New York",
       "state": "New York",
       "postal_code": 10016,
