@@ -19,7 +19,7 @@ class MultiServiceSpec extends FunSpec with Matchers {
   }
 
   it("loads multiple services") {
-    multi.services.map(_.service.name) should equal(Seq("API", "apidoc api"))
+    multi.services.map(_.service.name) should equal(Seq("API", "apibuilder api"))
   }
 
   it("bodyTypeFromPath") {
