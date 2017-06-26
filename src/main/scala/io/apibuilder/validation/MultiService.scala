@@ -1,6 +1,6 @@
 package io.apibuilder.validation
 
-import com.bryzek.apidoc.spec.v0.models.{Method, Operation, Parameter, Service}
+import io.apibuilder.spec.v0.models.{Method, Operation, Parameter, Service}
 import play.api.libs.json._
 
 /**
@@ -9,7 +9,7 @@ import play.api.libs.json._
   * services define an http path, first one is selected.
   */
 case class MultiService(
-  services: Seq[ApidocService]
+  services: Seq[ApiBuilderService]
 ) {
 
   /**
@@ -60,7 +60,7 @@ case class MultiService(
     * if no service, return a nice error message. Otherwise invoke
     * the provided function on the apidoc service.
     */
-  private[this] def resolveService(method: String, path: String): Either[Seq[String], ApidocService] = {
+  private[this] def resolveService(method: String, path: String): Either[Seq[String], ApiBuilderService] = {
     services.find { s =>
       s.isDefinedAt(method = method, path = path)
     } match {
@@ -89,7 +89,7 @@ object MultiService {
     * returning either a list of errors or an instance of MultiService
     */
   def fromUrls(urls: Seq[String]): Either[Seq[String], MultiService] = {
-    val eithers = urls.map { ApidocService.fromUrl }
+    val eithers = urls.map { ApiBuilderService.fromUrl }
     if (eithers.forall(_.isRight)) {
       Right(
         MultiService(

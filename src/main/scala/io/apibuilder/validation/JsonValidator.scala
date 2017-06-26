@@ -1,6 +1,6 @@
 package io.apibuilder.validation
 
-import com.bryzek.apidoc.spec.v0.models.{Enum, Model, Service, Union}
+import io.apibuilder.spec.v0.models.{Enum, Model, Service, Union}
 import org.joda.time.format.ISODateTimeFormat
 import play.api.libs.json._
 import scala.util.{Failure, Success, Try}

@@ -10,7 +10,7 @@ class MultiServiceSpec extends FunSpec with Matchers {
     MultiService.fromUrls(
       Seq(
         s"$base/src/test/resources/flow-api-service.json",
-        s"$base/src/test/resources/apidoc-api-service.json"
+        s"$base/src/test/resources/apibuilder-api-service.json"
       )
     )match {
       case Left(errors) => sys.error(s"Failed to load: $errors")
