@@ -1,4 +1,4 @@
-package io.flow.lib.apidoc.json.validation
+package io.apibuilder.validation
 
 import com.bryzek.apidoc.spec.v0.models.Method
 import play.api.libs.json._

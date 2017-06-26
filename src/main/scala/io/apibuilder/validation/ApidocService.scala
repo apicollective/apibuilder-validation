@@ -1,4 +1,4 @@
-package io.flow.lib.apidoc.json.validation
+package io.apibuilder.validation
 
 import com.bryzek.apidoc.spec.v0.models.{Method, Operation, Parameter, Service}
 import com.bryzek.apidoc.spec.v0.models.json._

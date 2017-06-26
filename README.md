@@ -1,19 +1,21 @@
-[![Build Status](https://travis-ci.org/flowcommerce/lib-apidoc-json-validation.svg?branch=master)](https://travis-ci.org/flowcommerce/lib-apidoc-json-validation)
+[![Build Status](https://travis-ci.org/flowcommerce/apibuilder-validation.svg?branch=master)](https://travis-ci.org/flowcommerce/apibuilder-validation)
 
-# lib-apidoc-json-validation
+# apibuilder-validation
 
-Accepts an instance of an [apidoc
-service](http://apidoc.me/bryzek/apidoc-spec/latest), providing high
-quality validation of JSON readers with an emphasis on providing human
-understandable error messages.
+Accepts an instance of an [apibuilder
+aservice](https://app.apibuilder.io/apicollective/apibuilder-spec/latest),
+providing high quality validation of JSON readers with an emphasis on
+providing human understandable error messages. Also handles safe
+conversions of types (e.g. number to string) based on the API Builder
+schema definition.
 
 # Usage
 
 ```
 val multi = MultiService.fromUrls(
   Seq(
-    "http://apidoc.me/flow/api/latest/service.json",
-    "http://apidoc.me/bryzek/apidoc-api/latest/service.json"
+    "https://app.apibuilder.io/flow/api/latest/service.json",
+    "https://app.apibuilder.io/apicollective/apibuilder-api/latest/service.json"
   )
 ) match {
   case Left(errors) => sys.error(s"Failed to load: $errors")

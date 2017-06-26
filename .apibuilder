@@ -1,0 +1,6 @@
+code:
+  apicollective:
+    apibuilder-spec:
+      version: latest
+      generators:
+        play_2_x_standalone_json: src/main/scala/io/apibuilder/generated

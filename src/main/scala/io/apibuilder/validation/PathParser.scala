@@ -1,4 +1,4 @@
-package io.flow.lib.apidoc.json.validation
+package io.apibuilder.validation
 
 case class ParsedPath(
   canonical: String,

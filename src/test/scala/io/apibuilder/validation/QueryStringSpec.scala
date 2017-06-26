@@ -1,4 +1,4 @@
-package io.flow.lib.apidoc.json.validation
+package io.apibuilder.validation
 
 import java.io.File
 import org.scalatest.{FunSpec, Matchers}
