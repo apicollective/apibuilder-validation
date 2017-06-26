@@ -10,7 +10,7 @@ import scala.io.Source
 import scala.util.{Failure, Success, Try}
 
 /**
-  * Wraps a single apidoc service, providing helpers to validate
+  * Wraps a single API Builder service, providing helpers to validate
   * objects based on the incoming http method and path
   */
 case class ApiBuilderService(
@@ -121,7 +121,7 @@ case class ApiBuilderService(
 object ApiBuilderService {
 
   /**
-    * Loads the apidoc service specification from the specified URI,
+    * Loads the API Builder service specification from the specified URI,
     * returning either a list of errors or the service itself.
     */
   def fromUrl(url: String): Either[Seq[String], ApiBuilderService] = {

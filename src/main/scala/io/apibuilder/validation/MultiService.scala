@@ -4,7 +4,7 @@ import io.apibuilder.spec.v0.models.{Method, Operation, Parameter, Service}
 import play.api.libs.json._
 
 /**
-  * Wrapper to work with multiple apidoc services.
+  * Wrapper to work with multiple API Builder services.
   * Takes an ordered list of services. If multiple
   * services define an http path, first one is selected.
   */
@@ -56,9 +56,9 @@ case class MultiService(
   }
 
   /**
-    * resolve the apidoc service defined at the provided method, path.
+    * resolve the API Builder service defined at the provided method, path.
     * if no service, return a nice error message. Otherwise invoke
-    * the provided function on the apidoc service.
+    * the provided function on the API Builder service.
     */
   private[this] def resolveService(method: String, path: String): Either[Seq[String], ApiBuilderService] = {
     services.find { s =>
@@ -85,7 +85,7 @@ case class MultiService(
 object MultiService {
   
   /**
-    * Loads the list of apidoc service specification from the specified URIs,
+    * Loads the list of API Builder service specification from the specified URIs,
     * returning either a list of errors or an instance of MultiService
     */
   def fromUrls(urls: Seq[String]): Either[Seq[String], MultiService] = {

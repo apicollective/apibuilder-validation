@@ -21,7 +21,7 @@ object Booleans {
 case class JsonValidator(val service: Service) {
 
   /**
-    * Validates the incoming JsValue against the apidoc schema,
+    * Validates the incoming JsValue against the API Builder schema,
     * returning either human friendly validation errors or a new
     * JsValue with any conversions applied (e.g. strings to booleans,
     * numbers to string, etc. as dictated by the schema).
@@ -56,7 +56,7 @@ case class JsonValidator(val service: Service) {
             
               case None => {
                 // may be a primitive type like 'string'
-                validateApidocType(
+                validateApiBuilderType(
                   prefix.getOrElse(s"Type '$typeName'"),
                   typeName,
                   js
@@ -190,9 +190,9 @@ case class JsonValidator(val service: Service) {
   private[this] val ObjectPattern = """^map\[(.+)\]$""".r
 
   /**
-    * Validates the JS Value based on the expected apidoc type.
+    * Validates the JS Value based on the expected API Builder type.
     */
-  private[this] def validateApidocType(prefix: String, typ: String, js: JsValue): Either[Seq[String], JsValue] = {
+  private[this] def validateApiBuilderType(prefix: String, typ: String, js: JsValue): Either[Seq[String], JsValue] = {
     typ.trim.toLowerCase match {
       case "string" => validateString(prefix, js)
       case "integer" => validateInteger(prefix, js)
