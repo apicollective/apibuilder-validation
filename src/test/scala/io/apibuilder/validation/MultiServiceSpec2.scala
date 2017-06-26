@@ -1,6 +1,6 @@
-package io.flow.lib.apidoc.json.validation
+package io.apibuilder.validation
 
-import com.bryzek.apidoc.spec.v0.models.Method
+import io.apibuilder.spec.v0.models.Method
 import play.api.libs.json._
 import org.scalatest.{FunSpec, Matchers}
 

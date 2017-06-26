@@ -1,7 +1,7 @@
-package io.flow.lib.apidoc.json.validation
+package io.apibuilder.validation
 
-import com.bryzek.apidoc.spec.v0.models.Service
-import com.bryzek.apidoc.spec.v0.models.json._
+import io.apibuilder.spec.v0.models.Service
+import io.apibuilder.spec.v0.models.json._
 import io.flow.v0.models.{Address, CardForm, EventType, HarmonizedItemForm, ItemForm, WebhookForm}
 import io.flow.v0.models.json._
 import play.api.libs.json._

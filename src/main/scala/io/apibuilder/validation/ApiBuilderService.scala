@@ -1,7 +1,7 @@
-package io.flow.lib.apidoc.json.validation
+package io.apibuilder.validation
 
-import com.bryzek.apidoc.spec.v0.models.{Method, Operation, Parameter, Service}
-import com.bryzek.apidoc.spec.v0.models.json._
+import io.apibuilder.spec.v0.models.{Method, Operation, Parameter, Service}
+import io.apibuilder.spec.v0.models.json._
 import java.net.URL
 
 import play.api.libs.json._
@@ -10,10 +10,10 @@ import scala.io.Source
 import scala.util.{Failure, Success, Try}
 
 /**
-  * Wraps a single apidoc service, providing helpers to validate
+  * Wraps a single API Builder service, providing helpers to validate
   * objects based on the incoming http method and path
   */
-case class ApidocService(
+case class ApiBuilderService(
   service: Service
 ) {
 
@@ -118,13 +118,13 @@ case class ApidocService(
 
 }
 
-object ApidocService {
+object ApiBuilderService {
 
   /**
-    * Loads the apidoc service specification from the specified URI,
+    * Loads the API Builder service specification from the specified URI,
     * returning either a list of errors or the service itself.
     */
-  def fromUrl(url: String): Either[Seq[String], ApidocService] = {
+  def fromUrl(url: String): Either[Seq[String], ApiBuilderService] = {
     Try {
       Source.fromURL(new URL(url),  "UTF-8").mkString
     } match {
@@ -135,9 +135,9 @@ object ApidocService {
     }
   }
 
-  def toService(contents: String): Either[Seq[String], ApidocService] = {
+  def toService(contents: String): Either[Seq[String], ApiBuilderService] = {
     Json.parse(contents).validate[Service] match {
-      case s: JsSuccess[Service] => Right(ApidocService(s.get))
+      case s: JsSuccess[Service] => Right(ApiBuilderService(s.get))
       case e: JsError => Left(Seq(s"Error parsing service: $e"))
     }
   }
