@@ -10,8 +10,8 @@ class MultiServiceSpec2 extends FunSpec with Matchers {
     val base = "file://" + new java.io.File(".").getAbsolutePath
     MultiService.fromUrls(
       Seq(
-        s"$base/src/test/resources/multi/api.service.json",
-        s"$base/src/test/resources/multi/api-internal.service.json"
+        s"$base/src/test/resources/flow-api-service.json",
+        s"$base/src/test/resources/flow-api-internal-service.json"
       )
     ) match {
       case Left(errors) => sys.error(s"Failed to load: $errors")
@@ -37,6 +37,12 @@ class MultiServiceSpec2 extends FunSpec with Matchers {
 
   it("resolves body when path exists in both services") {
     multi.bodyTypeFromPath("POST", "/:organization/payments") should equal(Some("payment_form"))
+  }
+
+  it("resolves body when there are multiple variables in path") {
+    multi.bodyTypeFromPath("POST", "/:organization/shopify/orders/:number/authorizations") should equal(
+      Some("io.flow.payment.v0.unions.authorization_form")
+    )
   }
 
   /**
