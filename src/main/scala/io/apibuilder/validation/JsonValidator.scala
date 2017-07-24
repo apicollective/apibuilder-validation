@@ -71,14 +71,24 @@ case class JsonValidator(val service: Service) {
 
   private[this] def toObject(prefix: String, js: JsValue): Either[Seq[String], JsObject] = {
     js match {
-      case v: JsArray => {
+      case _: JsArray => {
         Left(Seq(s"$prefix must be an object and not an array"))
       }
-      case v: JsBoolean => Left(Seq(s"$prefix must be an object and not a boolean"))
+      case _: JsBoolean => Left(Seq(s"$prefix must be an object and not a boolean"))
       case JsNull => Left(Seq(s"$prefix must be an object and not null"))
-      case v: JsNumber => Left(Seq(s"$prefix must be an object and not a number"))
-      case v: JsObject => Right(v)
-      case v: JsString => Left(Seq(s"$prefix must be an object and not a string"))
+      case _: JsNumber => Left(Seq(s"$prefix must be an object and not a number"))
+      case v: JsObject => Right(
+        // Remove null fields as there is nothing to validate there
+        JsObject(
+          v.value.filter { case (k, v) =>
+              v match {
+                case JsNull => false
+                case _ => true
+              }
+          }
+        )
+      )
+      case _: JsString => Left(Seq(s"$prefix must be an object and not a string"))
     }
   }
 
