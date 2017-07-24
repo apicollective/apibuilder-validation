@@ -342,26 +342,6 @@ class JsonValidatorSpec extends FunSpec with Matchers {
     )
   }
 
-  it("Properly validates null in place of array") {
-    val form = Json.obj(
-      "number" -> 123,
-      "cvv" -> 456,
-      "expiration_month" -> "01",
-      "expiration_year" -> "2019",
-      "name" -> "Joe Smith",
-      "address" -> Json.obj(
-        "streets" -> JsNull
-      )
-    )
-
-    validator.validate("card_form", form) match {
-      case Left(errors) => errors should equal(
-        Seq("Type 'card_form' field 'address' of type '[string]': must be an array and not null")
-      )
-      case Right(js) => sys.error("Expected form to NOT validate")
-    }
-  }
-
   it("Properly reports errors on js objects") {
     val form = Json.obj(
       "name" -> "",
@@ -412,6 +392,22 @@ class JsonValidatorSpec extends FunSpec with Matchers {
         Seq("Type 'merchant_of_record_authorization_form' field 'order_number' must be a string and not an array")
       )
       case Right(_) => sys.error("Expected validation error")
+    }
+  }
+
+  it("accept null as optional") {
+    val form = Json.obj(
+      "description" -> JsNull,
+      "number" -> "1",
+      "locale" -> "en_US",
+      "name" -> "test",
+      "currency" -> "USD",
+      "price" -> 10
+    )
+
+    validator.validate("item_form", form) match {
+      case Left(errors) => sys.error(s"Expected form to validate but got: $errors")
+      case Right(_) => // no-op
     }
   }
 }
