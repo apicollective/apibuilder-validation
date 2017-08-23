@@ -11,7 +11,7 @@ lazy val root = project
   .settings(
     libraryDependencies ++= Seq(
       "com.typesafe.play" %% "play-json" % "2.6.3",
-      "org.scalatest" %% "scalatest" % "3.0.3" % Test
+      "org.scalatest" %% "scalatest" % "3.0.4" % Test
     )
   )
 
