@@ -7,7 +7,7 @@ import io.apibuilder.spec.v0.models.{Method, Operation}
   * For example, a path like "/users/123" would resolve to "/users/:id"
   * assuming there is a valid operation for that path.
   *
-  * Stategy:
+  * Strategy:
   *   - Use a hash map lookup for all static routes (no variables)
   *   - For paths with variables
   *     - First segment by the HTTP Method
@@ -21,18 +21,19 @@ case class PathNormalizer(operations: Seq[Operation]) {
     *   - dynamic routes is a map from the HTTP Method to a list of routes to try (Seq[Route])
     */
   private[this] val (staticRouteMap, dynamicRouteMap) = {
+    val opsWithRoute = operations.map { op => OperationWithRoute(op) }
 
     // Map from method name to list of operations
-    val tmpDynamicRouteMap = scala.collection.mutable.Map[Method, Seq[Operation]]()
-    operations.foreach { op =>
-      Route(op) match {
+    val tmpDynamicRouteMap = scala.collection.mutable.Map[Method, Seq[OperationWithRoute]]()
+    opsWithRoute.foreach { opwithRoute =>
+      opwithRoute.route match {
         case r: Route.Dynamic => {
           tmpDynamicRouteMap.get(r.method) match {
             case None => {
-              tmpDynamicRouteMap += (r.method -> Seq(op))
+              tmpDynamicRouteMap += (r.method -> Seq(opwithRoute))
             }
             case Some(existing) => {
-              tmpDynamicRouteMap += (r.method -> (existing ++ Seq(op)))
+              tmpDynamicRouteMap += (r.method -> (existing ++ Seq(opwithRoute)))
             }
           }
         }
@@ -40,16 +41,16 @@ case class PathNormalizer(operations: Seq[Operation]) {
       }
     }
 
-    val staticRoutes = operations.flatMap { op =>
-      Route(op) match {
-        case _: Route.Dynamic => None
-        case _: Route.Static => Some(op)
+    val staticRoutes = opsWithRoute.flatMap { opWithRoute =>
+      opWithRoute.route match {
+        case _: Route.Static => Some(opWithRoute)
+        case _ => None
       }
     }
 
     val tmpStaticRouteMap = Map(
-      staticRoutes.map { op =>
-        routeKey(op.method, op.path) -> op
+      staticRoutes.map { opWithRoute =>
+        routeKey(opWithRoute.op.method, opWithRoute.op.path) -> opWithRoute
       }: _*
     )
 
@@ -59,12 +60,12 @@ case class PathNormalizer(operations: Seq[Operation]) {
   final def resolve(method: Method, path: String): Option[Operation] = {
     staticRouteMap.get(routeKey(method, path)) match {
       case None => {
-        dynamicRouteMap.getOrElse(method, Nil).find{ op =>
-          Route(op).matches(method, path.trim)
-        }
+        dynamicRouteMap.getOrElse(method, Nil).find { opWithRoute =>
+          opWithRoute.route.matches(method, path.trim)
+        }.map(_.op)
       }
-      case Some(op) => {
-        Some(op)
+      case Some(opWithRoute) => {
+        Some(opWithRoute.op)
       }
     }
   }
@@ -72,4 +73,20 @@ case class PathNormalizer(operations: Seq[Operation]) {
   private[this] def routeKey(method: Method, path: String): String = {
     s"$method:${path.trim}"
   }
+}
+
+private[validation] case class OperationWithRoute(
+  op: Operation,
+  route: Route
+)
+
+private[validation] object OperationWithRoute {
+
+  def apply(op: Operation): OperationWithRoute = {
+    OperationWithRoute(
+      op = op,
+      route = Route(op)
+    )
+  }
+
 }
