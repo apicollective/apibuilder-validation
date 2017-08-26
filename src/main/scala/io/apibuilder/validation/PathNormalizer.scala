@@ -1,6 +1,22 @@
 package io.apibuilder.validation
 
-import io.apibuilder.spec.v0.models.{Method, Operation}
+import io.apibuilder.spec.v0.models.{Method, Operation, Service}
+
+object PathNormalizer {
+
+  def apply(apiBuilderService: ApiBuilderService): PathNormalizer = {
+    apply(apiBuilderService.service)
+  }
+
+  def apply(multi: MultiService): PathNormalizer = {
+    apply(multi.services.flatMap(_.service.resources.flatMap(_.operations)))
+  }
+
+  def apply(service: Service): PathNormalizer = {
+    PathNormalizer(service.resources.flatMap(_.operations))
+  }
+
+}
 
 /**
   * Normalizes paths based on variables defined in the path.
