@@ -19,7 +19,7 @@ class MultiServiceSpecResolvesUrls extends FunSpec with Matchers {
     }
   }
 
-  it("validates unknown operations") {
+  it("validates unknown methods") {
     multi.validate("FOO", "/test-org/payments") should equal(
       Left(Seq("HTTP method 'FOO' is invalid. Must be one of: " + Method.all.map(_.toString).mkString(", ")))
     )
@@ -32,6 +32,12 @@ class MultiServiceSpecResolvesUrls extends FunSpec with Matchers {
   it("validates unknown paths") {
     multi.validate("GET", "/foo") should equal(
       Left(Seq("HTTP path '/foo' is not defined"))
+    )
+  }
+
+  it("validates unknown method for a known path") {
+    multi.validate("OPTIONS", "/users") should equal(
+      Left(Seq("HTTP method 'OPTIONS' not supported for path /users - Available methods: GET, POST"))
     )
   }
 
