@@ -36,10 +36,6 @@ class ApiBuilderServiceSpec extends FunSpec with Matchers {
     service.parametersFromPath("GET", "/users").get.map(_.name) should be(Seq("id", "email", "status", "limit", "offset", "sort"))
   }
 
-  it("unknown path") {
-    service.operationsByMethod("/other").get(Method.Options) should be(None)
-  }
-
   it("resolves for known paths") {
     service.bodyTypeFromPath("POST", "/users") should be(Some("user_form"))
     service.bodyTypeFromPath("post", "/:organization/orders") should be(Some("order_form"))

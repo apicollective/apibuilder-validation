@@ -17,26 +17,9 @@ case class ApiBuilderService(
   service: Service
 ) {
 
+  private[this] val normalizer = PathNormalizer(service)
+
   private[this] val validator = JsonValidator(service)
-
-  private[this] val byPaths: Map[String, Map[Method, Operation]] = {
-    val tmp = scala.collection.mutable.Map[String, scala.collection.mutable.Map[Method, Operation]]()
-
-    service.resources.flatMap(_.operations).map { op =>
-      val canonicalPath = PathParser.parse(op.path).canonical
-
-      val m = tmp.get(canonicalPath).getOrElse {
-        val map = scala.collection.mutable.Map[Method, Operation]()
-        tmp += canonicalPath -> map
-        map
-      }
-
-      m += op.method -> op
-    }
-    tmp.map {
-      case (canonicalPath, methods) => canonicalPath -> methods.toMap
-    }.toMap
-  }
 
   /**
     * If the specified method, path require a body, returns the type of the body
@@ -53,10 +36,12 @@ case class ApiBuilderService(
   }
 
   /**
-    * Returns a map of the operations available for the specified path. Keys are the HTTP Methods.
+    * Returns a map of the HTTP Methods available for the given path
     */
-  def operationsByMethod(path: String): Map[Method, Operation] = {
-    byPaths.getOrElse(PathParser.parse(path).canonical, Map.empty)
+  def methodsFromPath(path: String): Seq[Method] = {
+    Method.all.flatMap { m =>
+      normalizer.resolve(m, path)
+    }.map(_.method)
   }
 
   def isDefinedAt(method: String, path: String): Boolean = {
@@ -64,25 +49,23 @@ case class ApiBuilderService(
   }
 
   def isPathDefinedAt(path: String): Boolean = {
-    byPaths.isDefinedAt(PathParser.parse(path).canonical)
+    Method.all.exists { m =>
+      normalizer.resolve(m, path).nonEmpty
+    }
   }
+
   /**
     * If the provided method and path are known, returns the associated
     * operation. Otherwise returns an appropriate error message.
     */
   def validate(method: String, path: String): Either[Seq[String], Operation] = {
-    Method(method) match {
-      case Method.UNDEFINED(_) => {
-        Left(Seq(s"HTTP method '$method' is invalid. Must be one of: " + Method.all.map(_.toString).mkString(", ")))
-      }
-
-      case m => {
-        val methods = operationsByMethod(path)
-        methods.get(m) match {
+    normalizer.resolve(method, path) match {
+      case Left(errors) => Left(errors)
+      case Right(result) => {
+        result match {
           case Some(op) => Right(op)
-
           case None => {
-            methods.keys.toList match {
+            methodsFromPath(path).toList match {
               case Nil => {
                 Left(Seq(s"HTTP path $path is not defined"))
               }
@@ -101,7 +84,10 @@ case class ApiBuilderService(
     * Returns the operation associated with the specified method and path, if any
     */
   def operation(method: String, path: String): Option[Operation] = {
-    operationsByMethod(path).get(Method(method))
+    Method.fromString(method) match {
+      case None => None
+      case Some(m) => normalizer.resolve(m, path)
+    }
   }
 
   def upcast(method: String, path: String, js: JsValue): Either[Seq[String], JsValue] = {
