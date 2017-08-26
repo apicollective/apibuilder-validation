@@ -57,18 +57,6 @@ object Route {
 
   }
 
-  /**
-    * @param method GET, POST, etc.
-    * @param path e.g. /users/123
-    * @return Either validation errors or the route
-    */
-  def apply(method: String, path: String): Either[Seq[String], Route] = {
-    Method.fromString(method) match {
-      case None => Left(Seq("Invalid method '$method' - must be one of: " + Method.all.map(_.toString).mkString(", ")))
-      case Some(m) => Right(apply(m, path))
-    }
-  }
-
   def apply(op: Operation): Route = {
     apply(op.method, op.path)
   }

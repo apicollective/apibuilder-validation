@@ -73,6 +73,23 @@ case class PathNormalizer(operations: Seq[Operation]) {
     (tmpStaticRouteMap, tmpDynamicRouteMap.toMap)
   }
 
+
+  /**
+    * @param method GET, POST, etc.
+    * @param path e.g. /users/123
+    * @return Either validation errors or the route
+    */
+  final def resolve(method: String, path: String): Either[Seq[String], Option[Operation]] = {
+    Method.fromString(method) match {
+      case None => {
+        Left(Seq(s"HTTP method '$method' is invalid. Must be one of: " + Method.all.map(_.toString).mkString(", ")))
+      }
+      case Some(m) => {
+        Right(resolve(m, path))
+      }
+    }
+  }
+
   final def resolve(method: Method, path: String): Option[Operation] = {
     staticRouteMap.get(routeKey(method, path)) match {
       case None => {
