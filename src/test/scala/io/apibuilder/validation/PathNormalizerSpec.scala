@@ -27,4 +27,16 @@ class PathNormalizerSpec extends FunSpec with Matchers {
     postOrganizations.path should equal("/organizations")
   }
 
+  it("parse dynamic routes") {
+    normalizer.resolve(Method.Get, "/non/:foo/route/should/not/match") should be(None)
+
+    val getUsersByGuid = normalizer.resolve(Method.Get, "/users/123").get
+    getUsersByGuid.method should equal(Method.Get)
+    getUsersByGuid.path should equal("/users/:guid")
+
+    val putOrganizationsByGuid = normalizer.resolve(Method.Put, "/apicollective/apibuilder-api").get
+    putOrganizationsByGuid.method should equal(Method.Put)
+    putOrganizationsByGuid.path should equal("/:orgKey/:applicationKey")
+  }
+
 }
