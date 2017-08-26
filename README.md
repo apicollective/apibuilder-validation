@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/flowcommerce/apibuilder-validation.svg?branch=master)](https://travis-ci.org/flowcommerce/apibuilder-validation)
+[![Build Status](https://travis-ci.org/apicollective/apibuilder-validation.svg?branch=master)](https://travis-ci.org/apicollective/apibuilder-validation)
 
 # apibuilder-validation
 
