@@ -80,4 +80,17 @@ class MultiServiceSpecResolvesUrls extends FunSpec with Matchers {
       sys.error("Failed to validate payment_form")
     }
   }
+
+  it("resolves static methods over dynamic ones") {
+    multi.resolveService("POST", "/demo/tokens").right.get.service.name should equal("API")
+    multi.bodyTypeFromPath("POST", "/:organization/tokens") should equal(
+      Some("organization_token_form")
+    )
+
+    multi.resolveService("POST", "/users/tokens").right.get.service.name should equal("API Internal")
+    multi.bodyTypeFromPath("POST", "/users/tokens") should equal(
+      None
+    )
+  }
+
 }

@@ -41,15 +41,15 @@ case class PathNormalizer(operations: Seq[Operation]) {
 
     // Map from method name to list of operations
     val tmpDynamicRouteMap = scala.collection.mutable.Map[Method, Seq[OperationWithRoute]]()
-    opsWithRoute.foreach { opwithRoute =>
-      opwithRoute.route match {
+    opsWithRoute.foreach { opWithRoute =>
+      opWithRoute.route match {
         case r: Route.Dynamic => {
           tmpDynamicRouteMap.get(r.method) match {
             case None => {
-              tmpDynamicRouteMap += (r.method -> Seq(opwithRoute))
+              tmpDynamicRouteMap += (r.method -> Seq(opWithRoute))
             }
             case Some(existing) => {
-              tmpDynamicRouteMap += (r.method -> (existing ++ Seq(opwithRoute)))
+              tmpDynamicRouteMap += (r.method -> (existing ++ Seq(opWithRoute)))
             }
           }
         }

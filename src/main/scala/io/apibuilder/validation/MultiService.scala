@@ -60,12 +60,11 @@ case class MultiService(
     * if no service, return a nice error message. Otherwise invoke
     * the provided function on the API Builder service.
     */
-  private[this] def resolveService(method: String, path: String): Either[Seq[String], ApiBuilderService] = {
-    services.find { s =>
+  private[validation] def resolveService(method: String, path: String): Either[Seq[String], ApiBuilderService] = {
+    services.filter { s =>
       s.isDefinedAt(method = method, path = path)
     } match {
-      case Some(s) => Right(s)
-      case None => {
+      case Nil => {
         services.find(_.isPathDefinedAt(path)) match {
           case None => {
             Left(Seq(s"HTTP path '$path' is not defined"))
@@ -76,6 +75,25 @@ case class MultiService(
             case Right(_) => Right(s)
           }
         }
+      }
+      case one :: Nil => Right(one)
+
+      case multiple => {
+        // If we find a non dynamic path in any service, return that one.
+        // Otherwise return the first matching service. This handles ambiguity:
+        //   - service 1 defines POST /:organization/tokens
+        //   - service 2 defines POST /users/tokens
+        // We want to return service 2 when the path is /users/tokens
+        Right(
+          multiple.find { s =>
+            s.validate(method, path) match {
+              case Right(op) if Route.isStatic(op.path) => true
+              case _ => false
+            }
+          }.getOrElse {
+            multiple.head
+          }
+        )
       }
     }
   }
