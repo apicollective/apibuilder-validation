@@ -62,11 +62,18 @@ object Route {
   }
 
   def apply(method: Method, path: String): Route = {
-    if (path.indexOf(":") >= 0) {
+    if (isDynamic(path)) {
       Dynamic(method = method, path = path)
     } else {
       Static(method = method, path = path)
     }
   }
 
+  def isDynamic(path: String): Boolean = {
+    path.indexOf(":") >= 0
+  }
+
+  def isStatic(path: String): Boolean = {
+    !isDynamic(path)
+  }
 }
