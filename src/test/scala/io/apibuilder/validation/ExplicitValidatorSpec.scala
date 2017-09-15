@@ -24,7 +24,7 @@ class ExplicitValidatorSpec extends FunSpec with Matchers {
 
     validator.validate("object_with_price_form", form) match {
       case Left(errors) => errors should equal(
-        Seq("Type 'object_with_price_form' field 'price.amount' must be a valid decimal")
+        Seq("object_with_price_form.price.amount must be a valid decimal")
       )
       case Right(_) => sys.error(s"Expected errors but got none")
     }
