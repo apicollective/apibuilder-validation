@@ -7,12 +7,12 @@ import org.scalatest.{FunSpec, Matchers}
 
 class ExplicitValidatorSpec extends FunSpec with Matchers {
 
-  lazy val service = {
+  private[this] lazy val service = {
     val contents = scala.io.Source.fromFile("src/test/resources/apibuilder-explicit-validation-service.json", "UTF-8").getLines.mkString("\n")
     Json.parse(contents).as[Service]
   }
 
-  lazy val validator = JsonValidator(service)
+  private[this] lazy val validator = JsonValidator(service)
 
   it("properly identifies invalid object") {
     val form = Json.obj(
