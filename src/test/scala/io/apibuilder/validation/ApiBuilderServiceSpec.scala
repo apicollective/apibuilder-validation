@@ -1,6 +1,5 @@
 package io.apibuilder.validation
 
-import io.apibuilder.spec.v0.models.Method
 import play.api.libs.json._
 import org.scalatest.{FunSpec, Matchers}
 
@@ -66,7 +65,7 @@ class ApiBuilderServiceSpec extends FunSpec with Matchers {
       "/:organization/webhooks",
       Json.obj("url" -> "https://test.flow.io")
     ) should equal(
-      Left(Seq("Missing required field for type 'webhook_form': 'events'"))
+      Left(Seq("Missing required field for webhook_form: events"))
     )
   }
 
@@ -91,7 +90,7 @@ class ApiBuilderServiceSpec extends FunSpec with Matchers {
         "discriminator" -> "merchant_of_record_authorization_form"
       )
     ) should equal(
-      Left(Seq("Missing required field for type 'merchant_of_record_authorization_form': 'token'"))
+      Left(Seq("Missing required field for merchant_of_record_authorization_form: token"))
     )
   }
 

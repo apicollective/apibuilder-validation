@@ -18,7 +18,7 @@ object Booleans {
 
 }
 
-case class JsonValidator(val service: Service) {
+case class JsonValidator(service: Service) {
 
   /**
     * Validates the incoming JsValue against the API Builder schema,
@@ -57,7 +57,7 @@ case class JsonValidator(val service: Service) {
               case None => {
                 // may be a primitive type like 'string'
                 validateApiBuilderType(
-                  prefix.getOrElse(s"Type '$typeName'"),
+                  prefix.getOrElse(typeName),
                   typeName,
                   js
                 )
@@ -128,8 +128,8 @@ case class JsonValidator(val service: Service) {
       (js \ f.name).toOption.isEmpty
     }.map(_.name).toList match {
       case Nil => Nil
-      case one :: Nil => Seq(s"Missing required field for type '${model.name}': '$one'")
-      case multiple => Seq(s"Missing required fields for type '${model.name}': " + multiple.mkString("'", "', '", "'"))
+      case one :: Nil => Seq(s"Missing required field for ${model.name}: $one")
+      case multiple => Seq(s"Missing required fields for ${model.name}: " + multiple.mkString(", "))
     }
 
     val invalidTypes = js.fields.flatMap { case (name, value) =>
@@ -143,7 +143,7 @@ case class JsonValidator(val service: Service) {
             typeName = f.`type`,
             js = value,
             prefix = Some(
-              prefix.getOrElse(s"Type '${model.name}' field '${f.name}'")
+              prefix.getOrElse(model.name) + s".${f.name}"
             )
           ) match {
             case Left(errors) => {

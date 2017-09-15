@@ -22,7 +22,7 @@ class JsonValidatorSpec extends FunSpec with Matchers {
       "webhook_form",
       Json.obj("url" -> "https://test.flow.io")
     ) should equal(
-      Left(Seq("Missing required field for type 'webhook_form': 'events'"))
+      Left(Seq("Missing required field for webhook_form: events"))
     )
   }
 
@@ -31,7 +31,7 @@ class JsonValidatorSpec extends FunSpec with Matchers {
       "webhook_form",
       Json.obj()
     ) should equal(
-      Left(Seq("Missing required fields for type 'webhook_form': 'url', 'events'"))
+      Left(Seq("Missing required fields for webhook_form: url, events"))
     )
   }
 
@@ -43,7 +43,7 @@ class JsonValidatorSpec extends FunSpec with Matchers {
     validator.validate("webhook_form", form) should equal(
       Left(
         Seq(
-          "Type 'webhook_form' field 'url' must be a string and not an array"
+          "webhook_form.url must be a string and not an array"
         )
       )
     )
@@ -64,7 +64,7 @@ class JsonValidatorSpec extends FunSpec with Matchers {
     )
   }
 
-  it("converts 'number' into a string where possible when number is an int") {
+  it("converts number into a string where possible when number is an int") {
     val form = Json.obj(
       "url" -> 123,
       "events" -> Seq("*")
@@ -79,7 +79,7 @@ class JsonValidatorSpec extends FunSpec with Matchers {
     )
   }
 
-  it("converts 'number' into a string where possible when number is a double") {
+  it("converts number into a string where possible when number is a double") {
     val form = Json.obj(
       "url" -> 123.45,
       "events" -> Seq("*")
@@ -97,19 +97,19 @@ class JsonValidatorSpec extends FunSpec with Matchers {
   it("validates a double") {
     validator.validate("double", Json.parse("123.45")).right.get.as[Double] should equal(123.45)
     validator.validate("double", Json.parse("123")).right.get.as[Double] should equal(123)
-    validator.validate("double", JsString(" ")) should equal(Left(List("Type 'double' must be a valid double")))
+    validator.validate("double", JsString(" ")) should equal(Left(List("double must be a valid double")))
   }
 
   it("validates a decimal") {
     validator.validate("decimal", Json.parse("123.45")).right.get.as[BigDecimal] should equal(123.45)
     validator.validate("decimal", Json.parse("123")).right.get.as[BigDecimal] should equal(123)
-    validator.validate("decimal", JsString(" ")) should equal(Left(List("Type 'decimal' must be a valid decimal")))
+    validator.validate("decimal", JsString(" ")) should equal(Left(List("decimal must be a valid decimal")))
   }
 
   it("validates a UUID") {
     val uuid = java.util.UUID.randomUUID
     validator.validate("uuid", JsString(uuid.toString)).right.get.as[java.util.UUID] should equal(uuid)
-    validator.validate("uuid", JsString(" ")) should equal(Left(List("Type 'uuid' must be a valid UUID")))
+    validator.validate("uuid", JsString(" ")) should equal(Left(List("uuid must be a valid UUID")))
   }
 
   it("validates an ISO 8601 date (yyyy-MM-dd)") {
@@ -117,9 +117,9 @@ class JsonValidatorSpec extends FunSpec with Matchers {
     validator.validate("date-iso8601", JsString("2017-1-01")).right.get.as[String] should equal("2017-1-01")
     validator.validate("date-iso8601", JsString("2017-01-1")).right.get.as[String] should equal("2017-01-1")
     validator.validate("date-iso8601", JsString("2017-1-1")).right.get.as[String] should equal("2017-1-1")
-    validator.validate("date-iso8601", JsString("invalid")) should equal(Left(List("Type 'date-iso8601' must be a valid ISO 8601 date")))
+    validator.validate("date-iso8601", JsString("invalid")) should equal(Left(List("date-iso8601 must be a valid ISO 8601 date")))
     // Tests that the format must be yyyy-MM-dd
-    validator.validate("date-iso8601", JsString((new DateTime(2017, 2, 24, 0, 0, 0)).toString)) should equal(Left(List("Type 'date-iso8601' must be a valid ISO 8601 date")))
+    validator.validate("date-iso8601", JsString((new DateTime(2017, 2, 24, 0, 0, 0)).toString)) should equal(Left(List("date-iso8601 must be a valid ISO 8601 date")))
   }
 
   it("validates an ISO 8601 datetime") {
@@ -129,7 +129,7 @@ class JsonValidatorSpec extends FunSpec with Matchers {
     validator.validate("date-time-iso8601", JsString("2017-01-1")).right.get.as[String] should equal("2017-01-1")
     validator.validate("date-time-iso8601", JsString("2017-1-1")).right.get.as[String] should equal("2017-1-1")
     validator.validate("date-time-iso8601", JsString(dt)).right.get.as[String] should equal(dt)
-    validator.validate("date-time-iso8601", JsString("invalid")) should equal(Left(List("Type 'date-time-iso8601' must be a valid ISO 8601 datetime")))
+    validator.validate("date-time-iso8601", JsString("invalid")) should equal(Left(List("date-time-iso8601 must be a valid ISO 8601 datetime")))
   }
 
   it("converts booleans where possible") {
@@ -174,7 +174,7 @@ class JsonValidatorSpec extends FunSpec with Matchers {
     )
     validator.validate("avs", form) should equal(
       Left(
-        Seq("Type 'avs' field 'code' invalid value 'bad'. Valid values for the enum 'avs_code' are: 'match', 'partial', 'unsupported', 'no_match'")
+        Seq("avs.code invalid value 'bad'. Valid values for the enum 'avs_code' are: 'match', 'partial', 'unsupported', 'no_match'")
       )
     )
   }
@@ -193,7 +193,7 @@ class JsonValidatorSpec extends FunSpec with Matchers {
 
     validator.validate("card_form", form) match {
       case Left(errors) => errors should equal(
-        Seq("Type 'card_form' field 'address' of type '[string]': element in position[1] must be a string and not null")
+        Seq("card_form.address.streets of type '[string]': element in position[1] must be a string and not null")
       )
       case Right(js) => sys.error("Expected form to NOT validate")
     }
@@ -275,14 +275,14 @@ class JsonValidatorSpec extends FunSpec with Matchers {
     )
 
     form.validate[HarmonizedItemForm] match {
-      case s: JsSuccess[HarmonizedItemForm] => sys.error("Expected form to NOT validate")
-      case e: JsError => //
+      case _: JsSuccess[HarmonizedItemForm] => sys.error("Expected form to NOT validate")
+      case _: JsError => //
     }
 
     validator.validate("harmonized_item_form", form).left.get should be(
       Seq(
-        "Type 'harmonized_item_form' field 'categories' of type '[string]': element in position[1] must be a string and not an object",
-        "Type 'harmonized_item_form' field 'categories' of type '[string]': element in position[2] must be a string and not null"
+        "harmonized_item_form.categories of type '[string]': element in position[1] must be a string and not an object",
+        "harmonized_item_form.categories of type '[string]': element in position[2] must be a string and not null"
       )
     )
   }
@@ -338,7 +338,9 @@ class JsonValidatorSpec extends FunSpec with Matchers {
     )
 
     validator.validate("item_form", form) should be(
-      Left(Seq("Type 'item_form' field 'attributes' of type 'map[string]': element[a] must be a string and not an object"))
+      Left(
+        Seq("item_form.attributes of type 'map[string]': element[a] must be a string and not an object")
+      )
     )
   }
 
@@ -352,7 +354,7 @@ class JsonValidatorSpec extends FunSpec with Matchers {
 
     validator.validate("invitation_form", form) match {
       case Left(errors) => errors should equal(
-        Seq("Type 'invitation_form' field 'name' must be an object and not a string")
+        Seq("invitation_form.name must be an object and not a string")
       )
       case Right(js) => sys.error("Expected form to NOT validate")
     }
@@ -389,7 +391,7 @@ class JsonValidatorSpec extends FunSpec with Matchers {
 
     validator.validate("merchant_of_record_authorization_form", form) match {
       case Left(errors) => errors should equal(
-        Seq("Type 'merchant_of_record_authorization_form' field 'order_number' must be a string and not an array")
+        Seq("merchant_of_record_authorization_form.order_number must be a string and not an array")
       )
       case Right(_) => sys.error("Expected validation error")
     }
