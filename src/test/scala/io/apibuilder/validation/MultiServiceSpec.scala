@@ -46,7 +46,7 @@ class MultiServiceSpec extends FunSpec with Matchers {
       "/:organization/webhooks",
       Json.obj("url" -> "https://test.flow.io")
     ) should equal(
-      Left(Seq("Missing required field for type 'webhook_form': 'events'"))
+      Left(Seq("Missing required field for webhook_form: events"))
     )
 
     // path from apidoc api
@@ -55,7 +55,7 @@ class MultiServiceSpec extends FunSpec with Matchers {
       "/:orgKey",
       Json.obj("url" -> "https://test.flow.io")
     ) should equal(
-      Left(Seq("Missing required fields for type 'application_form': 'name', 'visibility'"))
+      Left(Seq("Missing required fields for application_form: name, visibility"))
     )
   }
 
