@@ -240,6 +240,7 @@ object FormData {
 
   private[this] def toJsPrimitive(value: String): JsValue = {
     value match {
+      case null => JsNull
       case "true" => JsBoolean(true)
       case "false" => JsBoolean(false)
       case other => {

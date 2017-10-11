@@ -107,7 +107,8 @@ class FormDataSpec extends FunSpec with Matchers {
       "one[two][three][five]" -> Seq("wow"),
       "arr[][arr2][]" -> Seq("fruit", "vegetables"),
       "tags[]" -> Seq("foo", "bar"),
-      "yikes" -> Seq("yes", "no")
+      "yikes" -> Seq("yes", "no"),
+      "anEmptyString" -> Seq(null)
     )
 
     it("returns JsValue") {
@@ -155,6 +156,11 @@ class FormDataSpec extends FunSpec with Matchers {
         case JsSuccess(succ,_) => succ should be(Seq("yes", "no"))
         case JsError(_) => assert(false)
       }
+    }
+
+    it("handles empty strings") {
+      val res = FormData.toJson(data).fields.find(_._1 == "anEmptyString")
+      res should be(Some("anEmptyString" -> JsNull))
     }
   }
 }
