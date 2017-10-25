@@ -1,8 +1,10 @@
 package io.apibuilder.validation
 
 import io.apibuilder.spec.v0.models.{Enum, Model, Service, Union}
+import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import play.api.libs.json._
+
 import scala.util.{Failure, Success, Try}
 
 /**
@@ -429,7 +431,7 @@ case class JsonValidator(service: Service) {
           ISODateTimeFormat.yearMonthDay.parseLocalDate(v.value)
         } match {
           case Success(_) => Right(JsString(v.value.toString))
-          case Failure(_) => Left(Seq(s"$prefix must be a valid ISO 8601 date"))
+          case Failure(_) => Left(Seq(s"$prefix must be a valid ISO 8601 date. Example: '2017-07-24'"))
         }
       }
     }
@@ -445,14 +447,15 @@ case class JsonValidator(service: Service) {
       }
       case v: JsBoolean => Left(Seq(s"$prefix must be a valid ISO 8601 datetime and not a boolean"))
       case JsNull => Left(Seq(s"$prefix must be a valid ISO 8601 datetime and not null"))
-      case v: JsNumber => Left(Seq(s"$prefix must be a valid ISO 8601 datetime and not a number"))
-      case v: JsObject => Left(Seq(s"$prefix must be a valid ISO 8601 datetime and not an object"))
+      case _: JsNumber => Left(Seq(s"$prefix must be a valid ISO 8601 datetime and not a number"))
+      case _: JsObject => Left(Seq(s"$prefix must be a valid ISO 8601 datetime and not an object"))
       case v: JsString => {
+        println(s"validateDateTimeIso8601 $prefix $v")
         Try {
           ISODateTimeFormat.dateTimeParser.parseDateTime(v.value)
         } match {
           case Success(_) => Right(JsString(v.value.toString))
-          case Failure(_) => Left(Seq(s"$prefix must be a valid ISO 8601 datetime"))
+          case Failure(_) => Left(Seq(s"$prefix must be a valid ISO 8601 datetime. Example: '2017-07-24T09:41:08+02:00'"))
         }
       }
     }
