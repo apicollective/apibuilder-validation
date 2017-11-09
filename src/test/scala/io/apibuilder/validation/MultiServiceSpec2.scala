@@ -74,4 +74,31 @@ class MultiServiceSpec2 extends FunSpec with Matchers {
       sys.error("Failed to validate payment_form")
     }
   }
+  def rightOrErrors[K,V](f: Either[K, V]): V = {
+    f match {
+      case Left(bad) => sys.error(s"Expected valid value but got: $bad")
+      case Right(v) => v
+    }
+  }
+
+  it("validateResponseCode") {
+    val op = rightOrErrors(
+      multi.validate("POST", "/:organization/payments")
+    )
+
+    Seq(201, 401, 422).foreach { code =>
+      rightOrErrors {
+        multi.validateResponseCode(op, code)
+      }
+    }
+
+    Seq(100, 200, 417, 500, 503).foreach { code =>
+      multi.validateResponseCode(op, code) match {
+        case Left(error) => error should equal(
+          s"Unexpected response code[$code] for operation[POST /:organization/payments]. Expected response codes: 201, 401, 422"
+        )
+        case Right(v) => sys.error(s"Expected error but got: $v")
+      }
+    }
+  }
 }

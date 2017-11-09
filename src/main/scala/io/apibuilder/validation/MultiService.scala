@@ -1,6 +1,6 @@
 package io.apibuilder.validation
 
-import io.apibuilder.spec.v0.models.{Method, Operation, Parameter, Service}
+import io.apibuilder.spec.v0.models._
 import play.api.libs.json._
 
 /**
@@ -52,6 +52,38 @@ case class MultiService(
     resolveService(method, path) match {
       case Left(errors) => Left(errors)
       case Right(service) => service.validate(method, path)
+    }
+  }
+
+  /**
+    * If the responseCode is valid for the operation, returns a Right(Unit) - otherwise
+    * returns an error message detailing the difference in expectation.
+    */
+  def validateResponseCode(op: Operation, responseCode: Int): Either[String, Unit] = {
+    val responseCodes = op.responses.map(_.code)
+    if (responseCodes.exists {
+      case ResponseCodeOption.Default => true
+      case _ => false
+    }) {
+      // All response codes are valid
+      Right(())
+
+    } else {
+      val expectedResponseCodes = responseCodes.flatMap {
+        case ResponseCodeOption.Default => None
+        case ResponseCodeOption.UNDEFINED(_) => None
+        case ResponseCodeInt(value) => Some(value)
+        case ResponseCodeUndefinedType(_) => None
+      }
+
+      if (expectedResponseCodes.contains(responseCode)) {
+        Right(())
+      } else {
+        Left(
+          s"Unexpected response code[$responseCode] for operation[${op.method} ${op.path}]. Expected response codes: " +
+            expectedResponseCodes.mkString(", ")
+        )
+      }
     }
   }
 
