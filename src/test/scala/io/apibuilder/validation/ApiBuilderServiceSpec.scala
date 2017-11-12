@@ -74,9 +74,9 @@ class ApiBuilderServiceSpec extends FunSpec with Matchers {
       "POST",
       "/:organization/authorizations",
       Json.obj("discriminator" -> "authorization_form")
-    ) should equal(
+    )  should equal(
       Left(Seq(
-        "Invalid discriminator 'authorization_form' for union type 'authorization_form': must be one of 'authorization_copy_form', 'direct_authorization_form', 'merchant_of_record_authorization_form', 'paypal_authorization_form', 'unionpay_authorization_form', 'redirect_authorization_form'"
+        "Invalid discriminator 'authorization_form' for union type 'authorization_form': must be one of 'authorization_copy_form', 'direct_authorization_form', 'merchant_of_record_authorization_form', 'paypal_authorization_form', 'redirect_authorization_form', 'card_authorization_form'"
       ))
     )
   }
