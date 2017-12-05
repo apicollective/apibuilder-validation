@@ -1,0 +1,17 @@
+locations[0][state]=New York
+locations[0][city]=Brooklyn
+locations[1][state]=New Jersey
+locations[1][city]=Hoboken
+
+{
+  "locations": [
+    {
+      "state": "New York",
+      "city": "Brooklyn"
+    },
+    {
+      "state": "New Jersey",
+      "city": "Hoboken"
+    }
+  ]
+}
