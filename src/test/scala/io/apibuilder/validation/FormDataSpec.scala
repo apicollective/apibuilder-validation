@@ -1,6 +1,6 @@
 package io.apibuilder.validation
 
-import org.scalatest.{Matchers, FunSpec}
+import org.scalatest.{FunSpec, Matchers}
 import play.api.libs.json._
 
 class FormDataSpec extends FunSpec with Matchers {
@@ -22,7 +22,7 @@ class FormDataSpec extends FunSpec with Matchers {
     FormData.parseEncoded("key=val1&key=val2") should be(
       Map("key" -> Seq("val1", "val2"))
     )
-    
+
     FormData.parseEncoded("key=val1&key=val2&foo=bar") should be(
       Map(
         "key" -> Seq("val1", "val2"),
@@ -69,7 +69,7 @@ class FormDataSpec extends FunSpec with Matchers {
     FormData.parseEncoded("key=val1&key=val2") should be(
       Map("key" -> Seq("val1", "val2"))
     )
-    
+
     FormData.parseEncoded("key=val1&key=val2&foo=bar") should be(
       Map(
         "key" -> Seq("val1", "val2"),
@@ -96,7 +96,7 @@ class FormDataSpec extends FunSpec with Matchers {
     val foo2: String = (js \ "foo2").as[JsString].value
     foo2 should equal("c")
   }
-  
+
   describe("toJson") {
 
     val data: Map[String, Seq[String]] = Map(
@@ -120,40 +120,40 @@ class FormDataSpec extends FunSpec with Matchers {
 
     it("creates simple json object") {
       (FormData.toJson(data) \ "email").validate[String] match {
-        case JsSuccess(succ,_) => succ should be("test@flow.io")
+        case JsSuccess(succ, _) => succ should be("test@flow.io")
         case JsError(_) => assert(false)
       }
     }
 
     it("creates complex json object") {
       (FormData.toJson(data) \ "name" \ "first").validate[String] match {
-        case JsSuccess(succ,_) => succ should be("mike")
+        case JsSuccess(succ, _) => succ should be("mike")
         case JsError(_) => assert(false)
       }
 
       (FormData.toJson(data) \ "name" \ "last").validate[String] match {
-        case JsSuccess(succ,_) => succ should be("roth")
+        case JsSuccess(succ, _) => succ should be("roth")
         case JsError(_) => assert(false)
       }
     }
 
     it("creates simple array json object") {
       (FormData.toJson(data) \ "tags").validate[Seq[String]] match {
-        case JsSuccess(succ,_) => succ should be(Seq("foo", "bar"))
+        case JsSuccess(succ, _) => succ should be(Seq("foo", "bar"))
         case JsError(_) => assert(false)
       }
     }
 
     it("creates complex array json object") {
       (FormData.toJson(data) \ "arr").validate[Seq[JsValue]] match {
-        case JsSuccess(succ,_) => assert((succ.head \ "arr2").toOption.isDefined)
+        case JsSuccess(succ, _) => assert((succ.head \ "arr2").toOption.isDefined)
         case JsError(_) => assert(false)
       }
     }
 
     it("multi valued arrays are lists") {
       (FormData.toJson(data) \ "yikes").validate[Seq[String]] match {
-        case JsSuccess(succ,_) => succ should be(Seq("yes", "no"))
+        case JsSuccess(succ, _) => succ should be(Seq("yes", "no"))
         case JsError(_) => assert(false)
       }
     }
@@ -161,6 +161,66 @@ class FormDataSpec extends FunSpec with Matchers {
     it("handles empty strings") {
       val res = FormData.toJson(data).fields.find(_._1 == "anEmptyString")
       res should be(Some("anEmptyString" -> JsNull))
+    }
+
+    it("parses values inside array of arrays index by outer array") {
+      val number1 = 123
+      val quantity1 = 31
+      val index1 = 0
+      val number2 = 999
+      val quantity2 = 5
+      val index2 = 1
+      val number3 = 800
+      val quantity3 = 1
+      val index3 = 2
+
+      val data =
+        s"""
+            items[$index1][number]=$number1
+           &items[$index1][quantity]=$quantity1
+           &items[$index2][number]=$number2
+           &items[$index2][quantity]=$quantity2
+           &items[$index3][number]=$number3
+           &items[$index3][quantity]=$quantity3
+          """.stripMargin.trim.replaceAll(" ", "").replaceAll("\\n","")
+
+      val actualJson = FormData.parseEncodedToJsObject(data)
+
+      actualJson \ "items" \ index1 \ "number" should be(JsDefined(JsNumber(number1)))
+      actualJson \ "items" \ index1 \ "quantity" should be(JsDefined(JsNumber(quantity1)))
+      actualJson \ "items" \ index2 \ "number" should be(JsDefined(JsNumber(number2)))
+      actualJson \ "items" \ index2 \ "quantity" should be(JsDefined(JsNumber(quantity2)))
+      actualJson \ "items" \ index3 \ "number" should be(JsDefined(JsNumber(number3)))
+      actualJson \ "items" \ index3 \ "quantity" should be(JsDefined(JsNumber(quantity3)))
+
+    }
+
+    it("generates array of arrays indexed by outer array") {
+      val number1 = 123
+      val quantity1 = 31
+      val index1 = 0
+      val number2 = 999
+      val quantity2 = 5
+      val index2 = 1
+      val number3 = 800
+      val quantity3 = 1
+      val index3 = 2
+
+      val data =
+        s"""
+            items[$index1][quantity]=$quantity1
+           &items[$index1][number]=$number1
+           &items[$index2][quantity]=$quantity2
+           &items[$index2][number]=$number2
+           &items[$index3][number]=$number3
+           &items[$index3][quantity]=$quantity3
+          """.stripMargin.trim.replaceAll(" ", "").replaceAll("\\n","")
+
+      val actualEncodedString: String = FormData.toEncodedWithIndex(FormData.parseEncodedToJsObject(data))
+      val expectedEncodedString = data
+
+      actualEncodedString should be (expectedEncodedString)
+      println(actualEncodedString)
     }
   }
 }
