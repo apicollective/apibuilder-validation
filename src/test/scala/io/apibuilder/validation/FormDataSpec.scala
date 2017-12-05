@@ -1,5 +1,7 @@
 package io.apibuilder.validation
 
+import java.io.File
+
 import org.scalatest.{FunSpec, Matchers}
 import play.api.libs.json._
 
@@ -164,63 +166,26 @@ class FormDataSpec extends FunSpec with Matchers {
     }
 
     it("parses values inside array of arrays index by outer array") {
-      val number1 = 123
-      val quantity1 = 31
-      val index1 = 0
-      val number2 = 999
-      val quantity2 = 5
-      val index2 = 1
-      val number3 = 800
-      val quantity3 = 1
-      val index3 = 2
+      val file = new File("src/test/resources/querystring/array_with_indexed_object.fixture")
+      val fixture = Fixture.load(file)
 
-      val data =
-        s"""
-            items[$index1][number]=$number1
-           &items[$index1][quantity]=$quantity1
-           &items[$index2][number]=$number2
-           &items[$index2][quantity]=$quantity2
-           &items[$index3][number]=$number3
-           &items[$index3][quantity]=$quantity3
-          """.stripMargin.trim.replaceAll(" ", "").replaceAll("\\n","")
+      val actualJson = FormData.parseEncodedToJsObject(fixture.urlEncodedString)
 
-      val actualJson = FormData.parseEncodedToJsObject(data)
-
-      actualJson \ "items" \ index1 \ "number" should be(JsDefined(JsNumber(number1)))
-      actualJson \ "items" \ index1 \ "quantity" should be(JsDefined(JsNumber(quantity1)))
-      actualJson \ "items" \ index2 \ "number" should be(JsDefined(JsNumber(number2)))
-      actualJson \ "items" \ index2 \ "quantity" should be(JsDefined(JsNumber(quantity2)))
-      actualJson \ "items" \ index3 \ "number" should be(JsDefined(JsNumber(number3)))
-      actualJson \ "items" \ index3 \ "quantity" should be(JsDefined(JsNumber(quantity3)))
-
+      actualJson \ "locations" \ 0 \ "state" should be(JsDefined(JsString("New York")))
+      actualJson \ "locations" \ 0 \ "city" should be(JsDefined(JsString("Brooklyn")))
+      actualJson \ "locations" \ 1 \ "state" should be(JsDefined(JsString("New Jersey")))
+      actualJson \ "locations" \ 1 \ "city" should be(JsDefined(JsString("Hoboken")))
     }
 
     it("generates array of arrays indexed by outer array") {
-      val number1 = 123
-      val quantity1 = 31
-      val index1 = 0
-      val number2 = 999
-      val quantity2 = 5
-      val index2 = 1
-      val number3 = 800
-      val quantity3 = 1
-      val index3 = 2
+      val file = new File("src/test/resources/querystring/array_with_indexed_object.fixture")
+      val fixture = Fixture.load(file)
+      val json = fixture.expected
+      val expectedQueryString = fixture.urlEncodedString
 
-      val data =
-        s"""
-            items[$index1][quantity]=$quantity1
-           &items[$index1][number]=$number1
-           &items[$index2][quantity]=$quantity2
-           &items[$index2][number]=$number2
-           &items[$index3][number]=$number3
-           &items[$index3][quantity]=$quantity3
-          """.stripMargin.trim.replaceAll(" ", "").replaceAll("\\n","")
+      val actualEncodedString: String = FormData.toEncodedWithIndex(json)
 
-      val actualEncodedString: String = FormData.toEncodedWithIndex(FormData.parseEncodedToJsObject(data))
-      val expectedEncodedString = data
-
-      actualEncodedString should be (expectedEncodedString)
-      println(actualEncodedString)
+      actualEncodedString should be (expectedQueryString)
     }
   }
 }

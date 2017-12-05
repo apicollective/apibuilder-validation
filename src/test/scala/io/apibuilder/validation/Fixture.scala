@@ -3,13 +3,15 @@ package io.apibuilder.validation
 import java.io.File
 import java.net.URLEncoder
 
-import play.api.libs.json.{JsObject, JsValue, Json}
+import play.api.libs.json.{JsObject, Json}
 
 case class Fixture(params: Seq[(String, String)], expected: JsObject) {
 
   def rawQueryString: String = {
     params.map { case (k,v) => s"$k=" + URLEncoder.encode(v, "UTF-8") }.mkString("&")
   }
+
+  def urlEncodedString = rawQueryString.replaceAll("\\+","%20")
 
 }
 

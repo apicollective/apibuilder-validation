@@ -1,6 +1,6 @@
 package io.apibuilder.validation
 
-import java.net.URLDecoder
+import java.net.{URLDecoder, URLEncoder}
 
 import play.api.libs.json._
 
@@ -96,11 +96,13 @@ object FormData {
     }
   }
 
+  private[this] def encodeSpacesToPercent20(s: String) = s.replaceAll(" ","%20")
+
   private[this] def encodeWithIndex(value: String, keys: Seq[String] = Nil, index: Int = 0): String = {
     keys.toList match {
-      case Nil => value
+      case Nil => encodeSpacesToPercent20(value)
       case one :: rest => {
-        s"%s=%s".format(buildKeyWithIndex(one, rest, index), value)
+        s"%s=%s".format(buildKeyWithIndex(one, rest, index), encodeSpacesToPercent20(value))
       }
     }
   }
