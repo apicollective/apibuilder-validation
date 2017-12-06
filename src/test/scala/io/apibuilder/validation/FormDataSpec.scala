@@ -1,6 +1,8 @@
 package io.apibuilder.validation
 
-import org.scalatest.{Matchers, FunSpec}
+import java.io.File
+
+import org.scalatest.{FunSpec, Matchers}
 import play.api.libs.json._
 
 class FormDataSpec extends FunSpec with Matchers {
@@ -22,7 +24,7 @@ class FormDataSpec extends FunSpec with Matchers {
     FormData.parseEncoded("key=val1&key=val2") should be(
       Map("key" -> Seq("val1", "val2"))
     )
-    
+
     FormData.parseEncoded("key=val1&key=val2&foo=bar") should be(
       Map(
         "key" -> Seq("val1", "val2"),
@@ -69,7 +71,7 @@ class FormDataSpec extends FunSpec with Matchers {
     FormData.parseEncoded("key=val1&key=val2") should be(
       Map("key" -> Seq("val1", "val2"))
     )
-    
+
     FormData.parseEncoded("key=val1&key=val2&foo=bar") should be(
       Map(
         "key" -> Seq("val1", "val2"),
@@ -96,7 +98,7 @@ class FormDataSpec extends FunSpec with Matchers {
     val foo2: String = (js \ "foo2").as[JsString].value
     foo2 should equal("c")
   }
-  
+
   describe("toJson") {
 
     val data: Map[String, Seq[String]] = Map(
@@ -120,40 +122,40 @@ class FormDataSpec extends FunSpec with Matchers {
 
     it("creates simple json object") {
       (FormData.toJson(data) \ "email").validate[String] match {
-        case JsSuccess(succ,_) => succ should be("test@flow.io")
+        case JsSuccess(succ, _) => succ should be("test@flow.io")
         case JsError(_) => assert(false)
       }
     }
 
     it("creates complex json object") {
       (FormData.toJson(data) \ "name" \ "first").validate[String] match {
-        case JsSuccess(succ,_) => succ should be("mike")
+        case JsSuccess(succ, _) => succ should be("mike")
         case JsError(_) => assert(false)
       }
 
       (FormData.toJson(data) \ "name" \ "last").validate[String] match {
-        case JsSuccess(succ,_) => succ should be("roth")
+        case JsSuccess(succ, _) => succ should be("roth")
         case JsError(_) => assert(false)
       }
     }
 
     it("creates simple array json object") {
       (FormData.toJson(data) \ "tags").validate[Seq[String]] match {
-        case JsSuccess(succ,_) => succ should be(Seq("foo", "bar"))
+        case JsSuccess(succ, _) => succ should be(Seq("foo", "bar"))
         case JsError(_) => assert(false)
       }
     }
 
     it("creates complex array json object") {
       (FormData.toJson(data) \ "arr").validate[Seq[JsValue]] match {
-        case JsSuccess(succ,_) => assert((succ.head \ "arr2").toOption.isDefined)
+        case JsSuccess(succ, _) => assert((succ.head \ "arr2").toOption.isDefined)
         case JsError(_) => assert(false)
       }
     }
 
     it("multi valued arrays are lists") {
       (FormData.toJson(data) \ "yikes").validate[Seq[String]] match {
-        case JsSuccess(succ,_) => succ should be(Seq("yes", "no"))
+        case JsSuccess(succ, _) => succ should be(Seq("yes", "no"))
         case JsError(_) => assert(false)
       }
     }
@@ -161,6 +163,29 @@ class FormDataSpec extends FunSpec with Matchers {
     it("handles empty strings") {
       val res = FormData.toJson(data).fields.find(_._1 == "anEmptyString")
       res should be(Some("anEmptyString" -> JsNull))
+    }
+
+    it("parses values inside array of arrays index by outer array") {
+      val file = new File("src/test/resources/querystring/array_with_indexed_object.fixture")
+      val fixture = Fixture.load(file)
+
+      val actualJson = FormData.parseEncodedToJsObject(fixture.urlEncodedString)
+
+      actualJson \ "locations" \ 0 \ "state" should be(JsDefined(JsString("New York")))
+      actualJson \ "locations" \ 0 \ "city" should be(JsDefined(JsString("Brooklyn")))
+      actualJson \ "locations" \ 1 \ "state" should be(JsDefined(JsString("New Jersey")))
+      actualJson \ "locations" \ 1 \ "city" should be(JsDefined(JsString("Hoboken")))
+    }
+
+    it("generates array of arrays indexed by outer array") {
+      val file = new File("src/test/resources/querystring/array_with_indexed_object.fixture")
+      val fixture = Fixture.load(file)
+      val json = fixture.expected
+      val expectedQueryString = fixture.urlEncodedString
+
+      val actualEncodedString: String = FormData.toEncodedWithIndex(json)
+
+      actualEncodedString should be (expectedQueryString)
     }
   }
 }
