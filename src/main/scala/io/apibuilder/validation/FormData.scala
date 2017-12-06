@@ -67,16 +67,16 @@ object FormData {
     * @param keys Keeps track of the top level keys we are parsing to
     *             build up nested keys (e.g. user[first] for maps)
     */
-  def toEncodedWithIndex(js: JsValue, keys: Seq[String] = Nil, index: Int = 0): String = {
+  def toUrlFormEncoded(js: JsValue, keys: Seq[String] = Nil, index: Int = 0): String = {
     js match {
       case o: JsObject => {
         o.value.map { case (key, value) =>
-          toEncodedWithIndex(value, keys ++ Seq(key), index)
+          toUrlFormEncoded(value, keys ++ Seq(key), index)
         }.mkString("&")
       }
       case o: JsArray => {
         o.value.zipWithIndex.map { case (v, i) =>
-          toEncodedWithIndex(v, keys, i)
+          toUrlFormEncoded(v, keys, i)
         }.mkString("&")
       }
       case o: JsString => encodeWithIndex(o.value, keys, index)
