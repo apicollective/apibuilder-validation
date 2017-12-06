@@ -1,6 +1,6 @@
-names[]=Mark
-names[]=Angie
-names[]=Randall
+names[0]=Mark
+names[1]=Angie
+names[2]=Randall
 
 {
   "names": ["Mark", "Angie", "Randall"]

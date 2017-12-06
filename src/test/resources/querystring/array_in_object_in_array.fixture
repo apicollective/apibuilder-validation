@@ -1,0 +1,19 @@
+locations[0][name]=Garage A
+locations[0][access][0]=parking
+locations[0][access][1]=floor_12
+locations[1][name]=Garage B
+locations[1][access][0]=full
+
+{
+  "locations": [
+    {
+      "name": "Garage A",
+      "access": ["parking", "floor_12"]
+    },
+    {
+      "name": "Garage B",
+      "access": ["full"]
+    }
+  ]
+}
+

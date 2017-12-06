@@ -41,7 +41,7 @@ class FormDataSpec extends FunSpec with Matchers {
 
   it("rewriteEncoded") {
     FormData.rewriteEncoded("number[]=100379876543&number[]=WT65xSPLX-SPT-5") should be(
-      "number=100379876543&number=WT65xSPLX-SPT-5"
+      "number[0]=100379876543&number[1]=WT65xSPLX-SPT-5"
     )
 
     FormData.rewriteEncoded("user[name][first]=mike&user[name][last]=bryzek") should be(
@@ -49,11 +49,11 @@ class FormDataSpec extends FunSpec with Matchers {
     )
 
     FormData.rewriteEncoded("user[name][first][]=mike&user[name][first][]=maciej&user[name][last]=bryzek") should be(
-      "user[name][first]=mike&user[name][first]=maciej&user[name][last]=bryzek"
+      "user[name][first][0]=mike&user[name][first][1]=maciej&user[name][last]=bryzek"
     )
 
     FormData.rewriteEncoded("q=category:shoes") should be(
-      "q=category:shoes"
+      "q=category%3Ashoes"
     )
   }
 
@@ -64,6 +64,12 @@ class FormDataSpec extends FunSpec with Matchers {
 
     FormData.toJson(FormData.parseEncoded("number[]=1&number[]=2")) should be(
       Json.obj("number" -> Seq(1, 2))
+    )
+  }
+
+  it("nested arrays") {
+    FormData.parseEncoded("a[0][b[0]][c]=d") should be(
+      Map("a[0][b[0]][c]" -> Seq("d"))
     )
   }
 
@@ -165,27 +171,5 @@ class FormDataSpec extends FunSpec with Matchers {
       res should be(Some("anEmptyString" -> JsNull))
     }
 
-    it("parses values inside array of arrays index by outer array") {
-      val file = new File("src/test/resources/querystring/array_with_indexed_object.fixture")
-      val fixture = Fixture.load(file)
-
-      val actualJson = FormData.parseEncodedToJsObject(fixture.urlEncodedString)
-
-      actualJson \ "locations" \ 0 \ "state" should be(JsDefined(JsString("New York")))
-      actualJson \ "locations" \ 0 \ "city" should be(JsDefined(JsString("Brooklyn")))
-      actualJson \ "locations" \ 1 \ "state" should be(JsDefined(JsString("New Jersey")))
-      actualJson \ "locations" \ 1 \ "city" should be(JsDefined(JsString("Hoboken")))
-    }
-
-    it("generates array of arrays indexed by outer array") {
-      val file = new File("src/test/resources/querystring/array_with_indexed_object.fixture")
-      val fixture = Fixture.load(file)
-      val json = fixture.expected
-      val expectedQueryString = fixture.urlEncodedString
-
-      val actualEncodedString: String = FormData.toUrlFormEncoded(json)
-
-      actualEncodedString should be (expectedQueryString)
-    }
   }
 }

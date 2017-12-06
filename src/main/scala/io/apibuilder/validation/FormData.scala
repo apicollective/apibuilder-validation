@@ -41,6 +41,8 @@ object FormData {
     *             build up nested keys (e.g. user[first] for maps)
     */
   def toEncoded(js: JsValue, keys: Seq[String] = Nil): String = {
+    def urlEncode(s: String): String = java.net.URLEncoder.encode(s, "UTF-8")
+    def encodeIt(value: String, keys: Seq[String]) = encode(urlEncode(value), keys)
     js match {
       case o: JsObject => {
         o.value.map { case (key, value) =>
@@ -48,42 +50,15 @@ object FormData {
         }.mkString("&")
       }
       case o: JsArray => {
-        o.value.map { v =>
-          toEncoded(v, keys)
-        }.mkString("&")
-      }
-      case o: JsString => encode(o.value, keys)
-      case o: JsBoolean => encode(o.value.toString, keys)
-      case o: JsNumber => encode(o.value.toString, keys)
-      case JsNull => encode("", keys)
-      case other => encode(other.toString, keys)
-    }
-  }
-
-  /**
-    * Converts the specified js value into a url form encoded string,
-    * recursively through all types.
-    *
-    * @param keys Keeps track of the top level keys we are parsing to
-    *             build up nested keys (e.g. user[first] for maps)
-    */
-  def toUrlFormEncoded(js: JsValue, keys: Seq[String] = Nil, index: Int = 0): String = {
-    js match {
-      case o: JsObject => {
-        o.value.map { case (key, value) =>
-          toUrlFormEncoded(value, keys ++ Seq(key), index)
-        }.mkString("&")
-      }
-      case o: JsArray => {
         o.value.zipWithIndex.map { case (v, i) =>
-          toUrlFormEncoded(v, keys, i)
+          toEncoded(v, keys ++ Seq(i.toString))
         }.mkString("&")
       }
-      case o: JsString => encodeWithIndex(o.value, keys, index)
-      case o: JsBoolean => encodeWithIndex(o.value.toString, keys, index)
-      case o: JsNumber => encodeWithIndex(o.value.toString, keys, index)
-      case JsNull => encodeWithIndex("", keys, index)
-      case other => encodeWithIndex(other.toString, keys, index)
+      case o: JsString => encodeIt(o.value, keys)
+      case o: JsBoolean => encodeIt(o.value.toString, keys)
+      case o: JsNumber => encodeIt(o.value.toString, keys)
+      case JsNull => encodeIt("", keys)
+      case other => encodeIt(other.toString, keys)
     }
   }
 
@@ -96,30 +71,11 @@ object FormData {
     }
   }
 
-  private[this] def encodeSpacesToPercent20(s: String) = s.replaceAll(" ","%20")
-
-  private[this] def encodeWithIndex(value: String, keys: Seq[String] = Nil, index: Int = 0): String = {
-    keys.toList match {
-      case Nil => encodeSpacesToPercent20(value)
-      case one :: rest => {
-        s"%s=%s".format(buildKeyWithIndex(one, rest, index), encodeSpacesToPercent20(value))
-      }
-    }
-  }
-
   @scala.annotation.tailrec
   private[this] def buildKey(result: String, values: Seq[String]): String = {
     values.toList match {
       case Nil => result
       case one :: rest => buildKey(s"$result[$one]", rest)
-    }
-  }
-
-  @scala.annotation.tailrec
-  private[this] def buildKeyWithIndex(result: String, values: Seq[String], index: Int = 0): String = {
-    values.toList match {
-      case Nil => result
-      case one :: rest => buildKeyWithIndex(s"$result[$index][$one]", rest, index + 1)
     }
   }
 

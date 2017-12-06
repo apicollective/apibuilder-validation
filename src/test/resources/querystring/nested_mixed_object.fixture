@@ -5,9 +5,9 @@ items[0][quantity]=1
 items[1][number]=ITM-23423
 items[1][price]=23.99
 items[1][quantity]=4
-selected[]=84747474
-selected[]=383838383
-selected[]=2388383
+selected[0]=84747474
+selected[1]=383838383
+selected[2]=2388383
 
 {
   "number": "ORD-34234",

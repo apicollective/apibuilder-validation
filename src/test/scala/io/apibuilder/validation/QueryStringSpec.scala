@@ -6,8 +6,13 @@ import play.api.libs.json.{JsArray, JsObject, JsValue, JsNull, Json}
 
 class QueryStringSpec extends FunSpec with Matchers {
 
-  private[this] val Dir: File = {
+  private[this] val QueryStringDir: File = {
     val d = new File("src/test/resources/querystring")
+    assert(d.exists(), s"Dir[$d] does not exist")
+    d
+  }
+  private[this] val QueryStringToJsonOnlyDir: File = {
+    val d = new File("src/test/resources/querystring-to-json-only")
     assert(d.exists(), s"Dir[$d] does not exist")
     d
   }
@@ -65,8 +70,8 @@ class QueryStringSpec extends FunSpec with Matchers {
     }
   }
 
-  it("examples") {
-    val files = Dir.listFiles.filter(_.getName.endsWith(".fixture"))
+  it("examples - querystring to json") {
+    val files = QueryStringDir.listFiles.filter(_.getName.endsWith(".fixture")) ++ QueryStringToJsonOnlyDir.listFiles.filter(_.getName.endsWith(".fixture"))
     files.nonEmpty should be(true)
     files.foreach { file =>
       val fixture = Fixture.load(file)
@@ -98,9 +103,35 @@ class QueryStringSpec extends FunSpec with Matchers {
           println(s" - $d")
         }
 
-        sys.error(s"$Dir/${file.getName}: ${fixture.rawQueryString} - JsValue did not match expected")
+        sys.error(s"$QueryStringDir/${file.getName}: ${fixture.rawQueryString} - JsValue did not match expected")
       }
     }
   }
+  it("examples - json to querystring") {
+    val files = QueryStringDir.listFiles.filter(_.getName.endsWith(".fixture"))
+    files.nonEmpty should be(true)
+    files.foreach { file =>
+      val fixture = Fixture.load(file)
+      val parsed = FormData.parseEncodedToJsObject(fixture.rawQueryString)
+
+      val actual: Array[String] = FormData.toEncoded(parsed).split("&").sorted
+      val expected: Array[String] = fixture.rawQueryString.split("&").sorted
+
+
+      if (actual.mkString("&") != expected.mkString("&")) {
+        println(s"$QueryStringDir/${file.getName}: ${expected.mkString("&")} - JsValue did not match expected: Actual: ${actual.mkString("&")}")
+        for (idx <- actual.indices) {
+          if (!actual(idx).equals(expected(idx))) {
+            println(s"JsValue did not match expected - file: ${file.getName}: ")
+            println(s"Expected: ${expected(idx)}")
+            println(s"Actual: ${actual(idx)}")
+          }
+        }
+      }
+
+      actual should contain theSameElementsInOrderAs expected
+    }
+  }
+
 }
 
