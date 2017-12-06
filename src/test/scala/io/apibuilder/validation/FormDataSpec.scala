@@ -183,7 +183,7 @@ class FormDataSpec extends FunSpec with Matchers {
       val json = fixture.expected
       val expectedQueryString = fixture.urlEncodedString
 
-      val actualEncodedString: String = FormData.toEncodedWithIndex(json)
+      val actualEncodedString: String = FormData.toUrlFormEncoded(json)
 
       actualEncodedString should be (expectedQueryString)
     }
