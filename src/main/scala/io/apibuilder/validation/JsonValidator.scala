@@ -174,24 +174,33 @@ case class JsonValidator(service: Service) {
   ): Either[Seq[String], JsValue] = {
     union.discriminator match {
       case None => {
-        // TODO: if we want to validate, we would expect js object to have one key
-        // that is the name of the type.
         Right(js)
       }
 
       case Some(discriminator) => {
-        (js \ discriminator).asOpt[String] match {
-          case None => Left(Seq(s"Union type '${union.name}' requires a field named '$discriminator'"))
-          case Some(value) => {
-            union.types.find(_.`type` == value) match {
+        val disc = (js \ discriminator).asOpt[String]
+
+        val unionType = disc match {
+          case None => union.types.find(_.default.getOrElse(false))
+          case Some(t) => union.types.find(_.`type` == t)
+        }
+
+        unionType match {
+          case None => {
+            disc match {
               case None => {
+                Left(Seq(s"Union type '${union.name}' requires a field named '$discriminator'"))
+              }
+              case Some(value) => {
                 Left(Seq(s"Invalid discriminator '$value' for union type '${union.name}': must be one of " + union.types.map(_.`type`).mkString("'", "', '", "'")))
               }
-              case Some(_) => {
-                assert(value != union.name, s"Specific union type name cannot match name of the union itself - else we'd recurse infinitely")
-                validate(value, js, prefix)
-              }
             }
+
+          }
+
+          case Some(t) => {
+            assert(t.`type` != union.name, s"Specific union type name cannot match name of the union itself - else we'd recurse infinitely")
+            validate(t.`type`, js, prefix)
           }
         }
       }

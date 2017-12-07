@@ -1,6 +1,16 @@
 {
   "name": "apibuilder-explicit-validation",
 
+  "unions": {
+    "cart_add_form": {
+      "discriminator": "discriminator",
+      "types": [
+        { "type": "single_cart_add_form", "default": true },
+        { "type": "multi_cart_add_form" }
+      ]
+    }
+  },
+
   "models": {
     "price_form": {
       "fields": [
@@ -12,6 +22,19 @@
     "object_with_price_form": {
       "fields": [
         { "name": "price", "type": "price_form" }
+      ]
+    },
+
+    "single_cart_add_form": {
+      "fields": [
+        { "name": "id", "type": "string" },
+        { "name": "quantity", "type": "long" }
+      ]
+    },
+
+    "multi_cart_add_form": {
+      "fields": [
+        { "name": "items", "type": "[single_cart_add_form]" }
       ]
     }
   }
