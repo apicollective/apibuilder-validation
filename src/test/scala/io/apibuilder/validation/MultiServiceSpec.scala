@@ -100,16 +100,6 @@ class MultiServiceSpec extends FunSpec with Matchers {
     )
   }
 
-  it("validate") {
-    multi.upcast(
-      "POST",
-      "/:organization/webhooks",
-      Json.obj("url" -> "https://test.flow.io")
-    ) should equal(
-      Left(Seq("Missing required field for webhook_form: events"))
-    )
-  }
-
   it("validate union type discriminator") {
     multi.upcast(
       "POST",
