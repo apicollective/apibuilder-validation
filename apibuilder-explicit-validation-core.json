@@ -1,0 +1,12 @@
+{
+  "name": "apibuilder-explicit-validation-core",
+
+  "enums": {
+    "gender": {
+      "values": [
+        { "name": "male" },
+        { "name": "female" }
+      ]
+    }
+  }
+}

@@ -1,6 +1,10 @@
 {
   "name": "apibuilder-explicit-validation",
 
+  "imports": [
+    { "uri": "https://app.apibuilder.io/apicollective/apibuilder-explicit-validation-core/latest/service.json" }
+  ],
+
   "unions": {
     "cart_add_form": {
       "discriminator": "discriminator",
@@ -12,6 +16,21 @@
   },
 
   "models": {
+    "person": {
+      "fields": [
+        { "name": "id", "type": "string" },
+        { "name": "name", "type": "string" },
+        { "name": "gender", "type": "io.apibuilder.explicit.validation.core.v0.enums.gender" }
+      ]
+    },
+
+    "person_form": {
+      "fields": [
+        { "name": "name", "type": "string" },
+        { "name": "gender", "type": "io.apibuilder.explicit.validation.core.v0.enums.gender" }
+      ]
+    },
+
     "price_form": {
       "fields": [
         { "name": "amount", "type": "decimal" },
@@ -37,7 +56,21 @@
         { "name": "items", "type": "[single_cart_add_form]" }
       ]
     }
+  },
+
+  "resources": {
+    "person": {
+      "path": "/people",
+
+      "operations": [
+        {
+          "method": "POST",
+          "body": { "type": "person_form" }
+        }
+      ]
+    }
   }
+
 }
 
     
