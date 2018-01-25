@@ -179,7 +179,18 @@ class JsonValidatorSpec extends FunSpec with Matchers {
       )
     )
   }
-  
+
+  it("validates enum values that are passed in as empty strings") {
+    val form = Json.obj(
+      "code" -> ""
+    )
+    validator.validate("avs", form) should equal(
+      Left(
+        Seq("avs.code invalid value ''. Valid values for the enum 'avs_code' are: 'match', 'partial', 'unsupported', 'no_match'")
+      )
+    )
+  }
+
   it("validates nested models") {
     val form = Json.obj(
       "number" -> 123,
