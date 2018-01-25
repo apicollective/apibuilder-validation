@@ -19,8 +19,6 @@ case class ApiBuilderService(
 
   private[this] val normalizer = PathNormalizer(service)
 
-  private[this] val validator = JsonValidator(service)
-
   /**
     * If the specified method, path require a body, returns the type of the body
     */
@@ -87,18 +85,6 @@ case class ApiBuilderService(
     Method.fromString(method) match {
       case None => None
       case Some(m) => normalizer.resolve(m, path)
-    }
-  }
-
-  def upcast(method: String, path: String, js: JsValue): Either[Seq[String], JsValue] = {
-    validate(method = method, path = path) match {
-      case Left(errors) => Left(errors)
-      case Right(op) => {
-        op.body.map(_.`type`) match {
-          case None => Right(js)
-          case Some(typ) => validator.validate(typ, js)
-        }
-      }
     }
   }
 

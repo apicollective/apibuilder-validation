@@ -12,6 +12,8 @@ case class MultiService(
   services: Seq[ApiBuilderService]
 ) {
 
+  private[this] val validator = JsonValidator(services.map(_.service))
+
   /**
     * If the specified method & path requires a body, returns the type of the body
     */
@@ -39,7 +41,17 @@ case class MultiService(
   def upcast(method: String, path: String, js: JsValue): Either[Seq[String], JsValue] = {
     resolveService(method, path) match {
       case Left(errors) => Left(errors)
-      case Right(service) => service.upcast(method, path,js)
+      case Right(service) => {
+        service.validate(method = method, path = path) match {
+          case Left(errors) => Left(errors)
+          case Right(op) => {
+            op.body.map(_.`type`) match {
+              case None => Right(js)
+              case Some(typ) => validator.validate(typ, js)
+            }
+          }
+        }
+      }
     }
   }
 

@@ -1,7 +1,6 @@
 package io.apibuilder.validation
 
 import io.apibuilder.spec.v0.models.{Enum, Model, Service, Union}
-import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import play.api.libs.json._
 
@@ -20,7 +19,47 @@ object Booleans {
 
 }
 
-case class JsonValidator(service: Service) {
+object JsonValidator {
+  def apply(service: Service): JsonValidator = JsonValidator(Seq(service))
+}
+
+case class JsonValidator(services: Seq[Service]) {
+  assert(services.nonEmpty, s"Must have at least one service")
+
+  private[this] def findType(name: String): Option[ApibuilderType] = {
+    val typeName = TypeName(name)
+    typeName.namespace match {
+      case None => {
+        // find first service with this type defined
+        services.flatMap { s =>
+          findType(s, typeName.name)
+        }.headOption
+      }
+
+      case Some(ns) => {
+        services.find(_.namespace == ns).flatMap { s =>
+          findType(s, typeName.name)
+        }
+      }
+    }
+  }
+
+  private[this] def findType(service: Service, typeName: String): Option[ApibuilderType] = {
+    service.enums.find(_.name == typeName) match {
+      case Some(e) => Some(ApibuilderType.Enum(service.namespace, e))
+      case None => {
+        service.models.find(_.name == typeName) match {
+          case Some(m) => Some(ApibuilderType.Model(service.namespace, m))
+          case None => {
+            service.unions.find(_.name == typeName) match {
+              case Some(u) => Some(ApibuilderType.Union(service.namespace, u))
+              case None => None
+            }
+          }
+        }
+      }
+    }
+  }
 
   /**
     * Validates the incoming JsValue against the API Builder schema,
@@ -33,37 +72,33 @@ case class JsonValidator(service: Service) {
     js: JsValue,
     prefix: Option[String] = None
   ): Either[Seq[String], JsValue] = {
-    service.enums.find(_.name == typeName) match {
-      case Some(e) => {
-        validateEnum(prefix.getOrElse("Body"), e, js)
+    findType(typeName) match {
+      case None => {
+        // may be a primitive type like 'string'
+        validateApiBuilderType(
+          prefix.getOrElse(typeName),
+          typeName,
+          js
+        )
       }
 
-      case None => {
-        service.models.find(_.name == typeName) match {
-          case Some(m) => {
+      case Some(t) => {
+        t match {
+          case ApibuilderType.Enum(_, e) => {
+            validateEnum(prefix.getOrElse("Body"), e, js)
+          }
+
+          case ApibuilderType.Model(_, m) => {
             toObject(prefix.getOrElse("Body"), js) match {
               case Left(errors) => Left(errors)
               case Right(obj) => validateModel(m, obj, prefix)
             }
           }
 
-          case None => {
-            service.unions.find(_.name == typeName) match {
-              case Some(u) => {
-                toObject(prefix.getOrElse("Body"), js) match {
-                  case Left(errors) => Left(errors)
-                  case Right(obj) => validateUnion(u, obj, prefix)
-                }
-              }
-            
-              case None => {
-                // may be a primitive type like 'string'
-                validateApiBuilderType(
-                  prefix.getOrElse(typeName),
-                  typeName,
-                  js
-                )
-              }
+          case ApibuilderType.Union(_, u) => {
+            toObject(prefix.getOrElse("Body"), js) match {
+              case Left(errors) => Left(errors)
+              case Right(obj) => validateUnion(u, obj, prefix)
             }
           }
         }
@@ -82,7 +117,7 @@ case class JsonValidator(service: Service) {
       case v: JsObject => Right(
         // Remove null fields as there is nothing to validate there
         JsObject(
-          v.value.filter { case (k, v) =>
+          v.value.filter { case (_, v) =>
               v match {
                 case JsNull => false
                 case _ => true
@@ -152,8 +187,8 @@ case class JsonValidator(service: Service) {
               errors
             }
 
-            case Right(value) => {
-              updated = updated ++ Json.obj(name -> value)
+            case Right(v) => {
+              updated = updated ++ Json.obj(name -> v)
               Nil
             }
           }
