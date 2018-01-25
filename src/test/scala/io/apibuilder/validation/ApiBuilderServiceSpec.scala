@@ -49,49 +49,4 @@ class ApiBuilderServiceSpec extends FunSpec with Matchers {
     service.bodyTypeFromPath("PUT", "/sessions/:id") should be(Some("session_put_form"))
   }
 
-  it("offers validation error w/ verb replacement") {
-    service.upcast(
-      "OPTIONS",
-      "/:organization/webhooks",
-      Json.obj("url" -> "https://test.flow.io", "events" -> "*")
-    ) should equal(
-      Left(Seq("HTTP method 'OPTIONS' not supported for path /:organization/webhooks - Available methods: GET, POST"))
-    )
-  }
-
-  it("validate") {
-    service.upcast(
-      "POST",
-      "/:organization/webhooks",
-      Json.obj("url" -> "https://test.flow.io")
-    ) should equal(
-      Left(Seq("Missing required field for webhook_form: events"))
-    )
-  }
-
-  it("validate union type discriminator") {
-    service.upcast(
-      "POST",
-      "/:organization/authorizations",
-      Json.obj("discriminator" -> "authorization_form")
-    )  should equal(
-      Left(Seq(
-        "Invalid discriminator 'authorization_form' for union type 'authorization_form': must be one of 'authorization_copy_form', 'direct_authorization_form', 'merchant_of_record_authorization_form', 'paypal_authorization_form', 'redirect_authorization_form', 'card_authorization_form'"
-      ))
-    )
-  }
-
-  it("validate union type") {
-    service.upcast(
-      "POST",
-      "/:organization/authorizations",
-      Json.obj(
-        "order_number" -> "123",
-        "discriminator" -> "merchant_of_record_authorization_form"
-      )
-    ) should equal(
-      Left(Seq("Missing required field for merchant_of_record_authorization_form: token"))
-    )
-  }
-
 }
