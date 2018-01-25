@@ -10,10 +10,10 @@ object TypeName {
   def apply(name: String): TypeName = {
     val parts = name.split("\\.").toList
 
-    if (parts.lengthCompare(3) >= 0) {
+    if (parts.lengthCompare(2) >= 0) {
       TypeName(
         name = parts.last,
-        namespace = Some(parts.slice(0, parts.length-3).mkString("."))
+        namespace = Some(parts.slice(0, parts.length-2).mkString("."))
       )
     } else {
       TypeName(

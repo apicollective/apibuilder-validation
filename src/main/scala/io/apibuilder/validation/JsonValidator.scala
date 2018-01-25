@@ -28,7 +28,6 @@ case class JsonValidator(services: Seq[Service]) {
 
   private[this] def findType(name: String): Option[ApibuilderType] = {
     val typeName = TypeName(name)
-    println(s"$name => $typeName")
     typeName.namespace match {
       case None => {
         // find first service with this type defined
@@ -38,9 +37,7 @@ case class JsonValidator(services: Seq[Service]) {
       }
 
       case Some(ns) => {
-        println(s"nameapsce: $ns")
         services.find(_.namespace == ns).flatMap { s =>
-          println(s"SERVICE => ${s.name}")
           findType(s, typeName.name)
         }
       }

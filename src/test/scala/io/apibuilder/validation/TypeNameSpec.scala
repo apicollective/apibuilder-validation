@@ -11,7 +11,7 @@ class TypeNameSpec extends FunSpec with Matchers {
 
   it("type name with namespace  ") {
     TypeName("io.apibuilder.explicit.validation.core.v0.enums.gender") should equal(
-      TypeName("gender", Some("io.apibuilder.explicit.validation.core"))
+      TypeName("gender", Some("io.apibuilder.explicit.validation.core.v0"))
     )
   }
 

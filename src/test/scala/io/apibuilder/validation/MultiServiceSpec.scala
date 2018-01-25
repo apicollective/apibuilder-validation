@@ -89,9 +89,9 @@ class MultiServiceSpec extends FunSpec with Matchers {
     (js \ "url").as[JsString].value should equal("123")
     (js \ "events").as[JsArray] should equal(JsArray(Seq(JsString("456"))))
   }
-  /*
-    it("offers validation error w/ verb replacement") {
-    service.upcast(
+
+  it("offers validation error w/ verb replacement") {
+    multi.upcast(
       "OPTIONS",
       "/:organization/webhooks",
       Json.obj("url" -> "https://test.flow.io", "events" -> "*")
@@ -101,7 +101,7 @@ class MultiServiceSpec extends FunSpec with Matchers {
   }
 
   it("validate") {
-    service.upcast(
+    multi.upcast(
       "POST",
       "/:organization/webhooks",
       Json.obj("url" -> "https://test.flow.io")
@@ -111,7 +111,7 @@ class MultiServiceSpec extends FunSpec with Matchers {
   }
 
   it("validate union type discriminator") {
-    service.upcast(
+    multi.upcast(
       "POST",
       "/:organization/authorizations",
       Json.obj("discriminator" -> "authorization_form")
@@ -123,7 +123,7 @@ class MultiServiceSpec extends FunSpec with Matchers {
   }
 
   it("validate union type") {
-    service.upcast(
+    multi.upcast(
       "POST",
       "/:organization/authorizations",
       Json.obj(
@@ -134,6 +134,5 @@ class MultiServiceSpec extends FunSpec with Matchers {
       Left(Seq("Missing required field for merchant_of_record_authorization_form: token"))
     )
   }
- 
-   */
+
 }
