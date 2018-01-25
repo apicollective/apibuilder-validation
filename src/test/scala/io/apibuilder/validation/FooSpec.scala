@@ -1,7 +1,5 @@
 package io.apibuilder.validation
 
-import java.io.File
-
 import org.scalatest.{FunSpec, Matchers}
 import play.api.libs.json._
 

@@ -26,9 +26,28 @@ object JsonValidator {
 case class JsonValidator(services: Seq[Service]) {
   assert(services.nonEmpty, s"Must have at least one service")
 
-  private[this] def findType(typeName: String): Option[ApibuilderType] = {
-    val service = services.head
+  private[this] def findType(name: String): Option[ApibuilderType] = {
+    val typeName = TypeName(name)
+    println(s"$name => $typeName")
+    typeName.namespace match {
+      case None => {
+        // find first service with this type defined
+        services.flatMap { s =>
+          findType(s, typeName.name)
+        }.headOption
+      }
 
+      case Some(ns) => {
+        println(s"nameapsce: $ns")
+        services.find(_.namespace == ns).flatMap { s =>
+          println(s"SERVICE => ${s.name}")
+          findType(s, typeName.name)
+        }
+      }
+    }
+  }
+
+  private[this] def findType(service: Service, typeName: String): Option[ApibuilderType] = {
     service.enums.find(_.name == typeName) match {
       case Some(e) => Some(ApibuilderType.Enum(service.namespace, e))
       case None => {
