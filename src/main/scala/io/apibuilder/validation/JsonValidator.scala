@@ -20,7 +20,7 @@ object Booleans {
 
 }
 
-case class JsonValidator(service: Service) {
+case class JsonValidator(services: Seq[Service]) {
 
   /**
     * Validates the incoming JsValue against the API Builder schema,
@@ -33,6 +33,9 @@ case class JsonValidator(service: Service) {
     js: JsValue,
     prefix: Option[String] = None
   ): Either[Seq[String], JsValue] = {
+    println(s"Service[${service.name}]: ${service.namespace}")
+    println(s"Looking for enum[$typeName]")
+
     service.enums.find(_.name == typeName) match {
       case Some(e) => {
         validateEnum(prefix.getOrElse("Body"), e, js)
