@@ -39,11 +39,11 @@ case class MultiService(
   def upcast(method: String, path: String, js: JsValue): Either[Seq[String], JsValue] = {
     resolveService(method, path) match {
       case Left(errors) => Left(errors)
-      case Right(_) => internalUpcast(method, path, js)
+      case Right(_) => multiServiceUpcast(method, path, js)
     }
   }
 
-  def internalUpcast(method: String, path: String, js: JsValue): Either[Seq[String], JsValue] = {
+  private def multiServiceUpcast(method: String, path: String, js: JsValue): Either[Seq[String], JsValue] = {
     validate(method = method, path = path) match {
       case Left(errors) => Left(errors)
       case Right(op) => {
