@@ -20,8 +20,12 @@ object Booleans {
 
 }
 
-case class JsonValidator(services: Seq[Service]) {
+object JsonValidator {
+  def apply(service: Service): JsonValidator = new JsonValidator(Seq(service))
+  def apply(services: Seq[Service]): JsonValidator = new JsonValidator(services)
+}
 
+class JsonValidator(services: Seq[Service]) {
   /**
     * Validates the incoming JsValue against the API Builder schema,
     * returning either human friendly validation errors or a new
@@ -33,16 +37,14 @@ case class JsonValidator(services: Seq[Service]) {
     js: JsValue,
     prefix: Option[String] = None
   ): Either[Seq[String], JsValue] = {
-    println(s"Service[${service.name}]: ${service.namespace}")
-    println(s"Looking for enum[$typeName]")
+    val enums = services.flatMap(_.enums)
+    val unions = services.flatMap(_.unions)
+    val models = services.flatMap(_.models)
 
-    service.enums.find(_.name == typeName) match {
-      case Some(e) => {
-        validateEnum(prefix.getOrElse("Body"), e, js)
-      }
-
+    enums.find(e => typeName.split('.').lastOption.contains(e.name)) match {
+      case Some(e) => validateEnum(prefix.getOrElse("Body"), e, js)
       case None => {
-        service.models.find(_.name == typeName) match {
+        models.find(_.name == typeName) match {
           case Some(m) => {
             toObject(prefix.getOrElse("Body"), js) match {
               case Left(errors) => Left(errors)
@@ -51,7 +53,7 @@ case class JsonValidator(services: Seq[Service]) {
           }
 
           case None => {
-            service.unions.find(_.name == typeName) match {
+            unions.find(_.name == typeName) match {
               case Some(u) => {
                 toObject(prefix.getOrElse("Body"), js) match {
                   case Left(errors) => Left(errors)

@@ -39,7 +39,19 @@ case class MultiService(
   def upcast(method: String, path: String, js: JsValue): Either[Seq[String], JsValue] = {
     resolveService(method, path) match {
       case Left(errors) => Left(errors)
-      case Right(service) => service.upcast(method, path,js)
+      case Right(_) => internalUpcast(method, path, js)
+    }
+  }
+
+  def internalUpcast(method: String, path: String, js: JsValue): Either[Seq[String], JsValue] = {
+    validate(method = method, path = path) match {
+      case Left(errors) => Left(errors)
+      case Right(op) => {
+        op.body.map(_.`type`) match {
+          case None => Right(js)
+          case Some(typ) => JsonValidator(services.map(_.service)).validate(typ, js)
+        }
+      }
     }
   }
 
