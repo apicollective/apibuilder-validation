@@ -45,6 +45,12 @@ class MultiServiceSpec extends FunSpec with Matchers {
     multi.operation("GET", "/users").get.parameters.map(_.name) should be(
       Seq("id", "email", "status", "limit", "offset", "sort")
     )
+    println(
+      multi.operation("GET", "/org/experiences/items").get
+    )
+    multi.operation("GET", "/org/experiences/items").get.parameters.map(_.name) should be(
+      Seq("organization", "number", "status", "experience", "country", "ip", "currency", "language", "limit", "offset", "sort")
+    )
   }
 
   it("validate") {
