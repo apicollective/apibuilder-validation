@@ -3,9 +3,9 @@ package io.apibuilder.validation
 import org.scalatest.{FunSpec, Matchers}
 import play.api.libs.json._
 
-class FooSpec extends FunSpec with Matchers {
+class JsonToUrlFormEncodedExampleSpec extends FunSpec with Matchers {
 
-  it("handles empty strings") {
+  it("example") {
     val item = Json.parse(
       """
         |{
@@ -44,11 +44,13 @@ class FooSpec extends FunSpec with Matchers {
         |}
       """.stripMargin
     )
-    println("YES")
-    println(FormData.toEncoded(item))
-    val parts = FormData.toEncoded(item).split("&").map(_.split("="))
-    println(parts.map(_.head).mkString(","))
-    println(parts.map(_.last).mkString(","))
+    if (false) {
+      println("YES")
+      println(FormData.toEncoded(item))
+      val parts = FormData.toEncoded(item).split("&").map(_.split("="))
+      println(parts.map(_.head).mkString(","))
+      println(parts.map(_.last).mkString(","))
+    }
   }
 
 }

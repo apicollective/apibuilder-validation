@@ -1,5 +1,6 @@
 package io.apibuilder.validation
 
+import io.apibuilder.spec.v0.models.Method
 import play.api.libs.json._
 import org.scalatest.{FunSpec, Matchers}
 
@@ -33,12 +34,19 @@ class MultiServiceSpec extends FunSpec with Matchers {
     multi.bodyTypeFromPath("POST", "/:orgKey") should equal(Some("application_form"))
   }
 
-  it("parametersFromPath") {
-    multi.parametersFromPath("POST", "/unknown/path/that/does/not/resolve") should equal(None)
-    multi.parametersFromPath("POST", "/users") should be(Some(Nil))
-    multi.parametersFromPath("GET", "/users").get.map(_.name) should be(Seq("id", "email", "status", "limit", "offset", "sort"))
+  it("operation") {
+    multi.operation("POST", "/foo/bar/baz") should be(None)
+
+    val op = multi.operation("POST", "/users").get
+    op.method should equal(Method.Post)
+    op.path should equal("/users")
+    op.parameters should be(Nil)
+
+    multi.operation("GET", "/users").get.parameters.map(_.name) should be(
+      Seq("id", "email", "status", "limit", "offset", "sort")
+    )
   }
-  
+
   it("validate") {
     // path from flow api
     multi.upcast(

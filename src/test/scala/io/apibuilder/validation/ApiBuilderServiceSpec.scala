@@ -1,6 +1,6 @@
 package io.apibuilder.validation
 
-import play.api.libs.json._
+import io.apibuilder.spec.v0.models.Method
 import org.scalatest.{FunSpec, Matchers}
 
 class ApiBuilderServiceSpec extends FunSpec with Matchers {
@@ -29,10 +29,17 @@ class ApiBuilderServiceSpec extends FunSpec with Matchers {
     service.bodyTypeFromPath("POST", "/:organization/webhooks") should be(Some("webhook_form"))
   }
 
-  it("parametersFromPath") {
-    service.parametersFromPath("POST", "/foo") should be(None)
-    service.parametersFromPath("POST", "/users") should be(Some(Nil))
-    service.parametersFromPath("GET", "/users").get.map(_.name) should be(Seq("id", "email", "status", "limit", "offset", "sort"))
+  it("operation") {
+    service.operation("POST", "/foo") should be(None)
+
+    val op = service.operation("POST", "/users").get
+    op.method should equal(Method.Post)
+    op.path should equal("/users")
+    op.parameters should be(Nil)
+
+    service.operation("GET", "/users").get.parameters.map(_.name) should be(
+      Seq("id", "email", "status", "limit", "offset", "sort")
+    )
   }
 
   it("resolves for known paths") {

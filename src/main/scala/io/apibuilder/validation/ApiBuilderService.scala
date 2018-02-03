@@ -1,6 +1,6 @@
 package io.apibuilder.validation
 
-import io.apibuilder.spec.v0.models.{Method, Operation, Parameter, Service}
+import io.apibuilder.spec.v0.models.{Method, Operation, Service}
 import io.apibuilder.spec.v0.models.json._
 import java.net.URL
 
@@ -24,13 +24,6 @@ case class ApiBuilderService(
     */
   def bodyTypeFromPath(method: String, path: String): Option[String] = {
     operation(method, path).flatMap(_.body.map(_.`type`))
-  }
-
-  /**
-    * If the specified method, path exists, returns the list of parameters it accepts
-    */
-  def parametersFromPath(method: String, path: String): Option[Seq[Parameter]] = {
-    operation(method, path).map(_.parameters)
   }
 
   /**

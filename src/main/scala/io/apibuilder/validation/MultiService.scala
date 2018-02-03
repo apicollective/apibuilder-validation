@@ -25,12 +25,14 @@ case class MultiService(
   }
 
   /**
-    * For the given method & path, returns a list of the defined parameters
+    * For the given method & path, returns the defined operation, if any
     */
-  def parametersFromPath(method: String, path: String): Option[Seq[Parameter]] = {
+  def operation(method: String, path: String): Option[Operation] = {
     resolveService(method, path) match {
       case Left(_) => None
-      case Right(service) => service.parametersFromPath(method, path)
+      case Right(service) => {
+        service.operation(method = method, path = path)
+      }
     }
   }
 
