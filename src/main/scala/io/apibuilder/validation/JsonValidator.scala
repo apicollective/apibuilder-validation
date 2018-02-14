@@ -26,7 +26,7 @@ object JsonValidator {
 case class JsonValidator(services: Seq[Service]) {
   assert(services.nonEmpty, s"Must have at least one service")
 
-  private[this] def findType(name: String): Option[ApibuilderType] = {
+  def findType(name: String): Option[ApibuilderType] = {
     val typeName = TypeName(name)
     typeName.namespace match {
       case None => {

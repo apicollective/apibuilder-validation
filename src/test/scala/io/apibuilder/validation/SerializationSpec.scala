@@ -6,7 +6,7 @@ import io.flow.v0.models.{Image, ImageForm, ItemForm}
 import org.scalatest.{FunSpec, Matchers}
 import play.api.libs.json.{JsArray, JsObject, JsValue, Json}
 
-class TmpSpec extends FunSpec with Matchers with helpers.Helpers {
+class SerializationSpec extends FunSpec with Matchers with helpers.Helpers {
 
   it("serialize and deserialize item form") {
     val form = ItemForm(
@@ -35,7 +35,7 @@ class TmpSpec extends FunSpec with Matchers with helpers.Helpers {
 
     val deserializedForm = rightOrErrors {
       flowMultiService.upcast(
-        "POST", "/test/catalog/items",
+        "item_form",
         FormData.toJson(
           FormData.parseEncoded(encoded)
         )
