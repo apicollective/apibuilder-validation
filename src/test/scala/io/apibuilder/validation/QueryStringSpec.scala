@@ -107,6 +107,7 @@ class QueryStringSpec extends FunSpec with Matchers {
       }
     }
   }
+
   it("examples - json to querystring") {
     val files = QueryStringDir.listFiles.filter(_.getName.endsWith(".fixture"))
     files.nonEmpty should be(true)
