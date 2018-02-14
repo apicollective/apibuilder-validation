@@ -49,7 +49,7 @@ case class MultiService(
           case Right(op) => {
             op.body.map(_.`type`) match {
               case None => Right(js)
-              case Some(typ) => validator.validate(typ, js)
+              case Some(typ) => upcast(typ, js)
             }
           }
         }
@@ -58,10 +58,22 @@ case class MultiService(
   }
 
   /**
-    * Validates that the path is known and the method is supported for the path.
-    * If known, returns the corresponding operation. Otherwise returns a
-    * list of errors.
+    * Upcast the json value based on the specified type name
+    *
+    * @param typeName e.g. 'user' - looks up the apibuilder type with this name
+    *                 and if found, uses that type to validate and upcase the
+    *                 JSON. Note if the type is not found, the JSON returned
+    *                 is unchanged.
     */
+  def upcast(typeName: String, js: JsValue): Either[Seq[String], JsValue] = {
+    validator.validate(typeName, js)
+  }
+
+  /**
+   * Validates that the path is known and the method is supported for the path.
+   * If known, returns the corresponding operation. Otherwise returns a
+   * list of errors.
+   */
   def validate(method: String, path: String): Either[Seq[String], Operation] = {
     resolveService(method, path) match {
       case Left(errors) => Left(errors)

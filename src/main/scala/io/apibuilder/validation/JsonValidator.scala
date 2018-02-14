@@ -26,7 +26,7 @@ object JsonValidator {
 case class JsonValidator(services: Seq[Service]) {
   assert(services.nonEmpty, s"Must have at least one service")
 
-  private[this] def findType(name: String): Option[ApibuilderType] = {
+  def findType(name: String): Option[ApibuilderType] = {
     val typeName = TypeName(name)
     typeName.namespace match {
       case None => {
@@ -117,8 +117,8 @@ case class JsonValidator(services: Seq[Service]) {
       case v: JsObject => Right(
         // Remove null fields as there is nothing to validate there
         JsObject(
-          v.value.filter { case (_, v) =>
-              v match {
+          v.value.filter { case (_, value) =>
+              value match {
                 case JsNull => false
                 case _ => true
               }
@@ -287,9 +287,10 @@ case class JsonValidator(services: Seq[Service]) {
         val eithers = v.value.zipWithIndex.map { case (el, index) =>
           validate(internalType, el, Some(prefix + s" element in position[$index]"))
         }
-        eithers.forall(_.isRight) match {
-          case true => Right(JsArray(eithers.map(_.right.get)))
-          case false => Left(eithers.filter(_.isLeft).flatMap(_.left.get))
+        if (eithers.forall(_.isRight)) {
+          Right(JsArray(eithers.map(_.right.get)))
+        } else {
+          Left(eithers.filter(_.isLeft).flatMap(_.left.get))
         }
       }
       case JsNull => Left(Seq(s"$prefix must be an array and not null"))
@@ -315,19 +316,18 @@ case class JsonValidator(services: Seq[Service]) {
         val eithers: Seq[Either[Seq[String], JsObject]] = v.fields.map { case (name, el) =>
           validate(internalType, el, Some(prefix + s" element[$name]")) match {
             case Left(errors) => Left(errors)
-            case Right(js) => Right(Json.obj(name -> js))
+            case Right(json) => Right(Json.obj(name -> json))
           }
         }
-        eithers.forall(_.isRight) match {
-          case true => {
-            Right(
-              eithers.map(_.right.get).foldLeft(v) { case (a, b) => a ++ b }
-            )
-          }
-          case false => Left(eithers.filter(_.isLeft).flatMap(_.left.get))
+        if (eithers.forall(_.isRight)) {
+          Right(
+            eithers.map(_.right.get).foldLeft(v) { case (a, b) => a ++ b }
+          )
+        } else {
+          Left(eithers.filter(_.isLeft).flatMap(_.left.get))
         }
       }
-      case v: JsString => Left(Seq(s"$prefix must be an object and not a string"))
+      case _: JsString => Left(Seq(s"$prefix must be an object and not a string"))
     }
   }
 
@@ -339,18 +339,18 @@ case class JsonValidator(services: Seq[Service]) {
           case _ => Left(Seq(s"$prefix must be an integer and not an array"))
         }
       }
-      case v: JsBoolean => Left(Seq(s"$prefix must be an integer and not a boolean"))
+      case _: JsBoolean => Left(Seq(s"$prefix must be an integer and not a boolean"))
       case JsNull => Left(Seq(s"$prefix must be an integer and not null"))
       case v: JsNumber => v.asOpt[Int] match {
         case None => Left(Seq(s"$prefix must be a valid integer"))
         case Some(_) => Right(v)
       }
-      case v: JsObject => Left(Seq(s"$prefix must be an integer and not an object"))
+      case _: JsObject => Left(Seq(s"$prefix must be an integer and not an object"))
       case v: JsString => {
         Try {
           v.value.toInt
         } match {
-          case Success(v) => Right(JsNumber(v))
+          case Success(num) => Right(JsNumber(num))
           case Failure(_) => Left(Seq(s"$prefix must be a valid integer"))
         }
       }
@@ -365,18 +365,18 @@ case class JsonValidator(services: Seq[Service]) {
           case _ => Left(Seq(s"$prefix must be a double and not an array"))
         }
       }
-      case v: JsBoolean => Left(Seq(s"$prefix must be a double and not a boolean"))
+      case _: JsBoolean => Left(Seq(s"$prefix must be a double and not a boolean"))
       case JsNull => Left(Seq(s"$prefix must be a double and not null"))
       case v: JsNumber => v.asOpt[Double] match {
         case None => Left(Seq(s"$prefix must be a valid double"))
         case Some(_) => Right(v)
       }
-      case v: JsObject => Left(Seq(s"$prefix must be a double and not an object"))
+      case _: JsObject => Left(Seq(s"$prefix must be a double and not an object"))
       case v: JsString => {
         Try {
           v.value.toDouble
         } match {
-          case Success(v) => Right(JsNumber(v))
+          case Success(num) => Right(JsNumber(num))
           case Failure(_) => Left(Seq(s"$prefix must be a valid double"))
         }
       }
@@ -391,18 +391,18 @@ case class JsonValidator(services: Seq[Service]) {
           case _ => Left(Seq(s"$prefix must be a decimal and not an array"))
         }
       }
-      case v: JsBoolean => Left(Seq(s"$prefix must be a decimal and not a boolean"))
+      case _: JsBoolean => Left(Seq(s"$prefix must be a decimal and not a boolean"))
       case JsNull => Left(Seq(s"$prefix must be a decimal and not null"))
       case v: JsNumber => v.asOpt[BigDecimal] match {
         case None => Left(Seq(s"$prefix must be a valid decimal"))
         case Some(_) => Right(v)
       }
-      case v: JsObject => Left(Seq(s"$prefix must be a decimal and not an object"))
+      case _: JsObject => Left(Seq(s"$prefix must be a decimal and not an object"))
       case v: JsString => {
         Try {
           BigDecimal.apply(v.value)
         } match {
-          case Success(v) => Right(JsNumber(v))
+          case Success(num) => Right(JsNumber(num))
           case Failure(_) => Left(Seq(s"$prefix must be a valid decimal"))
         }
       }
@@ -417,18 +417,18 @@ case class JsonValidator(services: Seq[Service]) {
           case _ => Left(Seq(s"$prefix must be a long and not an array"))
         }
       }
-      case v: JsBoolean => Left(Seq(s"$prefix must be a long and not a boolean"))
+      case _: JsBoolean => Left(Seq(s"$prefix must be a long and not a boolean"))
       case JsNull => Left(Seq(s"$prefix must be a long and not null"))
       case v: JsNumber => v.asOpt[Long] match {
         case None => Left(Seq(s"$prefix must be a valid long"))
         case Some(_) => Right(v)
       }
-      case v: JsObject => Left(Seq(s"$prefix must be a long and not an object"))
+      case _: JsObject => Left(Seq(s"$prefix must be a long and not an object"))
       case v: JsString => {
         Try {
           v.value.toLong
         } match {
-          case Success(v) => Right(JsNumber(v))
+          case Success(num) => Right(JsNumber(num))
           case Failure(_) => Left(Seq(s"$prefix must be a valid long"))
         }
       }
@@ -443,15 +443,15 @@ case class JsonValidator(services: Seq[Service]) {
           case _ => Left(Seq(s"$prefix must be a UUID and not an array"))
         }
       }
-      case v: JsBoolean => Left(Seq(s"$prefix must be a UUID and not a boolean"))
+      case _: JsBoolean => Left(Seq(s"$prefix must be a UUID and not a boolean"))
       case JsNull => Left(Seq(s"$prefix must be a UUID and not null"))
-      case v: JsNumber => Left(Seq(s"$prefix must be a UUID and not a number"))
-      case v: JsObject => Left(Seq(s"$prefix must be a UUID and not an object"))
+      case _: JsNumber => Left(Seq(s"$prefix must be a UUID and not a number"))
+      case _: JsObject => Left(Seq(s"$prefix must be a UUID and not an object"))
       case v: JsString => {
         Try {
           java.util.UUID.fromString(v.value)
         } match {
-          case Success(v) => Right(JsString(v.toString))
+          case Success(uuid) => Right(JsString(uuid.toString))
           case Failure(_) => Left(Seq(s"$prefix must be a valid UUID"))
         }
       }
@@ -466,10 +466,10 @@ case class JsonValidator(services: Seq[Service]) {
           case _ => Left(Seq(s"$prefix must be a valid ISO 8601 date and not an array"))
         }
       }
-      case v: JsBoolean => Left(Seq(s"$prefix must be a valid ISO 8601 date and not a boolean"))
+      case _: JsBoolean => Left(Seq(s"$prefix must be a valid ISO 8601 date and not a boolean"))
       case JsNull => Left(Seq(s"$prefix must be a valid ISO 8601 date and not null"))
-      case v: JsNumber => Left(Seq(s"$prefix must be a valid ISO 8601 date and not a number"))
-      case v: JsObject => Left(Seq(s"$prefix must be a valid ISO 8601 date and not an object"))
+      case _: JsNumber => Left(Seq(s"$prefix must be a valid ISO 8601 date and not a number"))
+      case _: JsObject => Left(Seq(s"$prefix must be a valid ISO 8601 date and not an object"))
       case v: JsString => {
         Try {
           ISODateTimeFormat.yearMonthDay.parseLocalDate(v.value)
@@ -489,7 +489,7 @@ case class JsonValidator(services: Seq[Service]) {
           case _ => Left(Seq(s"$prefix must be a valid ISO 8601 datetime and not an array"))
         }
       }
-      case v: JsBoolean => Left(Seq(s"$prefix must be a valid ISO 8601 datetime and not a boolean"))
+      case _: JsBoolean => Left(Seq(s"$prefix must be a valid ISO 8601 datetime and not a boolean"))
       case JsNull => Left(Seq(s"$prefix must be a valid ISO 8601 datetime and not null"))
       case _: JsNumber => Left(Seq(s"$prefix must be a valid ISO 8601 datetime and not a number"))
       case _: JsObject => Left(Seq(s"$prefix must be a valid ISO 8601 datetime and not an object"))
@@ -517,25 +517,25 @@ case class JsonValidator(services: Seq[Service]) {
       case v: JsBoolean => Right(v)
       case JsNull => Left(Seq(s"$prefix must be a boolean and not null"))
       case v: JsNumber => {
-        Booleans.TrueValues.contains(v.value.toString) match {
-          case true => Right(JsBoolean(true))
-          case false => {
-            Booleans.FalseValues.contains(v.value.toString) match {
-              case true => Right(JsBoolean(false))
-              case false => Left(Seq(s"$prefix must be a boolean and not a number"))
-            }
+        if (Booleans.TrueValues.contains(v.value.toString)) {
+          Right(JsBoolean(true))
+        } else {
+          if (Booleans.FalseValues.contains(v.value.toString)) {
+            Right(JsBoolean(false))
+          } else {
+            Left(Seq(s"$prefix must be a boolean and not a number"))
           }
         }
       }
-      case v: JsObject => Left(Seq(s"$prefix must be a boolean and not an object"))
+      case _: JsObject => Left(Seq(s"$prefix must be a boolean and not an object"))
       case v: JsString => {
-        Booleans.TrueValues.contains(v.value.toLowerCase) match {
-          case true => Right(JsBoolean(true))
-          case false => {
-            Booleans.FalseValues.contains(v.value.toLowerCase) match {
-              case true => Right(JsBoolean(false))
-              case false => Left(Seq(s"$prefix must be a valid boolean"))
-            }
+        if (Booleans.TrueValues.contains(v.value.toLowerCase)) {
+          Right(JsBoolean(true))
+        } else {
+          if (Booleans.FalseValues.contains(v.value.toLowerCase)) {
+            Right(JsBoolean(false))
+          } else {
+            Left(Seq(s"$prefix must be a valid boolean"))
           }
         }
       }
