@@ -117,8 +117,8 @@ case class JsonValidator(services: Seq[Service]) {
       case v: JsObject => Right(
         // Remove null fields as there is nothing to validate there
         JsObject(
-          v.value.filter { case (_, v) =>
-              v match {
+          v.value.filter { case (_, value) =>
+              value match {
                 case JsNull => false
                 case _ => true
               }
@@ -287,9 +287,10 @@ case class JsonValidator(services: Seq[Service]) {
         val eithers = v.value.zipWithIndex.map { case (el, index) =>
           validate(internalType, el, Some(prefix + s" element in position[$index]"))
         }
-        eithers.forall(_.isRight) match {
-          case true => Right(JsArray(eithers.map(_.right.get)))
-          case false => Left(eithers.filter(_.isLeft).flatMap(_.left.get))
+        if (eithers.forall(_.isRight)) {
+          Right(JsArray(eithers.map(_.right.get)))
+        } else {
+          Left(eithers.filter(_.isLeft).flatMap(_.left.get))
         }
       }
       case JsNull => Left(Seq(s"$prefix must be an array and not null"))
@@ -315,16 +316,15 @@ case class JsonValidator(services: Seq[Service]) {
         val eithers: Seq[Either[Seq[String], JsObject]] = v.fields.map { case (name, el) =>
           validate(internalType, el, Some(prefix + s" element[$name]")) match {
             case Left(errors) => Left(errors)
-            case Right(js) => Right(Json.obj(name -> js))
+            case Right(json) => Right(Json.obj(name -> json))
           }
         }
-        eithers.forall(_.isRight) match {
-          case true => {
-            Right(
-              eithers.map(_.right.get).foldLeft(v) { case (a, b) => a ++ b }
-            )
-          }
-          case false => Left(eithers.filter(_.isLeft).flatMap(_.left.get))
+        if (eithers.forall(_.isRight)) {
+          Right(
+            eithers.map(_.right.get).foldLeft(v) { case (a, b) => a ++ b }
+          )
+        } else {
+          Left(eithers.filter(_.isLeft).flatMap(_.left.get))
         }
       }
       case _: JsString => Left(Seq(s"$prefix must be an object and not a string"))
@@ -350,7 +350,7 @@ case class JsonValidator(services: Seq[Service]) {
         Try {
           v.value.toInt
         } match {
-          case Success(v) => Right(JsNumber(v))
+          case Success(num) => Right(JsNumber(num))
           case Failure(_) => Left(Seq(s"$prefix must be a valid integer"))
         }
       }
@@ -376,7 +376,7 @@ case class JsonValidator(services: Seq[Service]) {
         Try {
           v.value.toDouble
         } match {
-          case Success(v) => Right(JsNumber(v))
+          case Success(num) => Right(JsNumber(num))
           case Failure(_) => Left(Seq(s"$prefix must be a valid double"))
         }
       }
@@ -402,7 +402,7 @@ case class JsonValidator(services: Seq[Service]) {
         Try {
           BigDecimal.apply(v.value)
         } match {
-          case Success(v) => Right(JsNumber(v))
+          case Success(num) => Right(JsNumber(num))
           case Failure(_) => Left(Seq(s"$prefix must be a valid decimal"))
         }
       }
@@ -428,7 +428,7 @@ case class JsonValidator(services: Seq[Service]) {
         Try {
           v.value.toLong
         } match {
-          case Success(v) => Right(JsNumber(v))
+          case Success(num) => Right(JsNumber(num))
           case Failure(_) => Left(Seq(s"$prefix must be a valid long"))
         }
       }
@@ -451,7 +451,7 @@ case class JsonValidator(services: Seq[Service]) {
         Try {
           java.util.UUID.fromString(v.value)
         } match {
-          case Success(v) => Right(JsString(v.toString))
+          case Success(uuid) => Right(JsString(uuid.toString))
           case Failure(_) => Left(Seq(s"$prefix must be a valid UUID"))
         }
       }
