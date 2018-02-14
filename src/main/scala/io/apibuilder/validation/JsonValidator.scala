@@ -517,25 +517,25 @@ case class JsonValidator(services: Seq[Service]) {
       case v: JsBoolean => Right(v)
       case JsNull => Left(Seq(s"$prefix must be a boolean and not null"))
       case v: JsNumber => {
-        Booleans.TrueValues.contains(v.value.toString) match {
-          case true => Right(JsBoolean(true))
-          case false => {
-            Booleans.FalseValues.contains(v.value.toString) match {
-              case true => Right(JsBoolean(false))
-              case false => Left(Seq(s"$prefix must be a boolean and not a number"))
-            }
+        if (Booleans.TrueValues.contains(v.value.toString)) {
+          Right(JsBoolean(true))
+        } else {
+          if (Booleans.FalseValues.contains(v.value.toString)) {
+            Right(JsBoolean(false))
+          } else {
+            Left(Seq(s"$prefix must be a boolean and not a number"))
           }
         }
       }
       case _: JsObject => Left(Seq(s"$prefix must be a boolean and not an object"))
       case v: JsString => {
-        Booleans.TrueValues.contains(v.value.toLowerCase) match {
-          case true => Right(JsBoolean(true))
-          case false => {
-            Booleans.FalseValues.contains(v.value.toLowerCase) match {
-              case true => Right(JsBoolean(false))
-              case false => Left(Seq(s"$prefix must be a valid boolean"))
-            }
+        if (Booleans.TrueValues.contains(v.value.toLowerCase)) {
+          Right(JsBoolean(true))
+        } else {
+          if (Booleans.FalseValues.contains(v.value.toLowerCase)) {
+            Right(JsBoolean(false))
+          } else {
+            Left(Seq(s"$prefix must be a valid boolean"))
           }
         }
       }
