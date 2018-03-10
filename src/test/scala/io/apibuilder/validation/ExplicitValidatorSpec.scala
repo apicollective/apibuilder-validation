@@ -1,18 +1,14 @@
 package io.apibuilder.validation
 
-import io.apibuilder.spec.v0.models.Service
-import io.apibuilder.spec.v0.models.json._
+import io.apibuilder.validation.helpers.Helpers
 import play.api.libs.json.Json
 import org.scalatest.{FunSpec, Matchers}
 
-class ExplicitValidatorSpec extends FunSpec with Matchers {
+class ExplicitValidatorSpec extends FunSpec with Matchers with Helpers {
 
-  private[this] lazy val service = {
-    val contents = scala.io.Source.fromFile("src/test/resources/apibuilder-explicit-validation-service.json", "UTF-8").getLines.mkString("\n")
-    Json.parse(contents).as[Service]
-  }
-
-  private[this] lazy val validator = JsonValidator(service)
+  private[this] lazy val validator = JsonValidator(
+    loadService("apibuilder-explicit-validation-service.json").service
+  )
 
   it("properly identifies invalid object") {
     val form = Json.obj(

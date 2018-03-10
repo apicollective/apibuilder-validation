@@ -1,25 +1,13 @@
 package io.apibuilder.validation
 
+import io.apibuilder.validation.helpers.Helpers
 import org.scalatest.{FunSpec, Matchers}
 import play.api.libs.json.Json
 
-class MultiServiceApicollectiveSpec extends FunSpec with Matchers {
-
-  private[this] lazy val multi = {
-    val base = "file://" + new java.io.File(".").getAbsolutePath
-    MultiService.fromUrls(
-      Seq(
-        s"$base/src/test/resources/apibuilder-explicit-validation-core-service.json",
-        s"$base/src/test/resources/apibuilder-explicit-validation-service.json"
-      )
-    ) match {
-      case Left(errors) => sys.error(s"Failed to load: $errors")
-      case Right(s) => s
-    }
-  }
+class MultiServiceApicollectiveSpec extends FunSpec with Matchers with Helpers {
 
   it("validates imported enums") {
-    multi.upcast(
+    apibuilderMultiService.upcast(
       "POST",
       "/people",
       Json.obj(

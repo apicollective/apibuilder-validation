@@ -1,26 +1,21 @@
 package io.apibuilder.validation
 
 import io.apibuilder.spec.v0.models.Method
+import io.apibuilder.validation.helpers.Helpers
 import org.scalatest.{FunSpec, Matchers}
 
-class ApiBuilderServiceSpec extends FunSpec with Matchers {
+class ApiBuilderServiceSpec extends FunSpec with Matchers with Helpers {
 
-  def readFile(name: String): String = {
-    scala.io.Source.fromFile("src/test/resources/" + name, "UTF-8").getLines.mkString("\n")
-  }
-
-  private[this] lazy val service = ApiBuilderService.toService(readFile("flow-api-service.json")).right.get
+  private[this] lazy val service = loadService("flow-api-service.json")
 
   it("fromUrl") {
     ApiBuilderService.fromUrl("file://non-existent-tmp").left.getOrElse {
       sys.error("Expected error from invalid url")
     }
 
-    val result = ApiBuilderService.toService(readFile("apibuilder-common-service.json")) match {
-      case Left(errors) => sys.error(s"Failed to load service: $errors")
-      case Right(s) => s
-    }
-    result.service.name should be("apibuilder common")
+    rightOrErrors {
+      ApiBuilderService.toService(readFile("apibuilder-common-service.json"))
+    }.service.name should be("apibuilder common")
   }
 
   it("bodyTypeFromPath") {
