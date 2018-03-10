@@ -2,20 +2,18 @@ package io.apibuilder.validation
 
 import io.apibuilder.spec.v0.models.Service
 import io.apibuilder.spec.v0.models.json._
+import io.apibuilder.validation.helpers.Helpers
 import io.flow.v0.models.{Address, CardForm, EventType, HarmonizedItemForm, ItemForm, WebhookForm}
 import io.flow.v0.models.json._
 import play.api.libs.json._
 import org.joda.time.DateTime
 import org.scalatest.{FunSpec, Matchers}
 
-class JsonValidatorSpec extends FunSpec with Matchers {
+class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
 
-  lazy val service = {
-    val contents = scala.io.Source.fromFile("src/test/resources/flow-api-service.json", "UTF-8").getLines.mkString("\n")
-    Json.parse(contents).as[Service]
-  }
-
-  lazy val validator = JsonValidator(service)
+  private[this] lazy val validator = JsonValidator(
+    loadService("flow-api-service.json").service
+  )
 
   it("1 required field") {
     validator.validate(
@@ -423,5 +421,13 @@ class JsonValidatorSpec extends FunSpec with Matchers {
       case Left(errors) => sys.error(s"Expected form to validate but got: $errors")
       case Right(_) => // no-op
     }
+  }
+
+  it("understands arrays are required") {
+    apibuilderMultiService.upcast(
+      "POST", "/queries", Json.obj()
+    ) should equal(
+      Left(Seq("Missing required field for query_form: filters"))
+    )
   }
 }

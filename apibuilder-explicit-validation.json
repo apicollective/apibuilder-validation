@@ -68,6 +68,16 @@
           "body": { "type": "person_form" }
         }
       ]
+    },
+
+    "io.apibuilder.explicit.validation.core.v0.models.query_form": {
+      "path": "/queries",
+      "operations": [
+        {
+          "method": "POST",
+          "body": { "type": "io.apibuilder.explicit.validation.core.v0.models.query_form" }
+        }
+      ]
     }
   }
 

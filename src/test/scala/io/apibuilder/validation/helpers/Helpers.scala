@@ -1,20 +1,42 @@
 package io.apibuilder.validation.helpers
 
-import io.apibuilder.validation.MultiService
+import io.apibuilder.spec.v0.models.Service
+import io.apibuilder.spec.v0.models.json._
+import io.apibuilder.validation.{ApiBuilderService, MultiService}
+import play.api.libs.json.Json
 
 trait Helpers {
 
-  lazy val flowMultiService: MultiService = {
-    val base = "file://" + new java.io.File(".").getAbsolutePath
-    MultiService.fromUrls(
+  def readFile(filename: String): String = {
+    scala.io.Source.fromFile("src/test/resources/" + filename, "UTF-8").getLines.mkString("\n")
+  }
+
+  def loadService(filename: String): ApiBuilderService = {
+    ApiBuilderService(
+      Json.parse(readFile(filename)).as[Service]
+    )
+  }
+
+  def loadMultiService(files: Seq[String]): MultiService = {
+    MultiService(files.map(loadService))
+  }
+
+  lazy val apibuilderMultiService: MultiService = {
+    loadMultiService(
       Seq(
-        s"$base/src/test/resources/flow-api-service.json",
-        s"$base/src/test/resources/flow-api-internal-service.json"
+        "apibuilder-explicit-validation-core-service.json",
+        "apibuilder-explicit-validation-service.json"
       )
-    ) match {
-      case Left(errors) => sys.error(s"Failed to load: $errors")
-      case Right(s) => s
-    }
+    )
+  }
+
+  lazy val flowMultiService: MultiService = {
+    loadMultiService(
+      Seq(
+        "flow-api-service.json",
+        "flow-api-internal-service.json"
+      )
+    )
   }
 
   def rightOrErrors[K,V](f: Either[K, V]): V = {
