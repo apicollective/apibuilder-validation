@@ -7,7 +7,7 @@ apibuilder upload apicollective apibuilder-explicit-validation ./apibuilder-expl
 
 apibuilder download apicollective apibuilder-explicit-validation-core latest service > ./src/test/resources/apibuilder-explicit-validation-core-service.json
 
-apibuilder download apicollective apibuilder-explicit-validation-service latest service > ./src/test/resources/apibuilder-explicit-validation/latest/service.json
+apibuilder download apicollective apibuilder-explicit-validation latest service > ./src/test/resources/apibuilder-explicit-validation-service.json
 
 apibuilder download flow api latest service > ./src/test/resources/flow-api-service.json
 
