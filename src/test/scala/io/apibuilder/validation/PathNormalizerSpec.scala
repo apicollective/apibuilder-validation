@@ -1,17 +1,12 @@
 package io.apibuilder.validation
 
 import io.apibuilder.spec.v0.models.Method
+import io.apibuilder.validation.helpers.Helpers
 import org.scalatest.{FunSpec, Matchers}
 
-class PathNormalizerSpec extends FunSpec with Matchers {
+class PathNormalizerSpec extends FunSpec with Matchers with Helpers {
 
-  private[this] lazy val apibuilderApiService = {
-    val base = "file://" + new java.io.File(".").getAbsolutePath
-    ApiBuilderService.fromUrl(s"$base/src/test/resources/apibuilder-api-service.json") match {
-      case Left(errors) => sys.error(s"Failed to load: $errors")
-      case Right(s) => s
-    }
-  }
+  private[this] lazy val apibuilderApiService = loadService("apibuilder-api-service.json")
 
   private[this] val normalizer = PathNormalizer(apibuilderApiService)
 

@@ -1,21 +1,14 @@
 package io.apibuilder.validation
 
-import io.apibuilder.spec.v0.models.Service
-import io.apibuilder.spec.v0.models.json._
-import io.flow.v0.models.json._
-import io.flow.v0.models.{CardForm, HarmonizedItemForm, ItemForm}
-import org.joda.time.DateTime
+import io.apibuilder.validation.helpers.Helpers
 import org.scalatest.{FunSpec, Matchers}
 import play.api.libs.json._
 
-class JsonValidatorUnionSpec extends FunSpec with Matchers {
+class JsonValidatorUnionSpec extends FunSpec with Matchers with Helpers {
 
-  private[this] lazy val service = {
-    val contents = scala.io.Source.fromFile("src/test/resources/apibuilder-explicit-validation-service.json", "UTF-8").getLines.mkString("\n")
-    Json.parse(contents).as[Service]
-  }
-
-  lazy val validator = JsonValidator(service)
+  private[this] lazy val validator = JsonValidator(
+    loadService("apibuilder-explicit-validation-service.json").service
+  )
 
   it("understands default discriminator") {
     val js = Json.obj(

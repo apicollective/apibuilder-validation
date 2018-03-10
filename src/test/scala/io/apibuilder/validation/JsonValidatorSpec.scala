@@ -11,7 +11,7 @@ import org.scalatest.{FunSpec, Matchers}
 
 class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
 
-  private[this] lazy val validator = JsonValidator(
+  private[this] lazy val validator: JsonValidator = JsonValidator(
     loadService("flow-api-service.json").service
   )
 
