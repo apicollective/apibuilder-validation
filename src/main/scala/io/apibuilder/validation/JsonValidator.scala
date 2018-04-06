@@ -494,7 +494,6 @@ case class JsonValidator(services: Seq[Service]) {
       case _: JsNumber => Left(Seq(s"$prefix must be a valid ISO 8601 datetime and not a number"))
       case _: JsObject => Left(Seq(s"$prefix must be a valid ISO 8601 datetime and not an object"))
       case v: JsString => {
-        println(s"validateDateTimeIso8601 $prefix $v")
         Try {
           ISODateTimeFormat.dateTimeParser.parseDateTime(v.value)
         } match {
