@@ -12,7 +12,7 @@ class ApibuilderUnionDiscriminatorValueSpec extends FunSpec with Matchers with H
 
   it("uses discriminator values") {
     val userForm = Json.obj(
-      "discriminator" -> "user",
+      "discriminator" -> "full",
       "id" -> "1"
     )
     rightOrErrors {
@@ -33,7 +33,7 @@ class ApibuilderUnionDiscriminatorValueSpec extends FunSpec with Matchers with H
     )
     validator.validate("user_form", otherForm) should be(
       Left(Seq(
-        "Invalid discriminator 'user' for union type 'user_form': must be one of 'guest', 'full'"
+        "Invalid discriminator 'other' for union type 'user_form': must be one of 'guest', 'full'"
       ))
     )
   }
