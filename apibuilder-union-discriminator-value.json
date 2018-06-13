@@ -1,0 +1,28 @@
+{
+  "name": "apibuilder-union-discriminator-value",
+  "description": "Test validation of the discriminator_value field",
+
+  "unions": {
+    "user_form": {
+      "discriminator": "discriminator",
+      "types": [
+        { "type": "guest_user_form", "discriminator_value": "guest" },
+        { "type": "full_user_form", "discriminator_value": "full" }
+      ]
+    }
+  },
+
+  "models": {
+    "guest_user_form": {
+      "fields": [
+        { "name": "id", "type": "string" }
+      ]
+    },
+
+    "full_user_form": {
+      "fields": [
+        { "name": "id", "type": "string" }
+      ]
+    }
+  }
+}

@@ -1,6 +1,6 @@
 package io.apibuilder.validation
 
-import io.apibuilder.spec.v0.models.{Enum, Model, Service, Union}
+import io.apibuilder.spec.v0.models.{Enum, Model, Service, Union, UnionType}
 import org.joda.time.format.ISODateTimeFormat
 import play.api.libs.json._
 
@@ -215,9 +215,13 @@ case class JsonValidator(services: Seq[Service]) {
       case Some(discriminator) => {
         val disc = (js \ discriminator).asOpt[String]
 
+        def specificTypeDiscriminator(ut: UnionType): String = {
+          ut.discriminatorValue.getOrElse(ut.`type`)
+        }
+
         val unionType = disc match {
           case None => union.types.find(_.default.getOrElse(false))
-          case Some(t) => union.types.find(_.`type` == t)
+          case Some(t) => union.types.find { ut => specificTypeDiscriminator(ut) == t }
         }
 
         unionType match {
@@ -227,7 +231,7 @@ case class JsonValidator(services: Seq[Service]) {
                 Left(Seq(s"Union type '${union.name}' requires a field named '$discriminator'"))
               }
               case Some(value) => {
-                Left(Seq(s"Invalid discriminator '$value' for union type '${union.name}': must be one of " + union.types.map(_.`type`).mkString("'", "', '", "'")))
+                Left(Seq(s"Invalid discriminator '$value' for union type '${union.name}': must be one of " + union.types.map { ut => specificTypeDiscriminator(ut) }.mkString("'", "', '", "'")))
               }
             }
 
