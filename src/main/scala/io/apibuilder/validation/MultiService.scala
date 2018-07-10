@@ -14,6 +14,8 @@ case class MultiService(
 
   private[this] val validator = JsonValidator(services.map(_.service))
 
+  def findType(name: String): Option[ApibuilderType] = validator.findType(name)
+
   /**
     * If the specified method & path requires a body, returns the type of the body
     */
