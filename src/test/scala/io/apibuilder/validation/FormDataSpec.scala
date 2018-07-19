@@ -1,7 +1,5 @@
 package io.apibuilder.validation
 
-import java.io.File
-
 import org.scalatest.{FunSpec, Matchers}
 import play.api.libs.json._
 
@@ -171,5 +169,40 @@ class FormDataSpec extends FunSpec with Matchers {
       res should be(Some("anEmptyString" -> JsNull))
     }
 
+  }
+
+  describe("toEncoded") {
+
+    val data: Map[String, Seq[String]] = Map(
+      "string" -> Seq("greetings"),
+      "email" -> Seq("test@flow.io"),
+      "anEmptyString" -> Seq(null),
+      "number" -> Seq("123")
+    )
+
+    it("standard encoding") {
+      FormData.toEncoded(FormData.toJson(data)) should be (
+        """
+          |string=greetings
+          |&email=test%40flow.io
+          |&anEmptyString=
+          |&number=123
+        """.stripMargin.trim.replace("\n", "")
+      )
+    }
+
+    it("bespoke number format encoding") {
+      FormData.toEncoded(
+        js = FormData.toJson(data),
+        numberFormat = (n) => f"$n%.2f"
+      ) should be (
+        """
+          |string=greetings
+          |&email=test%40flow.io
+          |&anEmptyString=
+          |&number=123.00
+        """.stripMargin.trim.replace("\n", "")
+      )
+    }
   }
 }
