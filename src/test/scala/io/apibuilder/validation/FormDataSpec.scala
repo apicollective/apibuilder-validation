@@ -190,5 +190,19 @@ class FormDataSpec extends FunSpec with Matchers {
         """.stripMargin.trim.replace("\n", "")
       )
     }
+
+    it("bespoke number format encoding") {
+      FormData.toEncoded(
+        js = FormData.toJson(data),
+        numberFormat = (n) => f"$n%.2f"
+      ) should be (
+        """
+          |string=greetings
+          |&email=test%40flow.io
+          |&anEmptyString=
+          |&number=123.00
+        """.stripMargin.trim.replace("\n", "")
+      )
+    }
   }
 }

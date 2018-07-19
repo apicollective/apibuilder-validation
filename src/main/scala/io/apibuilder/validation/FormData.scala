@@ -39,28 +39,37 @@ object FormData {
     *
     * @param keys Keeps track of the top level keys we are parsing to
     *             build up nested keys (e.g. user[first] for maps)
+    * @param numberFormat optional user supplied number formatting function
     */
-  def toEncoded(js: JsValue, keys: Seq[String] = Nil): String = {
+  def toEncoded(
+    js: JsValue,
+    keys: Seq[String] = Nil,
+    numberFormat: (BigDecimal) => String = defaultNumberFormat
+  ): String = {
     def urlEncode(s: String): String = java.net.URLEncoder.encode(s, "UTF-8")
     def encodeIt(value: String, keys: Seq[String]) = encode(urlEncode(value), keys)
+    def encodeNumber(value: BigDecimal, keys: Seq[String]) = encode(urlEncode(numberFormat(value)), keys)
+
     js match {
       case o: JsObject => {
         o.value.map { case (key, value) =>
-          toEncoded(value, keys ++ Seq(key))
+          toEncoded(value, keys ++ Seq(key), numberFormat)
         }.mkString("&")
       }
       case o: JsArray => {
         o.value.zipWithIndex.map { case (v, i) =>
-          toEncoded(v, keys ++ Seq(i.toString))
+          toEncoded(v, keys ++ Seq(i.toString), numberFormat)
         }.mkString("&")
       }
       case o: JsString => encodeIt(o.value, keys)
       case o: JsBoolean => encodeIt(o.value.toString, keys)
-      case o: JsNumber => encodeIt(o.value.toString, keys)
+      case o: JsNumber => encodeNumber(o.value, keys)
       case JsNull => encodeIt("", keys)
       case other => encodeIt(other.toString, keys)
     }
   }
+
+  private[this] def defaultNumberFormat(value: BigDecimal): String = value.toString
 
   private[this] def encode(value: String, keys: Seq[String] = Nil): String = {
     keys.toList match {
