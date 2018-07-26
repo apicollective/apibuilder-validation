@@ -46,13 +46,13 @@ case class JsonValidator(services: Seq[Service]) {
 
   private[this] def findType(service: Service, typeName: String): Option[ApibuilderType] = {
     service.enums.find(_.name == typeName) match {
-      case Some(e) => Some(ApibuilderType.Enum(service.namespace, e))
+      case Some(e) => Some(ApibuilderType.Enum(service, e))
       case None => {
         service.models.find(_.name == typeName) match {
-          case Some(m) => Some(ApibuilderType.Model(service.namespace, m))
+          case Some(m) => Some(ApibuilderType.Model(service, m))
           case None => {
             service.unions.find(_.name == typeName) match {
-              case Some(u) => Some(ApibuilderType.Union(service.namespace, u))
+              case Some(u) => Some(ApibuilderType.Union(service, u))
               case None => None
             }
           }
