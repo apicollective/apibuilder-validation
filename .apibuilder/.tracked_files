@@ -1,0 +1,5 @@
+---
+apicollective:
+  apibuilder-spec:
+    play_2_x_standalone_json:
+    - src/main/scala/io/apibuilder/generated/ApicollectiveApibuilderSpecV0Models.scala
