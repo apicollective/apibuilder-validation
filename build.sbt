@@ -14,6 +14,12 @@ lazy val root = project
     libraryDependencies ++= Seq(
       "com.typesafe.play" %% "play-json" % "2.6.10",
       "org.scalatest" %% "scalatest" % "3.0.5" % Test
+    ),
+    credentials += Credentials(
+      "Artifactory Realm",
+      "flow.jfrog.io",
+      System.getenv("ARTIFACTORY_USERNAME"),
+      System.getenv("ARTIFACTORY_PASSWORD")
     )
   )
 
