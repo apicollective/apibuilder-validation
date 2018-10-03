@@ -16,7 +16,7 @@ import scala.util.{Failure, Success, Try}
 case class ApiBuilderService(
   service: Service
 ) {
-
+  private[this] val validator = JsonValidator(service)
   private[this] val normalizer = PathNormalizer(service)
 
   /**
@@ -24,6 +24,10 @@ case class ApiBuilderService(
     */
   def bodyTypeFromPath(method: String, path: String): Option[String] = {
     operation(method, path).flatMap(_.body.map(_.`type`))
+  }
+
+  def findType(name: String): Option[ApibuilderType] = {
+    validator.findType(name).headOption
   }
 
   /**

@@ -4,6 +4,7 @@ import io.apibuilder.spec.v0.models.{Enum, Model, Service, Union, UnionType}
 import org.joda.time.format.ISODateTimeFormat
 import play.api.libs.json._
 
+import scala.reflect.internal.Names
 import scala.util.{Failure, Success, Try}
 
 /**
@@ -26,21 +27,29 @@ object JsonValidator {
 case class JsonValidator(services: Seq[Service]) {
   assert(services.nonEmpty, s"Must have at least one service")
 
-  def findType(name: String): Option[ApibuilderType] = {
+  def findType(name: String): Seq[ApibuilderType] = {
     val typeName = TypeName(name)
     typeName.namespace match {
       case None => {
-        // find first service with this type defined
+        // find all services with this type defined
         services.flatMap { s =>
-          findType(s, typeName.name)
-        }.headOption
-      }
-
-      case Some(ns) => {
-        services.find(_.namespace == ns).flatMap { s =>
           findType(s, typeName.name)
         }
       }
+
+      case Some(ns) => {
+        findType(ns, typeName.name)
+      }
+    }
+  }
+
+  def findType(namespace: String, name: String): Seq[ApibuilderType] = {
+    assert(
+      TypeName(name).namespace.isEmpty,
+      s"name[$name] must not contain namespace"
+    )
+    services.filter(_.namespace == namespace).flatMap { service =>
+      findType(service, name)
     }
   }
 
@@ -66,14 +75,16 @@ case class JsonValidator(services: Seq[Service]) {
     * returning either human friendly validation errors or a new
     * JsValue with any conversions applied (e.g. strings to booleans,
     * numbers to string, etc. as dictated by the schema).
+    *
+    * Note: If multiple types match the specified name, selects the first one
     */
   def validate(
     typeName: String,
     js: JsValue,
     prefix: Option[String] = None
   ): Either[Seq[String], JsValue] = {
-    findType(typeName) match {
-      case None => {
+    findType(typeName).toList match {
+      case Nil => {
         // may be a primitive type like 'string'
         validateApiBuilderType(
           prefix.getOrElse(typeName),
@@ -82,7 +93,7 @@ case class JsonValidator(services: Seq[Service]) {
         )
       }
 
-      case Some(t) => {
+      case t :: _ => {
         t match {
           case ApibuilderType.Enum(_, e) => {
             validateEnum(prefix.getOrElse("Body"), e, js)
