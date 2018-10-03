@@ -63,8 +63,6 @@ case class JsonValidator(services: Seq[Service]) {
     * returning either human friendly validation errors or a new
     * JsValue with any conversions applied (e.g. strings to booleans,
     * numbers to string, etc. as dictated by the schema).
-    *
-    * Note: If multiple types match the specified name, selects the first one
     */
   def validate(
     typeName: String,
@@ -81,25 +79,38 @@ case class JsonValidator(services: Seq[Service]) {
         )
       }
 
-      case t :: _ => {
-        t match {
-          case ApibuilderType.Enum(_, e) => {
-            validateEnum(prefix.getOrElse("Body"), e, js)
-          }
+      case typ :: Nil => {
+        validateType(typ, js, prefix)
+      }
 
-          case ApibuilderType.Model(_, m) => {
-            toObject(prefix.getOrElse("Body"), js) match {
-              case Left(errors) => Left(errors)
-              case Right(obj) => validateModel(m, obj, prefix)
-            }
-          }
+      case multiple => {
+        println(s"Type[$typeName] matched multiple types[${multiple.map(_.qualified)}] - cannot validate")
+        Right(js)
+      }
+    }
+  }
 
-          case ApibuilderType.Union(_, u) => {
-            toObject(prefix.getOrElse("Body"), js) match {
-              case Left(errors) => Left(errors)
-              case Right(obj) => validateUnion(u, obj, prefix)
-            }
-          }
+  def validateType(
+    typ: ApibuilderType,
+    js: JsValue,
+    prefix: Option[String] = None
+  ): Either[Seq[String], JsValue] = {
+    typ match {
+      case ApibuilderType.Enum(_, e) => {
+        validateEnum(prefix.getOrElse("Body"), e, js)
+      }
+
+      case ApibuilderType.Model(_, m) => {
+        toObject(prefix.getOrElse("Body"), js) match {
+          case Left(errors) => Left(errors)
+          case Right(obj) => validateModel(m, obj, prefix)
+        }
+      }
+
+      case ApibuilderType.Union(_, u) => {
+        toObject(prefix.getOrElse("Body"), js) match {
+          case Left(errors) => Left(errors)
+          case Right(obj) => validateUnion(u, obj, prefix)
         }
       }
     }

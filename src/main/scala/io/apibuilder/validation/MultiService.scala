@@ -46,14 +46,25 @@ case class MultiService(
     */
   def upcast(method: String, path: String, js: JsValue): Either[Seq[String], JsValue] = {
     resolveService(method, path) match {
-      case Left(errors) => Left(errors)
+      case Left(errors) => {
+        Left(errors)
+      }
       case Right(service) => {
         service.validate(method = method, path = path) match {
-          case Left(errors) => Left(errors)
+          case Left(errors) => {
+            Left(errors)
+          }
           case Right(op) => {
             op.body.map(_.`type`) match {
-              case None => Right(js)
-              case Some(typ) => upcast(typ, js)
+              case None => {
+                Right(js)
+              }
+              case Some(typeName) => {
+                service.findType(typeName) match {
+                  case None => upcast(typeName, js)
+                  case Some(typ) => upcast(typ, js)
+                }
+              }
             }
           }
         }
@@ -71,6 +82,10 @@ case class MultiService(
     */
   def upcast(typeName: String, js: JsValue): Either[Seq[String], JsValue] = {
     validator.validate(typeName, js)
+  }
+
+  def upcast(typ: ApibuilderType, js: JsValue): Either[Seq[String], JsValue] = {
+    validator.validateType(typ, js)
   }
 
   /**
