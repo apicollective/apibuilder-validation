@@ -5,6 +5,10 @@ case class TypeName(
   namespace: Option[String]
 )
 
+/**
+  * Parses a type (like 'user' or 'io.flow.common.v0.models.user') into a
+  * namespace and name
+  */
 object TypeName {
 
   def apply(name: String): TypeName = {

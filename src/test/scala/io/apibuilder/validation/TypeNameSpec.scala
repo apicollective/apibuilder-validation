@@ -15,4 +15,8 @@ class TypeNameSpec extends FunSpec with Matchers {
     )
   }
 
+  it("namespace") {
+    TypeName("test.models.gender").namespace should equal(Some("test"))
+  }
+
 }
