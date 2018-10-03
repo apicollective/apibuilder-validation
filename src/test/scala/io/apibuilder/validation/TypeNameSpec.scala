@@ -5,18 +5,17 @@ import org.scalatest.{FunSpec, Matchers}
 class TypeNameSpec extends FunSpec with Matchers {
 
   it("flat type name") {
-    TypeName("person") should equal(TypeName("person", None))
-    TypeName("foo") should equal(TypeName("foo", None))
+    TypeName.parse("person", defaultNamespace = "io.flow") should equal(TypeName("person", "io.flow"))
+    TypeName.parse("foo", defaultNamespace = "io.flow") should equal(TypeName("foo", "io.flow"))
   }
 
   it("type name with namespace  ") {
-    TypeName("io.apibuilder.explicit.validation.core.v0.enums.gender") should equal(
-      TypeName("gender", Some("io.apibuilder.explicit.validation.core.v0"))
+    TypeName.parse(
+      "io.apibuilder.explicit.validation.core.v0.enums.gender",
+      defaultNamespace = "foo"
+    ) should equal(
+      TypeName("gender", "io.apibuilder.explicit.validation.core.v0")
     )
-  }
-
-  it("namespace") {
-    TypeName("test.models.gender").namespace should equal(Some("test"))
   }
 
 }

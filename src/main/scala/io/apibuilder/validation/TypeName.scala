@@ -2,7 +2,7 @@ package io.apibuilder.validation
 
 case class TypeName(
   name: String,
-  namespace: Option[String]
+  namespace: String
 )
 
 /**
@@ -11,18 +11,18 @@ case class TypeName(
   */
 object TypeName {
 
-  def apply(name: String): TypeName = {
+  def parse(name: String, defaultNamespace: String): TypeName = {
     val parts = name.split("\\.").toList
 
     if (parts.lengthCompare(2) >= 0) {
       TypeName(
         name = parts.last,
-        namespace = Some(parts.slice(0, parts.length-2).mkString("."))
+        namespace = parts.slice(0, parts.length-2).mkString(".")
       )
     } else {
       TypeName(
         name = parts.last,
-        namespace = None
+        namespace = defaultNamespace
       )
     }
   }

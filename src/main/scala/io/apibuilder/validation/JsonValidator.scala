@@ -4,7 +4,6 @@ import io.apibuilder.spec.v0.models.{Enum, Model, Service, Union, UnionType}
 import org.joda.time.format.ISODateTimeFormat
 import play.api.libs.json._
 
-import scala.reflect.internal.Names
 import scala.util.{Failure, Success, Try}
 
 /**
@@ -28,28 +27,17 @@ case class JsonValidator(services: Seq[Service]) {
   assert(services.nonEmpty, s"Must have at least one service")
 
   def findType(name: String): Seq[ApibuilderType] = {
-    val typeName = TypeName(name)
-    typeName.namespace match {
-      case None => {
-        // find all services with this type defined
-        services.flatMap { s =>
-          findType(s, typeName.name)
-        }
-      }
-
-      case Some(ns) => {
-        findType(ns, typeName.name)
-      }
+    services.map { service =>
+      TypeName.parse(defaultNamespace = service.namespace, name = name)
+    }.distinct.flatMap { typeName =>
+      findType(namespace = typeName.namespace, name = typeName.name)
     }
   }
 
   def findType(namespace: String, name: String): Seq[ApibuilderType] = {
-    assert(
-      TypeName(name).namespace.isEmpty,
-      s"name[$name] must not contain namespace"
-    )
-    services.filter(_.namespace == namespace).flatMap { service =>
-      findType(service, name)
+    val typeName = TypeName.parse(defaultNamespace = namespace, name = name)
+    services.filter(_.namespace == typeName.namespace).flatMap { service =>
+      findType(service, typeName.name)
     }
   }
 
