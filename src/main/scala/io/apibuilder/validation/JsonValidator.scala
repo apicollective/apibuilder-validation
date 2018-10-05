@@ -84,7 +84,7 @@ case class JsonValidator(services: Seq[Service]) {
       }
 
       case multiple => {
-        println(s"Type[$typeName] matched multiple types[${multiple.map(_.qualified)}] - cannot validate")
+        // multiple types matches - insufficient data to validate
         Right(js)
       }
     }
