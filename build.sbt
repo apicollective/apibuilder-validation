@@ -4,7 +4,7 @@ organization := "io.flow"
 
 scalaVersion in ThisBuild := "2.12.7"
 
-crossScalaVersions := Seq("2.12.7", "2.11.12")
+crossScalaVersions := Seq("2.12.7")
 
 version := "0.3.4"
 
