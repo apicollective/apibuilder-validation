@@ -91,4 +91,10 @@ class MultiServiceSpec2 extends FunSpec with Matchers with helpers.Helpers {
     flowMultiService.response(op, 201).get.`type` should equal("card")
     flowMultiService.response(op, 499) should be(None)
   }
+
+  it("correctly parses required fields") {
+    val orgModel = flowMultiService.findType("organization").headOption.get.asInstanceOf[ApibuilderType.Model].model
+    orgModel.fields.find(_.name == "id").get.required should be(true)
+    orgModel.fields.find(_.name == "parent").get.required should be(false)
+  }
 }

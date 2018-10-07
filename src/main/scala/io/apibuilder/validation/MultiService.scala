@@ -100,10 +100,18 @@ case class MultiService(
     }
   }
 
+  def validate(
+    typ: ApibuilderType,
+    js: JsValue,
+    prefix: Option[String] = None
+  ): Either[Seq[String], JsValue] = {
+    validator.validateType(typ, js, prefix)
+  }
+
   /**
-    * Looks up the response for the given status code for this operation, or None
-    * if there is no response documented for the status code
-    */
+   * Looks up the response for the given status code for this operation, or None
+   * if there is no response documented for the status code
+   */
   def response(operation: Operation, responseCode: Int): Option[Response] = {
     operation.responses.find { r =>
       r.code match {
