@@ -92,7 +92,7 @@ case class JsonValidator(services: Seq[Service]) {
         validateType(typ, js, prefix)
       }
 
-      case multiple => {
+      case _ => {
         // multiple types matches - insufficient data to validate
         Right(js)
       }
