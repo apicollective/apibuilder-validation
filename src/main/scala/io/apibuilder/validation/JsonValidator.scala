@@ -1,6 +1,6 @@
 package io.apibuilder.validation
 
-import io.apibuilder.spec.v0.models.{Enum, Model, Service, Union, UnionType}
+import io.apibuilder.spec.v0.models.{Service, UnionType}
 import org.joda.time.format.ISODateTimeFormat
 import play.api.libs.json._
 
@@ -26,16 +26,23 @@ object JsonValidator {
 case class JsonValidator(services: Seq[Service]) {
   assert(services.nonEmpty, s"Must have at least one service")
 
-  def findType(name: String): Seq[ApibuilderType] = {
-    services.map { service =>
-      TypeName.parse(defaultNamespace = service.namespace, name = name)
-    }.distinct.flatMap { typeName =>
-      findType(namespace = typeName.namespace, name = typeName.name)
+  def findType(name: String, defaultNamespace: Option[String]): Seq[ApibuilderType] = {
+    defaultNamespace match {
+      case None => {
+        services.map { service =>
+          TypeName.parse(defaultNamespace = service.namespace, name = name)
+        }.distinct.flatMap { typeName =>
+          findType(defaultNamespace = typeName.namespace, name = typeName.name)
+        }
+      }
+      case Some(ns) => {
+        findType(ns, name)
+      }
     }
   }
 
-  def findType(namespace: String, name: String): Seq[ApibuilderType] = {
-    val typeName = TypeName.parse(defaultNamespace = namespace, name = name)
+  def findType(defaultNamespace: String, name: String): Seq[ApibuilderType] = {
+    val typeName = TypeName.parse(defaultNamespace = defaultNamespace, name = name)
     services.filter(_.namespace == typeName.namespace).flatMap { service =>
       findType(service, typeName.name)
     }
@@ -67,15 +74,17 @@ case class JsonValidator(services: Seq[Service]) {
   def validate(
     typeName: String,
     js: JsValue,
+    defaultNamespace: Option[String],
     prefix: Option[String] = None
   ): Either[Seq[String], JsValue] = {
-    findType(typeName).toList match {
+    findType(typeName, defaultNamespace = defaultNamespace).toList match {
       case Nil => {
         // may be a primitive type like 'string'
         validateApiBuilderType(
           prefix.getOrElse(typeName),
           typeName,
-          js
+          js,
+          defaultNamespace
         )
       }
 
@@ -96,18 +105,18 @@ case class JsonValidator(services: Seq[Service]) {
     prefix: Option[String] = None
   ): Either[Seq[String], JsValue] = {
     typ match {
-      case ApibuilderType.Enum(_, e) => {
+      case e: ApibuilderType.Enum => {
         validateEnum(prefix.getOrElse("Body"), e, js)
       }
 
-      case ApibuilderType.Model(_, m) => {
+      case m: ApibuilderType.Model => {
         toObject(prefix.getOrElse("Body"), js) match {
           case Left(errors) => Left(errors)
           case Right(obj) => validateModel(m, obj, prefix)
         }
       }
 
-      case ApibuilderType.Union(_, u) => {
+      case u: ApibuilderType.Union => {
         toObject(prefix.getOrElse("Body"), js) match {
           case Left(errors) => Left(errors)
           case Right(obj) => validateUnion(u, obj, prefix)
@@ -141,19 +150,19 @@ case class JsonValidator(services: Seq[Service]) {
 
   private[this] def validateEnum(
     prefix: String,
-    enum: Enum,
+    typ: ApibuilderType.Enum,
     js: JsValue
   ): Either[Seq[String], JsValue] = {
     validateString(prefix, js) match {
       case Left(errors) => Left(errors)
       case Right(jsString) => {
         val incomingValue = jsString.value.trim
-        val valid = enum.values.map(_.name)
+        val valid = typ.enum.values.map(_.name)
         valid.find { _.toLowerCase.trim == incomingValue.toLowerCase } match {
           case None => {
             Left(
               Seq(
-                s"$prefix invalid value '${incomingValue}'. Valid values for the enum '${enum.name}' are: " +
+                s"$prefix invalid value '${incomingValue}'. Valid values for the enum '${typ.enum.name}' are: " +
                   valid.mkString("'", "', '", "'")
               )
             )
@@ -165,22 +174,22 @@ case class JsonValidator(services: Seq[Service]) {
   }
 
   private[this] def validateModel(
-    model: Model,
+    typ: ApibuilderType.Model,
     js: JsObject,
     prefix: Option[String]
   ): Either[Seq[String], JsValue] = {
     var updated = Json.obj()
 
-    val missingFields = model.fields.filter(_.required).filter { f =>
+    val missingFields = typ.model.fields.filter(_.required).filter { f =>
       (js \ f.name).toOption.isEmpty
     }.map(_.name).toList match {
       case Nil => Nil
-      case one :: Nil => Seq(s"Missing required field for ${model.name}: $one")
-      case multiple => Seq(s"Missing required fields for ${model.name}: " + multiple.mkString(", "))
+      case one :: Nil => Seq(s"Missing required field for ${typ.model.name}: $one")
+      case multiple => Seq(s"Missing required fields for ${typ.model.name}: " + multiple.mkString(", "))
     }
 
     val invalidTypes = js.fields.flatMap { case (name, value) =>
-      model.fields.find(_.name == name) match {
+      typ.model.fields.find(_.name == name) match {
         case None => {
           Nil
         }
@@ -190,8 +199,9 @@ case class JsonValidator(services: Seq[Service]) {
             typeName = f.`type`,
             js = value,
             prefix = Some(
-              prefix.getOrElse(model.name) + s".${f.name}"
-            )
+              prefix.getOrElse(typ.model.name) + s".${f.name}"
+            ),
+            defaultNamespace = Some(typ.service.namespace)
           ) match {
             case Left(errors) => {
               errors
@@ -213,11 +223,11 @@ case class JsonValidator(services: Seq[Service]) {
   }
 
   private[this] def validateUnion(
-    union: Union,
+    typ: ApibuilderType.Union,
     js: JsObject,
     prefix: Option[String]
   ): Either[Seq[String], JsValue] = {
-    union.discriminator match {
+    typ.union.discriminator match {
       case None => {
         Right(js)
       }
@@ -230,26 +240,26 @@ case class JsonValidator(services: Seq[Service]) {
         }
 
         val unionType = disc match {
-          case None => union.types.find(_.default.getOrElse(false))
-          case Some(t) => union.types.find { ut => specificTypeDiscriminator(ut) == t }
+          case None => typ.union.types.find(_.default.getOrElse(false))
+          case Some(t) => typ.union.types.find { ut => specificTypeDiscriminator(ut) == t }
         }
 
         unionType match {
           case None => {
             disc match {
               case None => {
-                Left(Seq(s"Union type '${union.name}' requires a field named '$discriminator'"))
+                Left(Seq(s"Union type '${typ.union.name}' requires a field named '$discriminator'"))
               }
               case Some(value) => {
-                Left(Seq(s"Invalid discriminator '$value' for union type '${union.name}': must be one of " + union.types.map { ut => specificTypeDiscriminator(ut) }.mkString("'", "', '", "'")))
+                Left(Seq(s"Invalid discriminator '$value' for union type '${typ.union.name}': must be one of " + typ.union.types.map { ut => specificTypeDiscriminator(ut) }.mkString("'", "', '", "'")))
               }
             }
 
           }
 
           case Some(t) => {
-            assert(t.`type` != union.name, s"Specific union type name cannot match name of the union itself - else we'd recurse infinitely")
-            validate(t.`type`, js, prefix)
+            assert(t.`type` != typ.union.name, s"Specific union type name cannot match name of the union itself - else we'd recurse infinitely")
+            validate(t.`type`, js, defaultNamespace = Some(typ.service.namespace), prefix = prefix)
           }
         }
       }
@@ -262,7 +272,12 @@ case class JsonValidator(services: Seq[Service]) {
   /**
     * Validates the JS Value based on the expected API Builder type.
     */
-  private[this] def validateApiBuilderType(prefix: String, typ: String, js: JsValue): Either[Seq[String], JsValue] = {
+  private[this] def validateApiBuilderType(
+    prefix: String,
+    typ: String,
+    js: JsValue,
+    defaultNamespace: Option[String]
+  ): Either[Seq[String], JsValue] = {
     typ.trim.toLowerCase match {
       case "string" => validateString(prefix, js)
       case "integer" => validateInteger(prefix, js)
@@ -273,8 +288,8 @@ case class JsonValidator(services: Seq[Service]) {
       case "uuid" => validateUuid(prefix, js)
       case "date-iso8601" => validateDateIso8601(prefix, js)
       case "date-time-iso8601" => validateDateTimeIso8601(prefix, js)
-      case ArrayPattern(internalType) => validateArray(prefix + s" of type '[$internalType]':", internalType, js)
-      case ObjectPattern(internalType) => validateObject(prefix + s" of type 'map[$internalType]':", internalType, js)
+      case ArrayPattern(internalType) => validateArray(prefix + s" of type '[$internalType]':", internalType, js, defaultNamespace)
+      case ObjectPattern(internalType) => validateObject(prefix + s" of type 'map[$internalType]':", internalType, js, defaultNamespace)
       case _ => Right(js)
     }
   }
@@ -295,11 +310,11 @@ case class JsonValidator(services: Seq[Service]) {
     }
   }
 
-  def validateArray(prefix: String, internalType: String, js: JsValue): Either[Seq[String], JsArray] = {
+  def validateArray(prefix: String, internalType: String, js: JsValue, defaultNamespace: Option[String]): Either[Seq[String], JsArray] = {
     js match {
       case v: JsArray => {
         val eithers = v.value.zipWithIndex.map { case (el, index) =>
-          validate(internalType, el, Some(prefix + s" element in position[$index]"))
+          validate(internalType, el, defaultNamespace = defaultNamespace, prefix = Some(prefix + s" element in position[$index]"))
         }
         if (eithers.forall(_.isRight)) {
           Right(JsArray(eithers.map(_.right.get)))
@@ -308,18 +323,18 @@ case class JsonValidator(services: Seq[Service]) {
         }
       }
       case JsNull => Left(Seq(s"$prefix must be an array and not null"))
-      case v => validate(internalType, v, Some(prefix + s" element in position[0]")) match {
+      case v => validate(internalType, v, defaultNamespace = defaultNamespace, prefix =  Some(prefix + s" element in position[0]")) match {
         case Left(errors) => Left(errors)
         case Right(t) => Right(JsArray(Seq(t)))
       }
     }
   }
 
-  def validateObject(prefix: String, internalType: String, js: JsValue): Either[Seq[String], JsObject] = {
+  def validateObject(prefix: String, internalType: String, js: JsValue, defaultNamespace: Option[String]): Either[Seq[String], JsObject] = {
     js match {
       case v: JsArray => {
         v.value.size match {
-          case 1 => validateObject(prefix, internalType, v.value.head)
+          case 1 => validateObject(prefix, internalType, v.value.head, defaultNamespace)
           case _ => Left(Seq(s"$prefix must be an object and not an array"))
         }
       }
@@ -328,7 +343,7 @@ case class JsonValidator(services: Seq[Service]) {
       case _: JsNumber => Left(Seq(s"$prefix must be an object and not a number"))
       case v: JsObject => {
         val eithers: Seq[Either[Seq[String], JsObject]] = v.fields.map { case (name, el) =>
-          validate(internalType, el, Some(prefix + s" element[$name]")) match {
+          validate(internalType, el, defaultNamespace = defaultNamespace, prefix = Some(prefix + s" element[$name]")) match {
             case Left(errors) => Left(errors)
             case Right(json) => Right(Json.obj(name -> json))
           }

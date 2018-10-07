@@ -16,7 +16,7 @@ class ApibuilderUnionDiscriminatorValueSpec extends FunSpec with Matchers with H
       "id" -> "1"
     )
     rightOrErrors {
-      validator.validate("user_form", userForm)
+      validator.validate("user_form", userForm, defaultNamespace = None)
     }
 
     val guestForm = Json.obj(
@@ -24,14 +24,14 @@ class ApibuilderUnionDiscriminatorValueSpec extends FunSpec with Matchers with H
       "id" -> "1"
     )
     rightOrErrors {
-      validator.validate("user_form", guestForm)
+      validator.validate("user_form", guestForm, defaultNamespace = None)
     }
 
     val otherForm = Json.obj(
       "discriminator" -> "other",
       "id" -> "1"
     )
-    validator.validate("user_form", otherForm) should be(
+    validator.validate("user_form", otherForm, defaultNamespace = None) should be(
       Left(Seq(
         "Invalid discriminator 'other' for union type 'user_form': must be one of 'guest', 'full'"
       ))

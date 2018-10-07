@@ -18,7 +18,8 @@ class JsonValidatorUnionSpec extends FunSpec with Matchers with Helpers {
 
     validator.validate(
       "cart_add_form",
-      js
+      js,
+      defaultNamespace = None
     ) should equal(
       Right(js)
     )
@@ -31,7 +32,8 @@ class JsonValidatorUnionSpec extends FunSpec with Matchers with Helpers {
         "discriminator" -> "bad",
         "id" -> "123",
         "quantity" -> 1
-      )
+      ),
+      defaultNamespace = None
     ) should equal(
       Left(Seq(
         "Invalid discriminator 'bad' for union type 'cart_add_form': must be one of 'single_cart_add_form', 'multi_cart_add_form'"

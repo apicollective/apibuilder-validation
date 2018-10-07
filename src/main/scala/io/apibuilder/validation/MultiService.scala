@@ -14,7 +14,7 @@ case class MultiService(
 
   private[this] val validator = JsonValidator(services.map(_.service))
 
-  def findType(name: String): Seq[ApibuilderType] = validator.findType(name)
+  def findType(name: String): Seq[ApibuilderType] = validator.findType(name, defaultNamespace = None)
 
   def findType(namespace: String, name: String): Seq[ApibuilderType] = validator.findType(namespace, name)
 
@@ -81,7 +81,7 @@ case class MultiService(
     *                 is unchanged.
     */
   def upcast(typeName: String, js: JsValue): Either[Seq[String], JsValue] = {
-    validator.validate(typeName, js)
+    validator.validate(typeName, js, defaultNamespace = None)
   }
 
   def upcast(typ: ApibuilderType, js: JsValue): Either[Seq[String], JsValue] = {
@@ -100,10 +100,18 @@ case class MultiService(
     }
   }
 
+  def validate(
+    typ: ApibuilderType,
+    js: JsValue,
+    prefix: Option[String] = None
+  ): Either[Seq[String], JsValue] = {
+    validator.validateType(typ, js, prefix)
+  }
+
   /**
-    * Looks up the response for the given status code for this operation, or None
-    * if there is no response documented for the status code
-    */
+   * Looks up the response for the given status code for this operation, or None
+   * if there is no response documented for the status code
+   */
   def response(operation: Operation, responseCode: Int): Option[Response] = {
     operation.responses.find { r =>
       r.code match {
