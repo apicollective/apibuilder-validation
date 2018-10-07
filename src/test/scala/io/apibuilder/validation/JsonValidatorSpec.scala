@@ -15,8 +15,14 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
     loadService("flow-api-service.json").service
   )
 
-  it("1 required field") {
+  private[this] def validate(typ: String, js: JsValue) = {
     validator.validate(
+      typ, js, defaultNamespace = None
+    )
+  }
+
+  it("1 required field") {
+    validate(
       "webhook_form",
       Json.obj("url" -> "https://test.flow.io")
     ) should equal(
@@ -25,7 +31,7 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
   }
 
   it("multiple required fields") {
-    validator.validate(
+    validate(
       "webhook_form",
       Json.obj()
     ) should equal(
@@ -38,7 +44,7 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
       "url" -> Seq("https://a.flow.io", "https://b.flow.io"),
       "events" -> Seq("*")
     )
-    validator.validate("webhook_form", form) should equal(
+    validate("webhook_form", form) should equal(
       Left(
         Seq(
           "webhook_form.url must be a string and not an array"
@@ -52,7 +58,7 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
       "url" -> "https://a.flow.io",
       "events" -> "*"
     )
-    validator.validate("webhook_form", form) should equal(
+    validate("webhook_form", form) should equal(
       Right(
         Json.obj(
           "url" -> "https://a.flow.io",
@@ -67,7 +73,7 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
       "url" -> 123,
       "events" -> Seq("*")
     )
-    validator.validate("webhook_form", form) should equal(
+    validate("webhook_form", form) should equal(
       Right(
         Json.obj(
           "url" -> "123",
@@ -82,7 +88,7 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
       "url" -> 123.45,
       "events" -> Seq("*")
     )
-    validator.validate("webhook_form", form) should equal(
+    validate("webhook_form", form) should equal(
       Right(
         Json.obj(
           "url" -> "123.45",
@@ -93,42 +99,42 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
   }
 
   it("validates a double") {
-    validator.validate("double", Json.parse("123.45")).right.get.as[Double] should equal(123.45)
-    validator.validate("double", Json.parse("123")).right.get.as[Double] should equal(123)
-    validator.validate("double", JsString(" ")) should equal(Left(List("double must be a valid double")))
+    validate("double", Json.parse("123.45")).right.get.as[Double] should equal(123.45)
+    validate("double", Json.parse("123")).right.get.as[Double] should equal(123)
+    validate("double", JsString(" ")) should equal(Left(List("double must be a valid double")))
   }
 
   it("validates a decimal") {
-    validator.validate("decimal", Json.parse("123.45")).right.get.as[BigDecimal] should equal(123.45)
-    validator.validate("decimal", Json.parse("123")).right.get.as[BigDecimal] should equal(123)
-    validator.validate("decimal", JsString(" ")) should equal(Left(List("decimal must be a valid decimal")))
+    validate("decimal", Json.parse("123.45")).right.get.as[BigDecimal] should equal(123.45)
+    validate("decimal", Json.parse("123")).right.get.as[BigDecimal] should equal(123)
+    validate("decimal", JsString(" ")) should equal(Left(List("decimal must be a valid decimal")))
   }
 
   it("validates a UUID") {
     val uuid = java.util.UUID.randomUUID
-    validator.validate("uuid", JsString(uuid.toString)).right.get.as[java.util.UUID] should equal(uuid)
-    validator.validate("uuid", JsString(" ")) should equal(Left(List("uuid must be a valid UUID")))
+    validate("uuid", JsString(uuid.toString)).right.get.as[java.util.UUID] should equal(uuid)
+    validate("uuid", JsString(" ")) should equal(Left(List("uuid must be a valid UUID")))
   }
 
   it("validates an ISO 8601 date (yyyy-MM-dd)") {
-    validator.validate("date-iso8601", JsString("2017-01-01")).right.get.as[String] should equal("2017-01-01")
-    validator.validate("date-iso8601", JsString("2017-1-01")).right.get.as[String] should equal("2017-1-01")
-    validator.validate("date-iso8601", JsString("2017-01-1")).right.get.as[String] should equal("2017-01-1")
-    validator.validate("date-iso8601", JsString("2017-1-1")).right.get.as[String] should equal("2017-1-1")
-    validator.validate("date-iso8601", JsString("invalid")) should equal(Left(List("date-iso8601 must be a valid ISO 8601 date. Example: '2017-07-24'")))
+    validate("date-iso8601", JsString("2017-01-01")).right.get.as[String] should equal("2017-01-01")
+    validate("date-iso8601", JsString("2017-1-01")).right.get.as[String] should equal("2017-1-01")
+    validate("date-iso8601", JsString("2017-01-1")).right.get.as[String] should equal("2017-01-1")
+    validate("date-iso8601", JsString("2017-1-1")).right.get.as[String] should equal("2017-1-1")
+    validate("date-iso8601", JsString("invalid")) should equal(Left(List("date-iso8601 must be a valid ISO 8601 date. Example: '2017-07-24'")))
     // Tests that the format must be yyyy-MM-dd
-    validator.validate("date-iso8601", JsString((new DateTime(2017, 2, 24, 0, 0, 0)).toString)) should equal(Left(List("date-iso8601 must be a valid ISO 8601 date. Example: '2017-07-24'")))
+    validate("date-iso8601", JsString((new DateTime(2017, 2, 24, 0, 0, 0)).toString)) should equal(Left(List("date-iso8601 must be a valid ISO 8601 date. Example: '2017-07-24'")))
   }
 
   it("validates an ISO 8601 datetime") {
     val dt = (new DateTime(2017, 1, 1, 0, 0, 0)).toString
-    validator.validate("date-time-iso8601", JsString("2014-06-20T11:41:08+02:00")).right.get.as[String] should equal("2014-06-20T11:41:08+02:00")
-    validator.validate("date-time-iso8601", JsString("2017-01-01")).right.get.as[String] should equal("2017-01-01")
-    validator.validate("date-time-iso8601", JsString("2017-1-01")).right.get.as[String] should equal("2017-1-01")
-    validator.validate("date-time-iso8601", JsString("2017-01-1")).right.get.as[String] should equal("2017-01-1")
-    validator.validate("date-time-iso8601", JsString("2017-1-1")).right.get.as[String] should equal("2017-1-1")
-    validator.validate("date-time-iso8601", JsString(dt)).right.get.as[String] should equal(dt)
-    validator.validate("date-time-iso8601", JsString("invalid")) should equal(Left(List("date-time-iso8601 must be a valid ISO 8601 datetime. Example: '2017-07-24T09:41:08+02:00'")))
+    validate("date-time-iso8601", JsString("2014-06-20T11:41:08+02:00")).right.get.as[String] should equal("2014-06-20T11:41:08+02:00")
+    validate("date-time-iso8601", JsString("2017-01-01")).right.get.as[String] should equal("2017-01-01")
+    validate("date-time-iso8601", JsString("2017-1-01")).right.get.as[String] should equal("2017-1-01")
+    validate("date-time-iso8601", JsString("2017-01-1")).right.get.as[String] should equal("2017-01-1")
+    validate("date-time-iso8601", JsString("2017-1-1")).right.get.as[String] should equal("2017-1-1")
+    validate("date-time-iso8601", JsString(dt)).right.get.as[String] should equal(dt)
+    validate("date-time-iso8601", JsString("invalid")) should equal(Left(List("date-time-iso8601 must be a valid ISO 8601 datetime. Example: '2017-07-24T09:41:08+02:00'")))
   }
 
   it("converts booleans where possible") {
@@ -139,7 +145,7 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
         "code" -> "match",
         "name" -> v
       )
-      validator.validate("avs", form) should equal(
+      validate("avs", form) should equal(
         Right(
           Json.obj(
             "code" -> "match",
@@ -156,7 +162,7 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
         "code" -> "match",
         "name" -> v
       )
-      validator.validate("avs", form) should equal(
+      validate("avs", form) should equal(
         Right(
           Json.obj(
             "code" -> "match",
@@ -171,7 +177,7 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
     val form = Json.obj(
       "code" -> "bad"
     )
-    validator.validate("avs", form) should equal(
+    validate("avs", form) should equal(
       Left(
         Seq("avs.code invalid value 'bad'. Valid values for the enum 'avs_code' are: 'match', 'partial', 'unsupported', 'no_match'")
       )
@@ -182,7 +188,7 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
     val form = Json.obj(
       "code" -> ""
     )
-    validator.validate("avs", form) should equal(
+    validate("avs", form) should equal(
       Left(
         Seq("avs.code invalid value ''. Valid values for the enum 'avs_code' are: 'match', 'partial', 'unsupported', 'no_match'")
       )
@@ -201,7 +207,7 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
       )
     )
 
-    validator.validate("card_form", form) match {
+    validate("card_form", form) match {
       case Left(errors) => errors should equal(
         Seq("card_form.address.streets of type '[string]': element in position[1] must be a string and not null")
       )
@@ -224,7 +230,7 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
       case e: JsError => //
     }
 
-    val converted: JsValue = validator.validate("card_form", form) match {
+    val converted: JsValue = validate("card_form", form) match {
       case Left(errors) => sys.error(errors.mkString(", "))
       case Right(js) => js
     }
@@ -256,7 +262,7 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
       case e: JsError => //
     }
 
-    val converted: JsValue = validator.validate("harmonized_item_form", form).right.get
+    val converted: JsValue = validate("harmonized_item_form", form).right.get
 
     converted.validate[HarmonizedItemForm] match {
       case s: JsSuccess[HarmonizedItemForm] => {
@@ -289,7 +295,7 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
       case _: JsError => //
     }
 
-    validator.validate("harmonized_item_form", form).left.get should be(
+    validate("harmonized_item_form", form).left.get should be(
       Seq(
         "harmonized_item_form.categories of type '[string]': element in position[1] must be a string and not an object",
         "harmonized_item_form.categories of type '[string]': element in position[2] must be a string and not null"
@@ -311,7 +317,7 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
       )
     )
 
-    val js = validator.validate("item_form", form) match {
+    val js = validate("item_form", form) match {
       case Left(errors) => sys.error(errors.mkString(", "))
       case Right(js) => js
     }
@@ -347,7 +353,7 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
       )
     )
 
-    validator.validate("item_form", form) should be(
+    validate("item_form", form) should be(
       Left(
         Seq("item_form.attributes of type 'map[string]': element[a] must be a string and not an object")
       )
@@ -362,7 +368,7 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
       "role" -> "member"
     )
 
-    validator.validate("invitation_form", form) match {
+    validate("invitation_form", form) match {
       case Left(errors) => errors should equal(
         Seq("invitation_form.name must be an object and not a string")
       )
@@ -378,7 +384,7 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
       "discriminator" -> "merchant_of_record_authorization_form"
     )
 
-    validator.validate("merchant_of_record_authorization_form", form) match {
+    validate("merchant_of_record_authorization_form", form) match {
       case Left(errors) => sys.error(s"Error validating form: $errors")
       case Right(js) => {
         js should equal(
@@ -399,7 +405,7 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
       "discriminator" -> "merchant_of_record_authorization_form"
     )
 
-    validator.validate("merchant_of_record_authorization_form", form) match {
+    validate("merchant_of_record_authorization_form", form) match {
       case Left(errors) => errors should equal(
         Seq("merchant_of_record_authorization_form.order_number must be a string and not an array")
       )
@@ -417,7 +423,7 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
       "price" -> 10
     )
 
-    validator.validate("item_form", form) match {
+    validate("item_form", form) match {
       case Left(errors) => sys.error(s"Expected form to validate but got: $errors")
       case Right(_) => // no-op
     }
