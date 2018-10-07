@@ -55,7 +55,7 @@ class MultipleTypesWithSameNameSpec extends FunSpec with Matchers
       mustFindModel(multi, "item"),
       Json.obj("value" -> Json.obj())
     ) should equal(
-      Left(Seq("Missing required fields for price: amount"))
+      Left(Seq("Missing required field for price: amount"))
     )
 
     multi.validate(

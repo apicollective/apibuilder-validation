@@ -16,7 +16,7 @@ trait ApiBuilderServiceHelpers {
     name: String = random(),
     organization: Organization = makeOrganization(),
     application: Application = makeApplication(),
-    namespace: String = "test.apicollective",
+    namespace: String = s"test.apicollective.${random()}",
     version: String = "1.2.3",
     baseUrl: Option[String] = None,
     description: Option[String] = None,
