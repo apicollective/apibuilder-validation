@@ -43,19 +43,19 @@ case class JsonValidator(services: Seq[Service]) {
 
   def findType(defaultNamespace: String, name: String): Seq[ApibuilderType] = {
     val typeName = TypeName.parse(defaultNamespace = defaultNamespace, name = name)
-    services.filter(_.namespace == typeName.namespace).flatMap { service =>
+    services.filter(_.namespace.equalsIgnoreCase(typeName.namespace)).flatMap { service =>
       findType(service, typeName.name)
     }
   }
 
   private[this] def findType(service: Service, typeName: String): Option[ApibuilderType] = {
-    service.enums.find(_.name == typeName) match {
+    service.enums.find(_.name.equalsIgnoreCase(typeName)) match {
       case Some(e) => Some(ApibuilderType.Enum(service, e))
       case None => {
-        service.models.find(_.name == typeName) match {
+        service.models.find(_.name.equalsIgnoreCase(typeName)) match {
           case Some(m) => Some(ApibuilderType.Model(service, m))
           case None => {
-            service.unions.find(_.name == typeName) match {
+            service.unions.find(_.name.equalsIgnoreCase(typeName)) match {
               case Some(u) => Some(ApibuilderType.Union(service, u))
               case None => None
             }

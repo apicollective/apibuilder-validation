@@ -1,9 +1,7 @@
 package io.apibuilder.validation
 
-import io.apibuilder.spec.v0.models.Service
-import io.apibuilder.spec.v0.models.json._
 import io.apibuilder.validation.helpers.Helpers
-import io.flow.v0.models.{Address, CardForm, EventType, HarmonizedItemForm, ItemForm, WebhookForm}
+import io.flow.v0.models.{CardForm, HarmonizedItemForm, ItemForm}
 import io.flow.v0.models.json._
 import play.api.libs.json._
 import org.joda.time.DateTime
@@ -19,6 +17,14 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
     validator.validate(
       typ, js, defaultNamespace = None
     )
+  }
+
+  it("findType is case insensitive") {
+    val m1 = validator.findType("webhook", defaultNamespace = None).head
+    m1.name should equal("webhook")
+
+    val m2 = validator.findType("WEBHOOK", defaultNamespace = None).head
+    m2.name should equal("webhook")
   }
 
   it("1 required field") {
@@ -123,11 +129,11 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
     validate("date-iso8601", JsString("2017-1-1")).right.get.as[String] should equal("2017-1-1")
     validate("date-iso8601", JsString("invalid")) should equal(Left(List("date-iso8601 must be a valid ISO 8601 date. Example: '2017-07-24'")))
     // Tests that the format must be yyyy-MM-dd
-    validate("date-iso8601", JsString((new DateTime(2017, 2, 24, 0, 0, 0)).toString)) should equal(Left(List("date-iso8601 must be a valid ISO 8601 date. Example: '2017-07-24'")))
+    validate("date-iso8601", JsString(new DateTime(2017, 2, 24, 0, 0, 0).toString)) should equal(Left(List("date-iso8601 must be a valid ISO 8601 date. Example: '2017-07-24'")))
   }
 
   it("validates an ISO 8601 datetime") {
-    val dt = (new DateTime(2017, 1, 1, 0, 0, 0)).toString
+    val dt = new DateTime(2017, 1, 1, 0, 0, 0).toString
     validate("date-time-iso8601", JsString("2014-06-20T11:41:08+02:00")).right.get.as[String] should equal("2014-06-20T11:41:08+02:00")
     validate("date-time-iso8601", JsString("2017-01-01")).right.get.as[String] should equal("2017-01-01")
     validate("date-time-iso8601", JsString("2017-1-01")).right.get.as[String] should equal("2017-1-01")
@@ -211,7 +217,7 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
       case Left(errors) => errors should equal(
         Seq("card_form.address.streets of type '[string]': element in position[1] must be a string and not null")
       )
-      case Right(js) => sys.error("Expected form to NOT validate")
+      case Right(_) => sys.error("Expected form to NOT validate")
     }
   }
 
@@ -226,8 +232,8 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
     )
 
     form.validate[CardForm] match {
-      case s: JsSuccess[CardForm] => sys.error("Expected form to NOT validate")
-      case e: JsError => //
+      case _: JsSuccess[CardForm] => sys.error("Expected form to NOT validate")
+      case _: JsError => //
     }
 
     val converted: JsValue = validate("card_form", form) match {
@@ -258,8 +264,8 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
     )
 
     form.validate[HarmonizedItemForm] match {
-      case s: JsSuccess[HarmonizedItemForm] => sys.error("Expected form to NOT validate")
-      case e: JsError => //
+      case _: JsSuccess[HarmonizedItemForm] => sys.error("Expected form to NOT validate")
+      case _: JsError => //
     }
 
     val converted: JsValue = validate("harmonized_item_form", form).right.get
@@ -372,7 +378,7 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
       case Left(errors) => errors should equal(
         Seq("invitation_form.name must be an object and not a string")
       )
-      case Right(js) => sys.error("Expected form to NOT validate")
+      case Right(_) => sys.error("Expected form to NOT validate")
     }
   }
 
