@@ -1,6 +1,6 @@
 name := "apibuilder-validation"
 
-organization := "io.flow"
+organization := "io.apibuilder"
 
 scalaVersion in ThisBuild := "2.12.8"
 
