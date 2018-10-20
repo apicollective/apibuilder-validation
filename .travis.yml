@@ -4,7 +4,7 @@ scala:
   - 2.11.12
 jdk:
   - oraclejdk8
-  - oraclejdk10
+  - openjdk11
 script: 
   - sbt ++$TRAVIS_SCALA_VERSION clean compile test
   # Tricks to avoid unnecessary cache updates
