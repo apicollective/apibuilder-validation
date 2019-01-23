@@ -5,6 +5,8 @@ import java.net.URLEncoder
 
 import play.api.libs.json.{JsObject, Json}
 
+import scala.util.{Failure, Success, Try}
+
 case class Fixture(params: Seq[(String, String)], expected: JsObject) {
 
   def rawQueryString: String = {
@@ -24,10 +26,15 @@ object Fixture {
       split("\n").map(_.trim).filter { l => !l.startsWith(CommentCharacter) }.mkString("\n").
       trim.split("\n\n").toList match {
       case definition :: expected :: Nil => {
-        Fixture(
-          params = parseParameters(file, definition),
-          expected = Json.parse(expected).as[JsObject]
-        )
+        Try {
+          Fixture(
+            params = parseParameters(file, definition),
+            expected = Json.parse(expected).as[JsObject]
+          )
+        } match {
+          case Success(f) => f
+          case Failure(ex) => sys.error(s"Failed to parse file[${file.getAbsolutePath}]: ${ex.getMessage}")
+        }
       }
       case _ => sys.error(s"File[$file] Could not parse contents - no newline found")
     }
