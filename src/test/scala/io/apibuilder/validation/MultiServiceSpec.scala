@@ -65,6 +65,41 @@ class MultiServiceSpec extends FunSpec with Matchers with Helpers {
     )
   }
 
+  it("tomhope") {
+    println(multi.upcast(
+      "PUT",
+      "/:organization/orders/:number",
+      Json.parse(
+        """
+          |{
+          |    "items": [],
+          |    "customer": {
+          |        "name": {
+          |            "first": "Matt",
+          |            "last": "Flow"
+          |        },
+          |        "phone": "1234567890",
+          |        "email": "mkersner@flow.io",
+          |        "address": {
+          |            "name": {
+          |                "first": "Matt",
+          |                "last": "Flow"
+          |            },
+          |            "streets": {
+          |                "": "33b Bay St"
+          |            },
+          |            "city": "Toronto",
+          |            "province": "Ontario",
+          |            "postal": "M5J 2Z3",
+          |            "country": "CAN",
+          |            "company": "Flow"
+          |        }
+          |    }
+          |}
+        """.stripMargin)
+    ))
+  }
+
   it("url query example") {
     val form = FormData.parseEncoded("name=John%20Doe&expiration_month=12&expiration_year=2017&cvv=123&cipher=VnHzBw%2BbaGrKZL0fimklhKupHJeowxK2Mqa9LbECCnb3R%2FxIgS1vr0sFg2mUGsXR7bsNV61UURB91VrWr19V1g%3D%3D&challenge%5Btext%5D=Flow&challenge%5Bcipher%5D=df2BQZykhnTfIVIX6Vg9yjUmyEprz3dLmUYU0O8GeyCZ0t3pn1nXSP7DRDfsZAASwtNupqyYx3G4W%2BmGlWQreg%3D%3D&callback=__flowjsonp0&method=post")
 

@@ -3,7 +3,7 @@
 # apibuilder-validation
 
 Accepts an instance of an [apibuilder
-aservice](https://app.apibuilder.io/apicollective/apibuilder-spec/latest),
+service](https://app.apibuilder.io/apicollective/apibuilder-spec/latest),
 providing high quality validation of JSON readers with an emphasis on
 providing human understandable error messages. Also handles safe
 conversions of types (e.g. number to string) based on the API Builder
