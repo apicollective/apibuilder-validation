@@ -1,5 +1,5 @@
-streets[]=foo
-streets[]=bar
+streets[0]=foo
+streets[1]=bar
 
 {
  "streets": ["foo", "bar"]
