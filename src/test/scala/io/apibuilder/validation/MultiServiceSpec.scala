@@ -65,8 +65,9 @@ class MultiServiceSpec extends FunSpec with Matchers with Helpers {
     )
   }
 
-  it("tomhope") {
-    println(multi.upcast(
+  it("error on missing array indices") {
+    // comes from decoding customer[address][streets][]=33b Bay St
+    multi.upcast(
       "PUT",
       "/:organization/orders/:number",
       Json.parse(
@@ -97,7 +98,9 @@ class MultiServiceSpec extends FunSpec with Matchers with Helpers {
           |    }
           |}
         """.stripMargin)
-    ))
+    ) should equal(
+      Left(Seq("order_put_form.customer.address.streets of type '[string]': element in position[0] must be a string and not an object"))
+    )
   }
 
   it("url query example") {
