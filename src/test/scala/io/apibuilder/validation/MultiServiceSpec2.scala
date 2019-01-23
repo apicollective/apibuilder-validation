@@ -76,7 +76,7 @@ class MultiServiceSpec2 extends FunSpec with Matchers with helpers.Helpers {
     Seq(100, 200, 417, 500, 503).foreach { code =>
       flowMultiService.validateResponseCode(op, code) match {
         case Left(error) => error should equal(
-          s"Unexpected response code[$code] for operation[POST /:organization/payments]. Declared response codes: 201, 401, 422"
+          s"Unexpected response code[$code] for operation[POST /:organization/payments]. Declared response codes: 201, 401, 403, 422"
         )
         case Right(v) => sys.error(s"Expected error but got: $v")
       }
