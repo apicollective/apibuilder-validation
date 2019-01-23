@@ -1,0 +1,6 @@
+streets[]=foo
+streets[]=bar
+
+{
+ "streets": ["foo", "bar"]
+}

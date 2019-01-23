@@ -1,0 +1,43 @@
+attributes[affiliate_id]=dajajdas
+items[0][number]=16431574384738
+items[0][quantity]=1
+customer[name][first]=Chris
+customer[name][last]=Hicks
+customer[phone]=000-000-0000
+customer[email]=chicks@flow.io
+customer[address][name][first]=Matt
+customer[address][name][last]=Flow
+customer[address][streets][0]=test
+customer[address][city]=Toronto
+customer[address][province]=Ontario
+customer[address][postal]=M5J 2Z3
+customer[address][country]=KOR
+customer[address][company]=Flow
+country=KOR
+
+{
+  "country": "KOR",
+  "attributes": {
+    "affiliate_id": "dajajdas"
+  },
+  "items": [{ "number": "16431574384738", "quantity": 1 }],
+  "customer": {
+    "name": {
+      "first": "Chris", "last": "Hicks"
+    },
+    "phone": "000-000-0000",
+    "email": "chicks@flow.io",
+    "address": {
+      "name": {
+        "first": "Matt",
+        "last": "Flow"
+      },
+      "streets": ["test"],
+      "city": "Toronto",
+      "province": "Ontario",
+      "postal": "M5J 2Z3",
+      "country": "KOR",
+      "company": "Flow"
+    }
+  }
+}
