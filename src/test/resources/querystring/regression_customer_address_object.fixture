@@ -20,7 +20,7 @@ country=KOR
   "attributes": {
     "affiliate_id": "dajajdas"
   },
-  "items": [{ "number": "16431574384738", "quantity": 1 }],
+  "items": [{ "number": 16431574384738, "quantity": 1 }],
   "customer": {
     "name": {
       "first": "Chris", "last": "Hicks"
