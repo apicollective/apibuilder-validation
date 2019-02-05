@@ -171,5 +171,38 @@ class FormDataSpec extends FunSpec with Matchers {
       res should be(Some("anEmptyString" -> JsNull))
     }
 
+    it("toJson for seq of tuples handles array bracket format") {
+      FormData.normalize(
+        Seq(
+          ("limit", "100"),
+          ("variant_id[1]", "foo"),
+          ("variant_id[0]", "bar")
+        ),
+        options = Set(EncodingOptions.OmitArrayIndexes)
+      ) should equal(
+        Seq(
+          ("limit", "100"),
+          ("variant_id", "bar"),
+          ("variant_id", "foo")
+        )
+      )
+    }
+
+    it("toJson for seq of tuples defaults to including array index") {
+      FormData.normalize(
+        Seq(
+          ("limit", "100"),
+          ("variant_id[1]", "foo"),
+          ("variant_id[0]", "bar")
+        )
+      ) should equal(
+        Seq(
+          ("limit", "100"),
+          ("variant_id[0]", "bar"),
+          ("variant_id[1]", "foo")
+        )
+      )
+    }
+
   }
 }

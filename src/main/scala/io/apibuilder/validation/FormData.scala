@@ -7,6 +7,17 @@ import play.api.libs.json._
 import scala.annotation.tailrec
 import scala.util.{Failure, Success, Try}
 
+trait EncodingOptions
+object EncodingOptions {
+
+  /**
+    * If specified, when we url encode form data for arrays, we will omit indexes.
+    * e.g. "variant_id[0]=bar" -> "variant_id=bar"
+    * This is required for the default parameter parsing in play
+    */
+  case object OmitArrayIndexes extends EncodingOptions
+}
+
 /**
   * Convert any url form encoded params (query or body) to a Json
   * object. Makes best guesses on types.
@@ -40,18 +51,27 @@ object FormData {
     * @param keys Keeps track of the top level keys we are parsing to
     *             build up nested keys (e.g. user[first] for maps)
     */
-  def toEncoded(js: JsValue, keys: Seq[String] = Nil): String = {
-    def urlEncode(s: String): String = java.net.URLEncoder.encode(s, "UTF-8")
-    def encodeIt(value: String, keys: Seq[String]) = encode(urlEncode(value), keys)
+  def toEncoded(
+    js: JsValue,
+    keys: Seq[String] = Nil,
+    options: Set[EncodingOptions] = Set.empty
+  ): String = {
+    def urlEncode(s: String): String = java.net.URLEncoder.encode(s, Encoding)
+    def encodeIt(value: String, keys: Seq[String]): String = encode(urlEncode(value), keys)
     js match {
       case o: JsObject => {
         o.value.map { case (key, value) =>
-          toEncoded(value, keys ++ Seq(key))
+          toEncoded(value, keys ++ Seq(key), options = options)
         }.mkString("&")
       }
       case o: JsArray => {
         o.value.zipWithIndex.map { case (v, i) =>
-          toEncoded(v, keys ++ Seq(i.toString))
+          val finalKeys = if (options.contains(EncodingOptions.OmitArrayIndexes)) {
+            keys
+          } else {
+            keys ++ Seq(i.toString)
+          }
+          toEncoded(v, keys = finalKeys, options = options)
         }.mkString("&")
       }
       case o: JsString => encodeIt(o.value, keys)
@@ -88,11 +108,17 @@ object FormData {
     )
   }
 
-  /**
-    * Parses a url encoded string into a map
-    */
   def parseEncoded(value: String): Map[String, Seq[String]] = {
-    val data = scala.collection.mutable.Map[String, Seq[String]]()
+    parseEncodedToSeq(value).groupBy(_._1).map { case (key, values) =>
+      key -> values.map(_._2)
+    }
+  }
+
+  /**
+  * Parses a url encoded string into a map
+  */
+  def parseEncodedToSeq(value: String): Seq[(String, String)] = {
+    val data = scala.collection.mutable.ListBuffer[(String, String)]()
     value.split("&").foreach { x =>
       x.split("=", 2).toList match {
         case key :: rest if key.nonEmpty => {
@@ -101,11 +127,7 @@ object FormData {
             case v => URLDecoder.decode(v, Encoding)
           }
 
-          val values = data.get(key) match {
-            case None => Seq(decodedValue)
-            case Some(existing) => existing ++ Seq(decodedValue)
-          }
-          data += URLDecoder.decode(key, Encoding) -> values
+          data.append((URLDecoder.decode(key, Encoding), decodedValue))
         }
 
         case _ => {
@@ -113,11 +135,23 @@ object FormData {
         }
       }
     }
-    data.toMap
+    data.toSeq
   }
 
   def toJson(data: Map[String, Seq[String]]): JsObject = {
     toJson(data.keys.toSeq, data)
+  }
+
+  def normalize(data: Seq[(String, String)], options: Set[EncodingOptions] = Set.empty): Seq[(String, String)] = {
+    val parsed = toJson(
+      Map(
+        data.map { el =>
+          el._1 -> Seq(el._2)
+        }: _*
+      )
+    )
+    val enc = toEncoded(parsed, options = options)
+    parseEncodedToSeq(enc)
   }
 
   @tailrec
