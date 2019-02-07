@@ -144,11 +144,9 @@ object FormData {
 
   def normalize(data: Seq[(String, String)], options: Set[EncodingOptions] = Set.empty): Seq[(String, String)] = {
     val parsed = toJson(
-      Map(
-        data.map { el =>
-          el._1 -> Seq(el._2)
-        }: _*
-      )
+      data.groupBy(_._1).map { case (key, values) =>
+        key -> values.map(_._2)
+      }
     )
     val enc = toEncoded(parsed, options = options)
     parseEncodedToSeq(enc)

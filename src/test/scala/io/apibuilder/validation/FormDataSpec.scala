@@ -204,5 +204,22 @@ class FormDataSpec extends FunSpec with Matchers {
       )
     }
 
+    it("normalize does not wipe out multi params with no brackets") {
+      FormData.normalize(
+        Seq(
+          ("limit", "100"),
+          ("variant_id", "foo"),
+          ("variant_id", "bar")
+        ),
+        options = Set(EncodingOptions.OmitArrayIndexes)
+      ) should equal(
+        Seq(
+          ("limit", "100"),
+          ("variant_id", "foo"),
+          ("variant_id", "bar")
+        )
+      )
+    }
+
   }
 }
