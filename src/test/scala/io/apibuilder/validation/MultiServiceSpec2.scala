@@ -97,4 +97,15 @@ class MultiServiceSpec2 extends FunSpec with Matchers with helpers.Helpers {
     orgModel.fields.find(_.name == "id").get.required should be(true)
     orgModel.fields.find(_.name == "parent").get.required should be(false)
   }
+
+  it("does not assume namespace") {
+    flowMultiService.findType(
+      "io.flow.shopify.external.v0.models",
+      "shopify_cart"
+    ) should be(Nil)
+
+    flowMultiService.findType(
+      "io.flow.shopify.external.v0.models.shopify_cart"
+    ) should be(Nil)
+  }
 }
