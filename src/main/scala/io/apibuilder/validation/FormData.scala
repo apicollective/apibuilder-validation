@@ -142,6 +142,12 @@ object FormData {
     toJson(data.keys.toSeq, data)
   }
 
+  def toJsonFromSimpleMap(data: Map[String, String]): JsObject = {
+    toJson(
+      data.map { case (k,v) => k -> Seq(v) }
+    )
+  }
+
   def normalize(data: Seq[(String, String)], options: Set[EncodingOptions] = Set.empty): Seq[(String, String)] = {
     val parsed = toJson(
       data.groupBy(_._1).map { case (key, values) =>

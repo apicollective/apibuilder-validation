@@ -105,6 +105,16 @@ class FormDataSpec extends FunSpec with Matchers {
     foo2 should equal("c")
   }
 
+  it("toJson parses single value") {
+    val data = Map("foo" -> "a", "bar" ->"b")
+    FormData.toJsonFromSimpleMap(data) should equal(
+      Json.obj(
+        "foo" -> "a",
+        "bar" -> "b"
+      )
+    )
+  }
+
   describe("toJson") {
 
     val data: Map[String, Seq[String]] = Map(
