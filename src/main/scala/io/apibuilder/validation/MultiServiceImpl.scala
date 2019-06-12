@@ -23,7 +23,7 @@ case class MultiServiceImpl(
   /**
     * Upcast the json value based on the specified type name
     *
-    * @param typeName e.g. 'user' - looks up the apibuilder type with this name
+    * @param typeName e.g. 'user' - looks up the API Builder type with this name
     *                 and if found, uses that type to validate and upcase the
     *                 JSON. Note if the type is not found, the JSON returned
     *                 is unchanged.
