@@ -1,7 +1,12 @@
 package io.apibuilder.validation
 
+import java.net.URL
+
 import io.apibuilder.spec.v0.models._
+import io.apibuilder.validation.util.ZipFileReader
 import play.api.libs.json._
+
+import scala.io.Source
 
 /**
   * Wrapper to work with multiple API Builder services.
@@ -232,7 +237,15 @@ object MultiService {
   * returning either a list of errors or an instance of MultiService
   */
   def fromUrls(urls: Seq[String]): Either[Seq[String], MultiService] = {
-    val eithers = urls.map(ApiBuilderService.fromUrl(url))
+    println(s"urls: " + urls)
+    val eithers = urls.flatMap { url =>
+      if (isZipFile(url)) {
+        ZipFileReader(Source.fromURL(new URL(url),  "UTF-8"))
+        Seq(ApiBuilderService.fromUrl(url))
+      } else {
+        Seq(ApiBuilderService.fromUrl(url))
+      }
+    }
     if (eithers.forall(_.isRight)) {
       Right(
         MultiService(
