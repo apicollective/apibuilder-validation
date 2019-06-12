@@ -93,6 +93,7 @@ case class PathNormalizer(operations: Seq[Operation]) {
   final def resolve(method: Method, path: String): Option[Operation] = {
     staticRouteMap.get(routeKey(method, path)) match {
       case None => {
+        // make constant time
         dynamicRouteMap.getOrElse(method, Nil).find { opWithRoute =>
           opWithRoute.route.matches(method, path.trim)
         }.map(_.op)

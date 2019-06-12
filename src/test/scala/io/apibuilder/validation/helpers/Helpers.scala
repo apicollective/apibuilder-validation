@@ -8,7 +8,12 @@ import play.api.libs.json.Json
 trait Helpers {
 
   def readFile(filename: String): String = {
-    scala.io.Source.fromFile("src/test/resources/" + filename, "UTF-8").getLines.mkString("\n")
+    val source = scala.io.Source.fromFile("src/test/resources/" + filename, "UTF-8")
+    try {
+      source.getLines.mkString("\n")
+    } finally {
+      source.close()
+    }
   }
 
   def loadService(filename: String): ApiBuilderService = {
