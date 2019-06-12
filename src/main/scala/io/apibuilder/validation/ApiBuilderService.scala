@@ -64,7 +64,18 @@ case class ApiBuilderService(
     }
   }
 
+  // TODO: Use concurrent hash
+  private[this] case class MethodPathCacheKey(method: Method, path: String)
+  private[this] val cache = scala.collection.mutable.HashMap[MethodPathCacheKey, Either[Seq[String], Operation]]()
   def validate(method: Method, path: String): Either[Seq[String], Operation] = {
+    val key = MethodPathCacheKey(method, path)
+    cache.getOrElseUpdate(
+      key,
+      doValidate(method, path)
+    )
+  }
+
+  private[this] def doValidate(method: Method, path: String): Either[Seq[String], Operation] = {
     normalizer.resolve(method, path) match {
       case Right(op) => Right(op)
       case Left(_) => {
@@ -90,9 +101,14 @@ case class ApiBuilderService(
     * and path, if any
     */
   def operation(method: String, path: String): Option[Operation] = {
-    normalizer.resolve(method, path) match {
-      case Left(_) => None
-      case Right(op) => Some(op)
+    Method.fromString(method) match {
+      case None => None
+      case Some(m) => {
+        normalizer.resolve(m, path) match {
+          case Left(_) => None
+          case Right(op) => Some(op)
+        }
+      }
     }
   }
 

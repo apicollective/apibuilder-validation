@@ -74,16 +74,6 @@ case class PathNormalizer(operations: Seq[Operation]) {
     (tmpStaticRouteMap, tmpDynamicRouteMap.toMap)
   }
 
-
-  /**
-    * @param method GET, POST, etc.
-    * @param path e.g. /users/123
-    * @return Either validation errors or the route
-    */
-  final def resolve(method: String, path: String): Either[Seq[String], Operation] = {
-    resolve(Method(method), path)
-  }
-
   final def resolve(method: Method, path: String): Either[Seq[String], Operation] = {
     method match {
       case Method.UNDEFINED(m) => {
