@@ -2,13 +2,18 @@ package io.apibuilder.validation.helpers
 
 import io.apibuilder.spec.v0.models.Service
 import io.apibuilder.spec.v0.models.json._
-import io.apibuilder.validation.{ApiBuilderService, MultiService}
+import io.apibuilder.validation.{ApiBuilderService, MultiService, MultiServiceImpl}
 import play.api.libs.json.Json
 
 trait Helpers {
 
   def readFile(filename: String): String = {
-    scala.io.Source.fromFile("src/test/resources/" + filename, "UTF-8").getLines.mkString("\n")
+    val source = scala.io.Source.fromFile("src/test/resources/" + filename, "UTF-8")
+    try {
+      source.getLines.mkString("\n")
+    } finally {
+      source.close()
+    }
   }
 
   def loadService(filename: String): ApiBuilderService = {
@@ -18,7 +23,7 @@ trait Helpers {
   }
 
   def loadMultiService(files: Seq[String]): MultiService = {
-    MultiService(files.map(loadService))
+    MultiServiceImpl(files.map(loadService))
   }
 
   lazy val apibuilderMultiService: MultiService = {

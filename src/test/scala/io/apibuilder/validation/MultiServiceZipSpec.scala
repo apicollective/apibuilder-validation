@@ -11,6 +11,7 @@ import org.scalatest.{FunSpec, Matchers}
 class MultiServiceZipSpec extends FunSpec with Matchers
   with helpers.ApiBuilderServiceHelpers
   with helpers.FileHelpers
+  with helpers.Helpers
 {
 
   case class ServiceAndFile(service: Service, file: File)
@@ -48,7 +49,31 @@ class MultiServiceZipSpec extends FunSpec with Matchers
   }
 
   it("Able to download service from the internet") {
-    val multi = MultiService.fromUrl("https://cdn.flow.io/util/lib-apibuilder/specs.zip").right.get
-    println(s"Multi: ${multi.services.size}")
+    MultiService.fromUrl("https://cdn.flow.io/util/lib-apibuilder/specs.zip") match {
+      case Left(errors) => sys.error(s"Errors: $errors")
+      case Right(_) => // no-op
+    }
+  }
+
+  it("performance is similar") {
+    val zipService = MultiService.fromUrl("https://cdn.flow.io/util/lib-apibuilder/specs.zip").right.get
+    zipService.validate("GET", "/users").right.get
+    flowMultiService.validate("GET", "/users").right.get
+
+    def run(service: MultiService) = {
+      time(1000) {
+        service.validate("GET", "/users")
+      }
+    }
+    run(flowMultiService) < 50 should be(true)
+    run(zipService) < 50 should be(true)
+  }
+
+  private[this] def time(numberIterations: Int)(f: => Any): Long = {
+    val start = System.currentTimeMillis()
+    0.to(numberIterations).foreach { _ =>
+      f
+    }
+    System.currentTimeMillis() - start
   }
 }
