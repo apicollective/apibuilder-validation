@@ -36,7 +36,7 @@ case class ZipFileBuilder(
   /**
     * Writes a zip file to the specified file
     */
-  private[this] def build(file: File): Unit = {
+  def build(file: File): Unit = {
     val fos = new FileOutputStream(file)
     val zipOS = new ZipOutputStream(fos)
     entries.foreach { file =>
