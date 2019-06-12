@@ -1,23 +1,39 @@
 package io.apibuilder.validation.util
 
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
+import java.io.{BufferedInputStream, File, FileOutputStream, InputStream}
+import java.net.URL
 import java.nio.file.Files
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
-case class ZipFileReader(fileZip: File) {
+object ZipFileReader {
+
+  /**
+    * Returns true if url path ends with .zip
+    */
+  def isZipFile(url: String): Boolean = {
+    url.trim.split("\\?").head.trim.toLowerCase().endsWith(".zip")
+  }
+
+  def fromUrl(url: String): Either[Seq[String], ZipFileReader] = {
+    val u = new URL(url)
+    val is = new BufferedInputStream(u.openStream, 1024)
+    val reader = ZipFileReader(is)
+    is.close()
+    Right(reader)
+  }
+}
+case class ZipFileReader(inputStream: InputStream) {
 
   private[this] val destDir: File = Files.createTempDirectory("zipfilereader").toFile
 
   /**
     * Returns a list of the entries of the zip file
     */
-  lazy val entries: Seq[ZipFileEntry] = {
+  val entries: Seq[ZipFileEntry] = {
     val all = scala.collection.mutable.ListBuffer[ZipFileEntry]()
     val buffer = new Array[Byte](1024)
-    val zis = new ZipInputStream(new FileInputStream(fileZip))
+    val zis = new ZipInputStream(inputStream)
     var zipEntry = zis.getNextEntry
     while (zipEntry != null) {
       val thisFile = newFile(zipEntry)

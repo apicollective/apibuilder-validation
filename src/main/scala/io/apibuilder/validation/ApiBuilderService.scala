@@ -1,9 +1,12 @@
 package io.apibuilder.validation
 
+import java.io.File
+
 import io.apibuilder.spec.v0.models.{Method, Operation, Service}
 import io.apibuilder.spec.v0.models.json._
 import java.net.URL
 
+import io.apibuilder.validation.ApiBuilderService.fromSource
 import play.api.libs.json._
 
 import scala.io.Source
@@ -94,14 +97,29 @@ object ApiBuilderService {
     * returning either a list of errors or the service itself.
     */
   def fromUrl(url: String): Either[Seq[String], ApiBuilderService] = {
-    Try {
-      val source = Source.fromURL(new URL(url),  "UTF-8")
-      val c = source.mkString
+    val source = Source.fromURL(new URL(url),  "UTF-8")
+    try {
+      fromSource(source)
+    } finally {
       source.close()
-      c
+    }
+  }
+
+  def fromFile(file: File): Either[Seq[String], ApiBuilderService] = {
+    val source = Source.fromFile(file,  "UTF-8")
+    try {
+      fromSource(source)
+    } finally {
+      source.close()
+    }
+  }
+
+  def fromSource(source: Source): Either[Seq[String], ApiBuilderService] = {
+    Try {
+      source.mkString
     } match {
       case Success(contents) => toService(contents)
-      case Failure(ex) => Left(Seq(s"Error downloading url[$url]: ${ex.getMessage}"))
+      case Failure(ex) => Left(Seq(s"Error creating ApiBuilderService: ${ex.getMessage}"))
     }
   }
 
