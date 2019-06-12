@@ -20,14 +20,6 @@ case class MultiServiceImpl(
 
   def findType(namespace: String, name: String): Seq[ApibuilderType] = validator.findType(namespace, name)
 
-  /**
-    * Upcast the json value based on the specified type name
-    *
-    * @param typeName e.g. 'user' - looks up the API Builder type with this name
-    *                 and if found, uses that type to validate and upcase the
-    *                 JSON. Note if the type is not found, the JSON returned
-    *                 is unchanged.
-    */
   def upcast(typeName: String, js: JsValue): Either[Seq[String], JsValue] = {
     validator.validate(typeName, js, defaultNamespace = None)
   }
@@ -36,11 +28,6 @@ case class MultiServiceImpl(
     validator.validateType(typ, js)
   }
 
-  /**
-   * Validates that the path is known and the method is supported for the path.
-   * If known, returns the corresponding operation. Otherwise returns a
-   * list of errors.
-   */
   def validate(method: String, path: String): Either[Seq[String], Operation] = {
     resolveService(method, path) match {
       case Left(errors) => Left(errors)

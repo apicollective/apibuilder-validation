@@ -55,7 +55,7 @@ trait MultiService extends ResponseHelpers {
     * Upcast the json value based on the specified type name
     *
     * @param typeName e.g. 'user' - looks up the API Builder type with this name
-    *                 and if found, uses that type to validate and upcase the
+    *                 and if found, uses that type to validate and upcast the
     *                 JSON. Note if the type is not found, the JSON returned
     *                 is unchanged.
     */
