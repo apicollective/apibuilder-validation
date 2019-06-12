@@ -95,11 +95,12 @@ object ApiBuilderService {
     */
   def fromUrl(url: String): Either[Seq[String], ApiBuilderService] = {
     Try {
-      Source.fromURL(new URL(url),  "UTF-8").mkString
+      val source = Source.fromURL(new URL(url),  "UTF-8")
+      val c = source.mkString
+      source.close()
+      c
     } match {
-      case Success(contents) => {
-        toService(contents)
-      }
+      case Success(contents) => toService(contents)
       case Failure(ex) => Left(Seq(s"Error downloading url[$url]: ${ex.getMessage}"))
     }
   }

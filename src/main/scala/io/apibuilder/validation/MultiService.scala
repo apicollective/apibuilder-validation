@@ -222,13 +222,17 @@ case class MultiService(
 }
 
 object MultiService {
-  
+
+  def fromUrl(url: String): Either[Seq[String], MultiService] = {
+    fromUrls(urls = Seq(url))
+  }
+
   /**
-    * Loads the list of API Builder service specification from the specified URIs,
-    * returning either a list of errors or an instance of MultiService
-    */
+  * Loads the list of API Builder service specification from the specified URIs,
+  * returning either a list of errors or an instance of MultiService
+  */
   def fromUrls(urls: Seq[String]): Either[Seq[String], MultiService] = {
-    val eithers = urls.map { ApiBuilderService.fromUrl }
+    val eithers = urls.map(ApiBuilderService.fromUrl(url))
     if (eithers.forall(_.isRight)) {
       Right(
         MultiService(

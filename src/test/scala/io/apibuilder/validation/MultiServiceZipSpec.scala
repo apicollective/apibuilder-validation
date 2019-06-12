@@ -10,7 +10,8 @@ import org.scalatest.{FunSpec, Matchers}
 
 class MultiServiceZipSpec extends FunSpec with Matchers
   with helpers.ApiBuilderServiceHelpers
-  with helpers.FileHelpers {
+  with helpers.FileHelpers
+{
 
   case class ServiceAndFile(service: Service, file: File)
 
@@ -24,16 +25,26 @@ class MultiServiceZipSpec extends FunSpec with Matchers
     )
   }
 
+  private[this] lazy val service1 = createServiceAndWriteToFile()
+  private[this] lazy val service2 = createServiceAndWriteToFile()
   private[this] lazy val zipFile: File = {
-    val service1 = createServiceAndWriteToFile()
-    val service2 = createServiceAndWriteToFile()
     ZipFileBuilder()
-      .withFile(service1.service.name, service1.file)
-      .withFile(service2.service.name, service2.file)
+      .withFile(service1.service.name + ".json", service1.file)
+      .withFile(service2.service.name + ".json", service2.file)
       .build()
   }
 
   it("loads multi service from zip file") {
     println(s"zipFile: $zipFile")
+    val multiService = MultiService.fromUrl(s"file://$zipFile") match {
+      case Left(errors) => sys.error(s"Failed to load $zipFile: $errors")
+      case Right(ms) => ms
+    }
+    multiService.findType(service1.service.models.head.name).headOption.getOrElse {
+      sys.error("Failed to find service 1 model")
+    }
+    multiService.findType(service2.service.models.head.name).headOption.getOrElse {
+      sys.error("Failed to find service 2 model")
+    }
   }
 }
