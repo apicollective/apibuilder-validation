@@ -1,7 +1,7 @@
 package io.apibuilder.validation
 
 import io.apibuilder.spec.v0.models._
-import io.apibuilder.validation.util.ZipFileReader
+import io.apibuilder.validation.zip.ZipFileReader
 import play.api.libs.json._
 
 /**

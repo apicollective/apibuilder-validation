@@ -4,7 +4,7 @@ import java.io.File
 
 import io.apibuilder.spec.v0.models.json._
 import io.apibuilder.spec.v0.models.Service
-import io.apibuilder.validation.util.ZipFileBuilder
+import io.apibuilder.validation.zip.ZipFileBuilder
 import play.api.libs.json._
 import org.scalatest.{FunSpec, Matchers}
 
