@@ -1,5 +1,7 @@
 package io.apibuilder.validation
 
+import java.util.concurrent.ConcurrentHashMap
+
 import io.apibuilder.spec.v0.models._
 import play.api.libs.json._
 
@@ -95,7 +97,15 @@ case class MultiServiceImpl(
     resolveService(Method(method), path)
   }
 
+  private[this] val resolveServiceCache = new ConcurrentHashMap[String, Either[Seq[String], ApiBuilderService]]()
   private[this] def resolveService(method: Method, path: String): Either[Seq[String], ApiBuilderService] = {
+    resolveServiceCache.computeIfAbsent(
+      s"$method$path",
+      _ => { doResolveService(method, path) }
+    )
+  }
+
+  private[this] def doResolveService(method: Method, path: String): Either[Seq[String], ApiBuilderService] = {
     services.filter { s =>
       s.isDefinedAt(method = method, path = path)
     } match {
