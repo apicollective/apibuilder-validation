@@ -13,6 +13,7 @@ lazy val root = project
   .settings(
     libraryDependencies ++= Seq(
       "com.typesafe.play" %% "play-json" % "2.6.10",
+      "org.apache.commons" % "commons-compress" % "1.18",
       "org.scalatest" %% "scalatest" % "3.0.5" % Test
     ),
     credentials += Credentials(
