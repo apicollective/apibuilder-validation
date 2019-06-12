@@ -12,8 +12,15 @@ object ZipFileReader {
   /**
     * Returns true if url path ends with .zip
     */
-  def isZipFile(url: String): Boolean = {
-    url.trim.split("\\?").head.trim.toLowerCase().endsWith(".zip")
+  def isZipFile(name: String): Boolean = endsWithSuffix(name, "zip")
+
+  /**
+    * Returns true if url path ends with .json
+    */
+  def isJsonFile(name: String): Boolean = endsWithSuffix(name, "json")
+
+  private[this] def endsWithSuffix(name: String, suffix: String) = {
+    name.trim.split("\\?").head.trim.toLowerCase().endsWith(s".$suffix")
   }
 
   def fromUrl(url: String): Either[Seq[String], ZipFileReader] = {
@@ -32,7 +39,7 @@ case class ZipFileReader(inputStream: InputStream) {
   private[this] val destDir: File = Files.createTempDirectory("zipfilereader").toFile
 
   /**
-    * Returns a list of the entries of the zip file
+    * Returns a list of the entries of the zip file (all files ending with .json)
     */
   val entries: Seq[ZipFileEntry] = {
     val all = scala.collection.mutable.ListBuffer[ZipFileEntry]()

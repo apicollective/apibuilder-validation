@@ -1,7 +1,8 @@
 package io.apibuilder.validation
 
 import io.apibuilder.spec.v0.models._
-import io.apibuilder.validation.zip.ZipFileReader
+import io.apibuilder.validation.util.FileOrder
+import io.apibuilder.validation.zip.{FileUtil, ZipFileReader}
 import play.api.libs.json._
 
 /**
@@ -76,6 +77,10 @@ trait MultiService extends ResponseHelpers {
 
 object MultiService {
 
+  // If this file is found in the zip file, we read files in
+  // the order in which they are listed.
+  private[this] val OrderByFileName: String = "order.txt"
+
   def fromUrl(url: String): Either[Seq[String], MultiService] = {
     fromUrls(urls = Seq(url))
   }
@@ -90,7 +95,11 @@ object MultiService {
         ZipFileReader.fromUrl(url) match {
           case Left(errors) => Seq(Left(errors))
           case Right(reader) => {
-            reader.entries.map { e =>
+            val fileSorter = FileOrder(reader.entries.find(_.name.toLowerCase() == OrderByFileName).map(_.file))
+            reader.entries
+              .filter { e => ZipFileReader.isJsonFile(e.name) }
+              .sortBy { e => fileSorter.sortOrder(e.name) }
+              .map { e =>
               ApiBuilderService.fromFile(e.file)
             }
           }

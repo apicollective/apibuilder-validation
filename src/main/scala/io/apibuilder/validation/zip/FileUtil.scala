@@ -2,7 +2,18 @@ package io.apibuilder.validation.zip
 
 import java.io.{File, PrintWriter}
 
+import scala.io.Source
+
 object FileUtil {
+
+  def readFileAsString(file: File): String = {
+    val source = Source.fromFile(file,  "UTF-8")
+    try {
+      source.mkString("")
+    } finally {
+      source.close()
+    }
+  }
 
   def writeToTempFile(
     contents: String,

@@ -8,6 +8,20 @@ import org.scalatest.{FunSpec, Matchers}
 class ZipFileSpec extends FunSpec with Matchers
   with helpers.FileHelpers
 {
+  it("isZipFile") {
+    ZipFileReader.isZipFile("foo.zip") should be(true)
+    ZipFileReader.isZipFile("foo.ZIP") should be(true)
+    ZipFileReader.isZipFile(" foo.zip ") should be(true)
+    ZipFileReader.isZipFile(" foo.csv ") should be(false)
+  }
+
+  it("isJsonFile") {
+    ZipFileReader.isJsonFile("foo.json") should be(true)
+    ZipFileReader.isJsonFile("foo.JSON") should be(true)
+    ZipFileReader.isJsonFile(" foo.json ") should be(true)
+    ZipFileReader.isJsonFile(" foo.csv ") should be(false)
+  }
+
   it("withFile defaults to file name") {
     val tmp = File.createTempFile("foo", "json")
     val zip = ZipFileBuilder().withFile(tmp).build()
