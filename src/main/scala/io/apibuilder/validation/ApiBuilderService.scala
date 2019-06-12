@@ -34,18 +34,22 @@ case class ApiBuilderService(
     * Returns a map of the HTTP Methods available for the given path
     */
   def methodsFromPath(path: String): Seq[Method] = {
-    Method.all.flatMap { m =>
-      normalizer.resolve(m, path)
-    }.map(_.method)
+    Method.all.filter { m =>
+      normalizer.resolve(m, path).isRight
+    }
   }
 
   def isDefinedAt(method: String, path: String): Boolean = {
+    isDefinedAt(Method(method), path)
+  }
+
+  def isDefinedAt(method: Method, path: String): Boolean = {
     validate(method, path).isRight
   }
 
   def isPathDefinedAt(path: String): Boolean = {
     Method.all.exists { m =>
-      normalizer.resolve(m, path).nonEmpty
+      normalizer.resolve(m, path).isRight
     }
   }
 
@@ -54,21 +58,24 @@ case class ApiBuilderService(
     * operation. Otherwise returns an appropriate error message.
     */
   def validate(method: String, path: String): Either[Seq[String], Operation] = {
-    normalizer.resolve(method, path) match {
-      case Left(errors) => Left(errors)
-      case Right(result) => {
-        result match {
-          case Some(op) => Right(op)
-          case None => {
-            methodsFromPath(path).toList match {
-              case Nil => {
-                Left(Seq(s"HTTP path $path is not defined"))
-              }
+    validate(Method(method), path)
+  }
 
-              case available => {
-                Left(Seq(s"HTTP method '$method' not supported for path $path - Available methods: " + available.map(_.toString).mkString(", ")))
-              }
-            }
+  def validate(method: Method, path: String): Either[Seq[String], Operation] = {
+    normalizer.resolve(method, path) match {
+      case Right(op) => Right(op)
+      case Left(_) => {
+        // Provide a friendly error here
+        methodsFromPath(path).toList match {
+          case Nil => {
+            Left(Seq(s"HTTP path $path is not defined"))
+          }
+
+          case available => {
+            Left(Seq(
+              s"HTTP method '$method' not supported for path $path - Available methods: " +
+                available.map(_.toString).mkString(", ")
+            ))
           }
         }
       }
@@ -76,12 +83,13 @@ case class ApiBuilderService(
   }
 
   /**
-    * Returns the operation associated with the specified method and path, if any
+    * Returns the operation associated with the specified method
+    * and path, if any
     */
   def operation(method: String, path: String): Option[Operation] = {
-    Method.fromString(method) match {
-      case None => None
-      case Some(m) => normalizer.resolve(m, path)
+    normalizer.resolve(method, path) match {
+      case Left(_) => None
+      case Right(op) => Some(op)
     }
   }
 

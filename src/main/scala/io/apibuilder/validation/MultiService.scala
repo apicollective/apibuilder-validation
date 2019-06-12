@@ -183,6 +183,10 @@ case class MultiService(
     * the provided function on the API Builder service.
     */
   private[validation] def resolveService(method: String, path: String): Either[Seq[String], ApiBuilderService] = {
+    resolveService(Method(method), path)
+  }
+
+  private[this] def resolveService(method: Method, path: String): Either[Seq[String], ApiBuilderService] = {
     services.filter { s =>
       s.isDefinedAt(method = method, path = path)
     } match {
