@@ -5,9 +5,9 @@ import io.apibuilder.validation.helpers.Helpers
 import play.api.libs.json._
 import org.scalatest.{FunSpec, Matchers}
 
-class MultiServiceSpec extends FunSpec with Matchers with Helpers {
+class MultiServiceImplImplSpec extends FunSpec with Matchers with Helpers {
 
-  private[this] lazy val multi = MultiService(
+  private[this] lazy val multi = MultiServiceImpl(
     Seq("flow-api-service.json", "apibuilder-api-service.json").map(loadService)
   )
 

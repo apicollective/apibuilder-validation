@@ -2,7 +2,7 @@ package io.apibuilder.validation.helpers
 
 import io.apibuilder.spec.v0.models.Service
 import io.apibuilder.spec.v0.models.json._
-import io.apibuilder.validation.{ApiBuilderService, MultiService}
+import io.apibuilder.validation.{ApiBuilderService, MultiService, MultiServiceImpl}
 import play.api.libs.json.Json
 
 trait Helpers {
@@ -23,7 +23,7 @@ trait Helpers {
   }
 
   def loadMultiService(files: Seq[String]): MultiService = {
-    MultiService(files.map(loadService))
+    MultiServiceImpl(files.map(loadService))
   }
 
   lazy val apibuilderMultiService: MultiService = {
