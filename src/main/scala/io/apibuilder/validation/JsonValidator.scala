@@ -14,8 +14,8 @@ import scala.util.{Failure, Success, Try}
   */
 object Booleans {
 
-  val TrueValues = Seq("t", "true", "y", "yes", "on", "1", "trueclass")
-  val FalseValues = Seq("f", "false", "n", "no", "off", "0", "falseclass")
+  val TrueValues: Seq[String] = Seq("t", "true", "y", "yes", "on", "1", "trueclass")
+  val FalseValues: Seq[String] = Seq("f", "false", "n", "no", "off", "0", "falseclass")
 
 }
 

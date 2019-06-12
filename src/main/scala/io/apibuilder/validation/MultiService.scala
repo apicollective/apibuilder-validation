@@ -37,7 +37,19 @@ trait MultiService extends ResponseHelpers {
     * Validates the js value across all services, upcasting types to
     * match the request method/path as needed.
     */
-  def upcast(method: String, path: String, js: JsValue): Either[Seq[String], JsValue]
+  final def upcast(operation: Operation, js: JsValue): Either[Seq[String], JsValue] = {
+    operation.body.map(_.`type`) match {
+      case None => Right(js)
+      case Some(typeName) => upcast(typeName, js)
+    }
+  }
+
+  final def upcast(method: String, path: String, js: JsValue): Either[Seq[String], JsValue] = {
+    validate(method, path) match {
+      case Left(errors) => Left(errors)
+      case Right(op) => upcast(op, js)
+    }
+  }
 
   /**
     * Upcast the json value based on the specified type name

@@ -21,38 +21,6 @@ case class MultiServiceImpl(
   def findType(namespace: String, name: String): Seq[ApibuilderType] = validator.findType(namespace, name)
 
   /**
-    * Validates the js value across all services, upcasting types to
-    * match the request method/path as needed.
-    */
-  def upcast(method: String, path: String, js: JsValue): Either[Seq[String], JsValue] = {
-    resolveService(method, path) match {
-      case Left(errors) => {
-        Left(errors)
-      }
-      case Right(service) => {
-        service.validate(method = method, path = path) match {
-          case Left(errors) => {
-            Left(errors)
-          }
-          case Right(op) => {
-            op.body.map(_.`type`) match {
-              case None => {
-                Right(js)
-              }
-              case Some(typeName) => {
-                service.findType(typeName) match {
-                  case None => upcast(typeName, js)
-                  case Some(typ) => upcast(typ, js)
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  /**
     * Upcast the json value based on the specified type name
     *
     * @param typeName e.g. 'user' - looks up the apibuilder type with this name
