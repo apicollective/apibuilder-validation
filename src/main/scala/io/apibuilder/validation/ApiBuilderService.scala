@@ -6,7 +6,6 @@ import io.apibuilder.spec.v0.models.{Method, Operation, Service}
 import io.apibuilder.spec.v0.models.json._
 import java.net.URL
 
-import io.apibuilder.validation.ApiBuilderService.fromSource
 import play.api.libs.json._
 
 import scala.io.Source
