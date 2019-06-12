@@ -11,7 +11,7 @@ class ZipFileSpec extends FunSpec with Matchers
   it("withFile defaults to file name") {
     val tmp = File.createTempFile("foo", "json")
     val zip = ZipFileBuilder().withFile(tmp).build()
-    ZipFileReader.fromFile(zip).right.get.entries.map(_.name) should equal(
+    ZipFileReader.fromFile(zip).entries.map(_.name) should equal(
       Seq(tmp.getName)
     )
   }
@@ -19,7 +19,7 @@ class ZipFileSpec extends FunSpec with Matchers
   it("withFile respects given name") {
     val tmp = File.createTempFile("foo", "json")
     val zip = ZipFileBuilder().withFile("bar.json", tmp).build()
-    ZipFileReader.fromFile(zip).right.get.entries.map(_.name) should equal(
+    ZipFileReader.fromFile(zip).entries.map(_.name) should equal(
       Seq("bar.json")
     )
   }
@@ -29,7 +29,7 @@ class ZipFileSpec extends FunSpec with Matchers
       .withFile("foo.json", writeToTempFile("foo"))
       .withFile("bar.json", writeToTempFile("bar"))
       .build()
-    val entries = ZipFileReader.fromFile(zip).right.get.entries
+    val entries = ZipFileReader.fromFile(zip).entries
     entries.map(_.name).sorted should equal(
       Seq("bar.json", "foo.json")
     )

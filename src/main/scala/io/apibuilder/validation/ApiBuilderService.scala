@@ -1,15 +1,13 @@
 package io.apibuilder.validation
 
-import java.io.File
+import java.io.{BufferedInputStream, ByteArrayOutputStream, File, FileInputStream, InputStream}
 
 import io.apibuilder.spec.v0.models.{Method, Operation, Service}
 import io.apibuilder.spec.v0.models.json._
-import java.net.URL
+import java.nio.charset.StandardCharsets
 
+import io.apibuilder.validation.util.UrlDownloader
 import play.api.libs.json._
-
-import scala.io.Source
-import scala.util.{Failure, Success, Try}
 
 /**
   * Wraps a single API Builder service, providing helpers to validate
@@ -96,35 +94,33 @@ object ApiBuilderService {
     * returning either a list of errors or the service itself.
     */
   def fromUrl(url: String): Either[Seq[String], ApiBuilderService] = {
-    Try {
-      val source = Source.fromURL(new URL(url), "UTF-8")
-      try {
-        fromSource(source)
-      } finally {
-        source.close()
-      }
-    } match {
-      case Success(r) => r
-      case Failure(ex) => Left(Seq(s"Error creating ApiBuilderService from url[$url]: ${ex.getMessage}"))
+    UrlDownloader.withInputStream(url) { is =>
+      fromInputStream(is)
     }
   }
 
   def fromFile(file: File): Either[Seq[String], ApiBuilderService] = {
-    val source = Source.fromFile(file,  "UTF-8")
+    val is = new BufferedInputStream(new FileInputStream(file))
     try {
-      fromSource(source)
+      fromInputStream(is)
     } finally {
-      source.close()
+      is.close()
     }
   }
 
-  def fromSource(source: Source): Either[Seq[String], ApiBuilderService] = {
-    Try {
-      source.mkString
-    } match {
-      case Success(contents) => toService(contents)
-      case Failure(ex) => Left(Seq(s"Error creating ApiBuilderService: ${ex.getMessage}"))
+  def fromInputStream(inputStream: InputStream): Either[Seq[String], ApiBuilderService] = {
+    toService(copyToString(inputStream))
+  }
+
+  private[this] def copyToString(inputStream: InputStream): String = {
+    val result = new ByteArrayOutputStream()
+    val buffer = new Array[Byte](1024)
+    var length = inputStream.read(buffer)
+    while (length != -1) {
+      result.write(buffer, 0, length)
+      length = inputStream.read(buffer)
     }
+    result.toString(StandardCharsets.UTF_8.name())
   }
 
   def toService(contents: String): Either[Seq[String], ApiBuilderService] = {

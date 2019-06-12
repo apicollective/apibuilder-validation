@@ -1,10 +1,11 @@
 package io.apibuilder.validation.zip
 
 import java.io.{BufferedInputStream, File, FileInputStream, FileOutputStream, InputStream}
-import java.net.URL
 import java.nio.file.Files
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
+
+import io.apibuilder.validation.util.UrlDownloader
 
 object ZipFileReader {
 
@@ -16,18 +17,13 @@ object ZipFileReader {
   }
 
   def fromUrl(url: String): Either[Seq[String], ZipFileReader] = {
-    val u = new URL(url)
-    val is = new BufferedInputStream(u.openStream, 1024)
-    val reader = ZipFileReader(is)
-    is.close()
-    Right(reader)
+    UrlDownloader.withInputStream(url) { is =>
+      Right(ZipFileReader(is))
+    }
   }
 
-  def fromFile(file: File): Either[Seq[String], ZipFileReader] = {
-    val is = new BufferedInputStream(new FileInputStream(file))
-    val reader = ZipFileReader(is)
-    is.close()
-    Right(reader)
+  def fromFile(file: File): ZipFileReader = {
+    ZipFileReader(new BufferedInputStream(new FileInputStream(file)))
   }
 }
 
