@@ -233,7 +233,6 @@ object MultiService {
   * returning either a list of errors or an instance of MultiService
   */
   def fromUrls(urls: Seq[String]): Either[Seq[String], MultiService] = {
-    println(s"urls: " + urls)
     val eithers = urls.flatMap { url =>
       if (ZipFileReader.isZipFile(url)) {
         ZipFileReader.fromUrl(url) match {
@@ -248,14 +247,16 @@ object MultiService {
         Seq(ApiBuilderService.fromUrl(url))
       }
     }
-    if (eithers.forall(_.isRight)) {
-      Right(
-        MultiService(
-          services = eithers.map(_.right.get)
+
+    eithers.flatMap(_.left.getOrElse(Nil)).toList match {
+      case Nil => {
+        Right(
+          MultiService(
+            services = eithers.map(_.right.get)
+          )
         )
-      )
-    } else {
-      Left(eithers.flatMap(_.left.getOrElse(Nil)))
+      }
+      case errors => Left(errors)
     }
   }
 

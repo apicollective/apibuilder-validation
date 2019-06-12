@@ -35,7 +35,6 @@ class MultiServiceZipSpec extends FunSpec with Matchers
   }
 
   it("loads multi service from zip file") {
-    println(s"zipFile: $zipFile")
     val multiService = MultiService.fromUrl(s"file://$zipFile") match {
       case Left(errors) => sys.error(s"Failed to load $zipFile: $errors")
       case Right(ms) => ms

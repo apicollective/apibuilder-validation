@@ -96,11 +96,16 @@ object ApiBuilderService {
     * returning either a list of errors or the service itself.
     */
   def fromUrl(url: String): Either[Seq[String], ApiBuilderService] = {
-    val source = Source.fromURL(new URL(url),  "UTF-8")
-    try {
-      fromSource(source)
-    } finally {
-      source.close()
+    Try {
+      val source = Source.fromURL(new URL(url), "UTF-8")
+      try {
+        fromSource(source)
+      } finally {
+        source.close()
+      }
+    } match {
+      case Success(r) => r
+      case Failure(ex) => Left(Seq(s"Error creating ApiBuilderService from url[$url]: ${ex.getMessage}"))
     }
   }
 
