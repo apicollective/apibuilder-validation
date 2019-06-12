@@ -6,7 +6,7 @@ import io.apibuilder.spec.v0.models.{Method, Operation, Service}
 import io.apibuilder.spec.v0.models.json._
 import java.nio.charset.StandardCharsets
 
-import io.apibuilder.validation.util.UrlDownloader
+import io.apibuilder.validation.util.{StandardErrors, UrlDownloader}
 import play.api.libs.json._
 
 /**
@@ -58,7 +58,10 @@ case class ApiBuilderService(
     * operation. Otherwise returns an appropriate error message.
     */
   def validate(method: String, path: String): Either[Seq[String], Operation] = {
-    validate(Method(method), path)
+    Method.fromString(method) match {
+      case None => Left(Seq(StandardErrors.invalidMethodError(method)))
+      case Some(m) => validate(m, path)
+    }
   }
 
   def validate(method: Method, path: String): Either[Seq[String], Operation] = {

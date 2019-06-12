@@ -1,6 +1,7 @@
 package io.apibuilder.validation
 
 import io.apibuilder.spec.v0.models._
+import io.apibuilder.validation.util.StandardErrors
 import io.apibuilder.validation.zip.ZipFileReader
 import play.api.libs.json._
 
@@ -183,7 +184,10 @@ case class MultiService(
     * the provided function on the API Builder service.
     */
   private[validation] def resolveService(method: String, path: String): Either[Seq[String], ApiBuilderService] = {
-    resolveService(Method(method), path)
+    Method.fromString(method) match {
+      case None => Left(Seq(StandardErrors.invalidMethodError(method)))
+      case Some(m) => resolveService(m, path)
+    }
   }
 
   private[this] def resolveService(method: Method, path: String): Either[Seq[String], ApiBuilderService] = {

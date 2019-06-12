@@ -1,6 +1,7 @@
 package io.apibuilder.validation
 
 import io.apibuilder.spec.v0.models.{Method, Operation, Service}
+import io.apibuilder.validation.util.StandardErrors
 
 object PathNormalizer {
 
@@ -86,7 +87,7 @@ case class PathNormalizer(operations: Seq[Operation]) {
   final def resolve(method: Method, path: String): Either[Seq[String], Operation] = {
     method match {
       case Method.UNDEFINED(m) => {
-        Left(Seq(s"HTTP method '$m' is invalid. Must be one of: " + Method.all.map(_.toString).mkString(", ")))
+        Left(Seq(StandardErrors.invalidMethodError(m)))
       }
       case _ => {
         staticRouteMap.get(routeKey(method, path)) match {
