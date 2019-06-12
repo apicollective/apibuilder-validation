@@ -1,6 +1,7 @@
 package io.apibuilder.validation
 
 import io.apibuilder.spec.v0.models._
+import io.apibuilder.validation.zip.ZipFileReader
 import play.api.libs.json._
 
 /**
@@ -222,21 +223,40 @@ case class MultiService(
 }
 
 object MultiService {
-  
+
+  def fromUrl(url: String): Either[Seq[String], MultiService] = {
+    fromUrls(urls = Seq(url))
+  }
+
   /**
-    * Loads the list of API Builder service specification from the specified URIs,
-    * returning either a list of errors or an instance of MultiService
-    */
+  * Loads the list of API Builder service specification from the specified URIs,
+  * returning either a list of errors or an instance of MultiService
+  */
   def fromUrls(urls: Seq[String]): Either[Seq[String], MultiService] = {
-    val eithers = urls.map { ApiBuilderService.fromUrl }
-    if (eithers.forall(_.isRight)) {
-      Right(
-        MultiService(
-          services = eithers.map(_.right.get)
+    val eithers = urls.flatMap { url =>
+      if (ZipFileReader.isZipFile(url)) {
+        ZipFileReader.fromUrl(url) match {
+          case Left(errors) => Seq(Left(errors))
+          case Right(reader) => {
+            reader.entries.map { e =>
+              ApiBuilderService.fromFile(e.file)
+            }
+          }
+        }
+      } else {
+        Seq(ApiBuilderService.fromUrl(url))
+      }
+    }
+
+    eithers.flatMap(_.left.getOrElse(Nil)).toList match {
+      case Nil => {
+        Right(
+          MultiService(
+            services = eithers.map(_.right.get)
+          )
         )
-      )
-    } else {
-      Left(eithers.flatMap(_.left.getOrElse(Nil)))
+      }
+      case errors => Left(errors)
     }
   }
 
