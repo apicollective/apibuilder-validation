@@ -24,6 +24,17 @@ case class ZipFileBuilder(
   }
 
   /**
+    * Creates a new file with the specified text contents, adding
+    * to the zip file.
+    */
+  def withTextFile(name: String, contents: String): ZipFileBuilder = {
+    val file = FileUtil.writeToTempFile(contents = contents)
+    this.copy(
+      entries = entries ++ Seq(ZipFileEntry(name = name, file = file))
+    )
+  }
+
+  /**
     * Creates a zip file using a temporary file
     */
   def build(): File = {

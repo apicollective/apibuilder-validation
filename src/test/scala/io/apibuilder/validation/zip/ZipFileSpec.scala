@@ -24,6 +24,15 @@ class ZipFileSpec extends FunSpec with Matchers
     )
   }
 
+  it("withTextFile") {
+    val zip = ZipFileBuilder().withTextFile("order.txt", "a\nb").build()
+    val reader = ZipFileReader.fromFile(zip)
+    reader.entries.map(_.name) should equal(
+      Seq("order.txt")
+    )
+    readFileAsString(reader.entries.head.file).split("\n") should equal(Seq("a", "b"))
+  }
+
   it("files are preserved") {
     val zip = ZipFileBuilder()
       .withFile("foo.json", writeToTempFile("foo"))

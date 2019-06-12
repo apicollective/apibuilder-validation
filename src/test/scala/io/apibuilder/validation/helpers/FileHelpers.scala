@@ -1,6 +1,8 @@
 package io.apibuilder.validation.helpers
 
-import java.io.{File, PrintWriter}
+import java.io.File
+
+import io.apibuilder.validation.zip.FileUtil
 
 import scala.io.Source
 
@@ -20,16 +22,11 @@ trait FileHelpers {
     prefix: String = "apibuildervalidation",
     suffix: String = "tmp"
   ): File = {
-    val tmp = File.createTempFile(prefix, s".$suffix")
-    tmp.deleteOnExit()
-    new PrintWriter(tmp) {
-      try {
-        write(contents)
-      } finally {
-        close()
-      }
-    }
-    tmp
+    FileUtil.writeToTempFile(
+      contents = contents,
+      prefix = prefix,
+      suffix = suffix
+    )
   }
 }
 
