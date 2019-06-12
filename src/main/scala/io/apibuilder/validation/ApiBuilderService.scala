@@ -5,6 +5,7 @@ import java.io.{BufferedInputStream, ByteArrayOutputStream, File, FileInputStrea
 import io.apibuilder.spec.v0.models.{Method, Operation, Service}
 import io.apibuilder.spec.v0.models.json._
 import java.nio.charset.StandardCharsets
+import java.util.concurrent.ConcurrentHashMap
 
 import io.apibuilder.validation.util.{StandardErrors, UrlDownloader}
 import play.api.libs.json._
@@ -58,20 +59,14 @@ case class ApiBuilderService(
     * operation. Otherwise returns an appropriate error message.
     */
   def validate(method: String, path: String): Either[Seq[String], Operation] = {
-    Method.fromString(method) match {
-      case None => Left(Seq(StandardErrors.invalidMethodError(method)))
-      case Some(m) => validate(m, path)
-    }
+    validate(Method(method), path)
   }
 
-  // TODO: Use concurrent hash
-  private[this] case class MethodPathCacheKey(method: Method, path: String)
-  private[this] val cache = scala.collection.mutable.HashMap[MethodPathCacheKey, Either[Seq[String], Operation]]()
+  private[this] val validateCache = new ConcurrentHashMap[String, Either[Seq[String], Operation]]()
   def validate(method: Method, path: String): Either[Seq[String], Operation] = {
-    val key = MethodPathCacheKey(method, path)
-    cache.getOrElseUpdate(
-      key,
-      doValidate(method, path)
+    validateCache.computeIfAbsent(
+      s"$method$path",
+      _ => { doValidate(method, path) }
     )
   }
 
@@ -80,16 +75,21 @@ case class ApiBuilderService(
       case Right(op) => Right(op)
       case Left(_) => {
         // Provide a friendly error here
-        methodsFromPath(path).toList match {
-          case Nil => {
-            Left(Seq(s"HTTP path $path is not defined"))
-          }
+        method match {
+          case Method.UNDEFINED(m) => Left(Seq(StandardErrors.invalidMethodError(m)))
+          case _ => {
+            methodsFromPath(path).toList match {
+              case Nil => {
+                Left(Seq(s"HTTP path $path is not defined"))
+              }
 
-          case available => {
-            Left(Seq(
-              s"HTTP method '$method' not supported for path $path - Available methods: " +
-                available.map(_.toString).mkString(", ")
-            ))
+              case available => {
+                Left(Seq(
+                  s"HTTP method '$method' not supported for path $path - Available methods: " +
+                    available.map(_.toString).mkString(", ")
+                ))
+              }
+            }
           }
         }
       }
@@ -101,14 +101,9 @@ case class ApiBuilderService(
     * and path, if any
     */
   def operation(method: String, path: String): Option[Operation] = {
-    Method.fromString(method) match {
-      case None => None
-      case Some(m) => {
-        normalizer.resolve(m, path) match {
-          case Left(_) => None
-          case Right(op) => Some(op)
-        }
-      }
+    normalizer.resolve(Method(method), path) match {
+      case Left(_) => None
+      case Right(op) => Some(op)
     }
   }
 

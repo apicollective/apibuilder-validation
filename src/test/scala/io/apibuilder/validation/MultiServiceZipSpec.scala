@@ -61,7 +61,7 @@ class MultiServiceZipSpec extends FunSpec with Matchers
     flowMultiService.validate("GET", "/users").right.get
 
     def run(service: MultiService) = {
-      time(5000) {
+      time(10000) {
         service.validate("GET", "/users")
       }
     }
