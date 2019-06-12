@@ -46,4 +46,9 @@ class MultiServiceZipSpec extends FunSpec with Matchers
       sys.error("Failed to find service 2 model")
     }
   }
+
+  it("Able to download service from the internet") {
+    val multi = MultiService.fromUrl("https://cdn.flow.io/util/lib-apibuilder/specs.zip").right.get
+    println(s"Multi: ${multi.services.size}")
+  }
 }
