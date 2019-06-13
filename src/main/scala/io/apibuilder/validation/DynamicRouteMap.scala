@@ -19,7 +19,7 @@ case class StaticRouteMap(routes: Seq[OperationWithRoute]) {
 case class DynamicRouteMap(routes: Seq[OperationWithRoute]) {
   private[this] val byMethod: Map[Method, Seq[OperationWithRoute]] = routes.groupBy(_.route.method)
 
-  // make constant time
+  // TODO: can we make constant time?
   def find(method: Method, path: String): Option[OperationWithRoute] = {
     byMethod.get(method) match {
       case None => None
