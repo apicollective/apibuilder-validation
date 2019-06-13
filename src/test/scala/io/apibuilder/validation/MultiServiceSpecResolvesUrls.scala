@@ -70,12 +70,12 @@ class MultiServiceSpecResolvesUrls extends FunSpec with Matchers with Helpers {
   }
 
   it("resolves static methods over dynamic ones") {
-    flowMultiService.asInstanceOf[MultiServiceImpl].resolveService("POST", "/demo/tokens").right.get.service.name should equal("API")
+    flowMultiService.asInstanceOf[MultiServiceImpl].resolveService(Method.Post, "/demo/tokens").right.get.service.name should equal("API")
     flowMultiService.bodyTypeFromPath("POST", "/:organization/tokens") should equal(
       Some("organization_token_form")
     )
 
-    flowMultiService.asInstanceOf[MultiServiceImpl].resolveService("POST", "/users/tokens").right.get.service.name should equal("API Internal")
+    flowMultiService.asInstanceOf[MultiServiceImpl].resolveService(Method.Post, "/users/tokens").right.get.service.name should equal("API Internal")
     flowMultiService.bodyTypeFromPath("POST", "/users/tokens") should equal(
       None
     )

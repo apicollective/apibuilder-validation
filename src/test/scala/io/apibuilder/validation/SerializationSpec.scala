@@ -28,7 +28,6 @@ class SerializationSpec extends FunSpec with Matchers with helpers.Helpers {
       )
     )
     val encoded = FormData.toEncoded(Json.toJson(form))
-    println(encoded)
     encoded should equal(
       "number=1&name=test&description=desc&price=100.0&attributes[coo]=CHN&attributes[material]=leather&locale=en-US&categories[0]=shoes&categories[1]=dresses&currency=USD&images[0][url]=http%3A%2F%2Fiomage.jpg"
     )

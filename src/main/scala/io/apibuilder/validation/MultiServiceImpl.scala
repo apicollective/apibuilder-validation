@@ -28,7 +28,7 @@ case class MultiServiceImpl(
     validator.validateType(typ, js)
   }
 
-  def validate(method: String, path: String): Either[Seq[String], Operation] = {
+  def validate(method: Method, path: String): Either[Seq[String], Operation] = {
     resolveService(method, path) match {
       case Left(errors) => Left(errors)
       case Right(service) => service.validate(method, path)
@@ -43,17 +43,14 @@ case class MultiServiceImpl(
     validator.validateType(typ, js, prefix)
   }
 
+  private[this] val resolveServiceCache = new ConcurrentHashMap[String, Either[Seq[String], ApiBuilderService]]()
+
   /**
     * resolve the API Builder service defined at the provided method, path.
     * if no service, return a nice error message. Otherwise invoke
     * the provided function on the API Builder service.
     */
-  private[validation] def resolveService(method: String, path: String): Either[Seq[String], ApiBuilderService] = {
-    resolveService(Method(method), path)
-  }
-
-  private[this] val resolveServiceCache = new ConcurrentHashMap[String, Either[Seq[String], ApiBuilderService]]()
-  private[this] def resolveService(method: Method, path: String): Either[Seq[String], ApiBuilderService] = {
+  def resolveService(method: Method, path: String): Either[Seq[String], ApiBuilderService] = {
     resolveServiceCache.computeIfAbsent(
       s"$method$path",
       _ => { doResolveService(method, path) }

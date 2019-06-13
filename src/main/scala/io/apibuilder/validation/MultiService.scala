@@ -2,7 +2,7 @@ package io.apibuilder.validation
 
 import io.apibuilder.spec.v0.models._
 import io.apibuilder.validation.util.FileOrder
-import io.apibuilder.validation.zip.{FileUtil, ZipFileReader}
+import io.apibuilder.validation.zip.ZipFileReader
 import play.api.libs.json._
 
 /**
@@ -69,7 +69,11 @@ trait MultiService extends ResponseHelpers {
    * If known, returns the corresponding operation. Otherwise returns a
    * list of errors.
    */
-  def validate(method: String, path: String): Either[Seq[String], Operation]
+  final def validate(method: String, path: String): Either[Seq[String], Operation] = {
+    validate(Method(method), path)
+  }
+
+  def validate(method: Method, path: String): Either[Seq[String], Operation]
 
   def validate(typ: ApibuilderType, js: JsValue, prefix: Option[String] = None): Either[Seq[String], JsValue]
 
@@ -99,9 +103,7 @@ object MultiService {
             reader.entries
               .filter { e => ZipFileReader.isJsonFile(e.name) }
               .sortBy { e => fileSorter.sortOrder(e.name) }
-              .map { e =>
-              ApiBuilderService.fromFile(e.file)
-            }
+              .map { e => ApiBuilderService.fromFile(e.file) }
           }
         }
       } else {
