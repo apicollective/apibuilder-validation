@@ -2,21 +2,24 @@ package io.apibuilder.validation
 
 import io.apibuilder.spec.v0.models.Method
 
-case class RouteKey(method: Method, path: String)
-
 case class StaticRouteMap(routes: Seq[OperationWithRoute]) {
-  private[this] val lookup: Map[RouteKey, OperationWithRoute] = Map(
+  private[this] def key(method: Method, path: String): String = {
+    s"$method$path"
+  }
+
+  private[this] val lookup: Map[String, OperationWithRoute] = Map(
     routes.map { op =>
-      RouteKey(op.route.method, op.route.path) -> op
+      key(op.route.method, op.route.path) -> op
     }: _*
   )
 
   def find(method: Method, path: String): Option[OperationWithRoute] = {
-    lookup.get(RouteKey(method, path))
+    lookup.get(key(method, path))
   }
 }
 
 case class DynamicRouteMap(routes: Seq[OperationWithRoute]) {
+
   private[this] val byMethod: Map[Method, Seq[OperationWithRoute]] = routes.groupBy(_.route.method)
 
   // TODO: can we make constant time?
