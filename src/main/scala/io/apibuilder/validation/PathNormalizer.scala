@@ -41,39 +41,16 @@ case class PathNormalizer(operations: Seq[Operation]) {
     val opsWithRoute = operations.map { op => OperationWithRoute(op) }
 
     // Map from method name to list of operations
-    val tmpDynamicRouteMap = scala.collection.mutable.Map[Method, Seq[OperationWithRoute]]()
-    opsWithRoute.foreach { opWithRoute =>
+    val (staticRoutes, dynamicRoutes) = opsWithRoute.partition { opWithRoute =>
       opWithRoute.route match {
-        case r: Route.Dynamic => {
-          tmpDynamicRouteMap.get(r.method) match {
-            case None => {
-              tmpDynamicRouteMap += (r.method -> Seq(opWithRoute))
-            }
-            case Some(existing) => {
-              tmpDynamicRouteMap += (r.method -> (existing ++ Seq(opWithRoute)))
-            }
-          }
-        }
-        case _: Route.Static => // no-op
+        case _: Route.Static => true
+        case _: Route.Dynamic => false
       }
     }
-
-    val staticRoutes = opsWithRoute.flatMap { opWithRoute =>
-      opWithRoute.route match {
-        case _: Route.Static => Some(opWithRoute)
-        case _ => None
-      }
-    }
-
-    val tmpStaticRouteMap = Map[RouteKey, OperationWithRoute](
-      staticRoutes.map { opWithRoute =>
-        RouteKey(opWithRoute.op.method, opWithRoute.op.path) -> opWithRoute
-      }: _*
-    )
 
     (
-      StaticRouteMap(tmpStaticRouteMap),
-      DynamicRouteMap(tmpDynamicRouteMap.toMap)
+      StaticRouteMap(staticRoutes),
+      DynamicRouteMap(dynamicRoutes)
     )
   }
 
@@ -84,14 +61,14 @@ case class PathNormalizer(operations: Seq[Operation]) {
       }
       case _ => {
         staticRouteMap.find(method, path) match {
+          case Some(opWithRoute) => {
+            Right(opWithRoute.op)
+          }
           case None => {
             dynamicRouteMap.find(method, path) match {
               case None => Left(Seq(s"HTTP Operation '$method $path' is not defined"))
               case Some(route) => Right(route.op)
             }
-          }
-          case Some(opWithRoute) => {
-            Right(opWithRoute.op)
           }
         }
       }
