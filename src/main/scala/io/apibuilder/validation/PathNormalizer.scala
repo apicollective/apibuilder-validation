@@ -37,41 +37,21 @@ case class PathNormalizer(operations: Seq[Operation]) {
     *   - static routes are simple lookups by path (Map[String, Route])
     *   - dynamic routes is a map from the HTTP Method to a list of routes to try (Seq[Route])
     */
-  private[this] val (staticRouteMap, dynamicRouteMap) = {
+  private[this] val (staticRouteMap: StaticRouteMap, dynamicRouteMap: DynamicRouteMap) = {
     val opsWithRoute = operations.map { op => OperationWithRoute(op) }
 
     // Map from method name to list of operations
-    val tmpDynamicRouteMap = scala.collection.mutable.Map[Method, Seq[OperationWithRoute]]()
-    opsWithRoute.foreach { opWithRoute =>
+    val (staticRoutes, dynamicRoutes) = opsWithRoute.partition { opWithRoute =>
       opWithRoute.route match {
-        case r: Route.Dynamic => {
-          tmpDynamicRouteMap.get(r.method) match {
-            case None => {
-              tmpDynamicRouteMap += (r.method -> Seq(opWithRoute))
-            }
-            case Some(existing) => {
-              tmpDynamicRouteMap += (r.method -> (existing ++ Seq(opWithRoute)))
-            }
-          }
-        }
-        case _: Route.Static => // no-op
+        case _: Route.Static => true
+        case _: Route.Dynamic => false
       }
     }
 
-    val staticRoutes = opsWithRoute.flatMap { opWithRoute =>
-      opWithRoute.route match {
-        case _: Route.Static => Some(opWithRoute)
-        case _ => None
-      }
-    }
-
-    val tmpStaticRouteMap = Map(
-      staticRoutes.map { opWithRoute =>
-        routeKey(opWithRoute.op.method, opWithRoute.op.path) -> opWithRoute
-      }: _*
+    (
+      StaticRouteMap(staticRoutes),
+      DynamicRouteMap(dynamicRoutes)
     )
-
-    (tmpStaticRouteMap, tmpDynamicRouteMap.toMap)
   }
 
   final def resolve(method: Method, path: String): Either[Seq[String], Operation] = {
@@ -80,27 +60,21 @@ case class PathNormalizer(operations: Seq[Operation]) {
         Left(Seq(StandardErrors.invalidMethodError(m)))
       }
       case _ => {
-        staticRouteMap.get(routeKey(method, path)) match {
+        staticRouteMap.find(method, path) match {
+          case Some(opWithRoute) => {
+            Right(opWithRoute.op)
+          }
           case None => {
-            // make constant time
-            dynamicRouteMap.getOrElse(method, Nil).find { opWithRoute =>
-              opWithRoute.route.matches(method, path.trim)
-            } match {
+            dynamicRouteMap.find(method, path) match {
               case None => Left(Seq(s"HTTP Operation '$method $path' is not defined"))
               case Some(route) => Right(route.op)
             }
-          }
-          case Some(opWithRoute) => {
-            Right(opWithRoute.op)
           }
         }
       }
     }
   }
 
-  private[this] def routeKey(method: Method, path: String): String = {
-    s"$method:${path.trim}"
-  }
 }
 
 private[validation] case class OperationWithRoute(
