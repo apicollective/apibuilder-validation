@@ -37,7 +37,7 @@ case class PathNormalizer(operations: Seq[Operation]) {
     *   - static routes are simple lookups by path (Map[String, Route])
     *   - dynamic routes is a map from the HTTP Method to a list of routes to try (Seq[Route])
     */
-  private[this] val (staticRouteMap, dynamicRouteMap) = {
+  private[this] val (staticRouteMap: StaticRouteMap, dynamicRouteMap: DynamicRouteMap) = {
     val opsWithRoute = operations.map { op => OperationWithRoute(op) }
 
     // Map from method name to list of operations
@@ -65,13 +65,16 @@ case class PathNormalizer(operations: Seq[Operation]) {
       }
     }
 
-    val tmpStaticRouteMap = Map(
+    val tmpStaticRouteMap = Map[RouteKey, OperationWithRoute](
       staticRoutes.map { opWithRoute =>
-        routeKey(opWithRoute.op.method, opWithRoute.op.path) -> opWithRoute
+        RouteKey(opWithRoute.op.method, opWithRoute.op.path) -> opWithRoute
       }: _*
     )
 
-    (tmpStaticRouteMap, tmpDynamicRouteMap.toMap)
+    (
+      StaticRouteMap(tmpStaticRouteMap),
+      DynamicRouteMap(tmpDynamicRouteMap.toMap)
+    )
   }
 
   final def resolve(method: Method, path: String): Either[Seq[String], Operation] = {
@@ -80,12 +83,9 @@ case class PathNormalizer(operations: Seq[Operation]) {
         Left(Seq(StandardErrors.invalidMethodError(m)))
       }
       case _ => {
-        staticRouteMap.get(routeKey(method, path)) match {
+        staticRouteMap.find(method, path) match {
           case None => {
-            // make constant time
-            dynamicRouteMap.getOrElse(method, Nil).find { opWithRoute =>
-              opWithRoute.route.matches(method, path.trim)
-            } match {
+            dynamicRouteMap.find(method, path) match {
               case None => Left(Seq(s"HTTP Operation '$method $path' is not defined"))
               case Some(route) => Right(route.op)
             }
@@ -98,9 +98,6 @@ case class PathNormalizer(operations: Seq[Operation]) {
     }
   }
 
-  private[this] def routeKey(method: Method, path: String): String = {
-    s"$method:${path.trim}"
-  }
 }
 
 private[validation] case class OperationWithRoute(
