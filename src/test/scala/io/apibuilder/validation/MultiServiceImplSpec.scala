@@ -19,11 +19,11 @@ class MultiServiceImplSpec extends FunSpec with Matchers with Helpers {
     multi.bodyTypeFromPath("POST", "/unknown/path/that/does/not/resolve") should equal(None)
 
     // resources from flow api
-    multi.bodyTypeFromPath("POST", "/users") should equal(Some("user_form"))
-    multi.bodyTypeFromPath("POST", "/:organization/webhooks") should equal(Some("webhook_form"))
+    multi.bodyTypeFromPath("POST", "/users").map(_.name) should equal(Some("user_form"))
+    multi.bodyTypeFromPath("POST", "/:organization/webhooks").map(_.name) should equal(Some("webhook_form"))
 
     // resources from apidoc api
-    multi.bodyTypeFromPath("POST", "/:orgKey") should equal(Some("application_form"))
+    multi.bodyTypeFromPath("POST", "/:orgKey").map(_.name) should equal(Some("application_form"))
   }
 
   it("operation") {
@@ -140,7 +140,9 @@ class MultiServiceImplSpec extends FunSpec with Matchers with Helpers {
       "/:organization/webhooks",
       Json.obj("url" -> "https://test.flow.io", "events" -> "*")
     ) should equal(
-      Left(Seq("HTTP method 'OPTIONS' not supported for path /:organization/webhooks - Available methods: GET, POST"))
+      Left(Seq(
+        "HTTP method 'OPTIONS' not defined for path '/:organization/webhooks' - Available methods: GET, POST, PUT, DELETE"
+      ))
     )
   }
 

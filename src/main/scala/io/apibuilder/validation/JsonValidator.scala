@@ -43,7 +43,9 @@ case class JsonValidator(services: Seq[Service]) {
 
   def findType(defaultNamespace: String, name: String): Seq[ApiBuilderType] = {
     val typeName = TypeName.parse(defaultNamespace = defaultNamespace, name = name)
+    println(s"typeName: $typeName")
     services.filter(_.namespace.equalsIgnoreCase(typeName.namespace)).flatMap { service =>
+      println(s"SERVICE: ${service.namespace}")
       findType(service, typeName.name)
     }
   }

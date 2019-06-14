@@ -12,7 +12,7 @@ class MultiServiceSpec2 extends FunSpec with Matchers with helpers.Helpers {
     )
 
     flowMultiService.validateOperation("OPTIONS", "/:organization/payments") should equal(
-      Left(Seq("HTTP method 'OPTIONS' not supported for path /:organization/payments - Available methods: GET, POST"))
+      Left(Seq("HTTP method 'OPTIONS' not defined for path '/:organization/payments' - Available methods: GET, POST"))
     )
   }
 
@@ -23,12 +23,12 @@ class MultiServiceSpec2 extends FunSpec with Matchers with helpers.Helpers {
   }
 
   it("resolves body when path exists in both services") {
-    flowMultiService.bodyTypeFromPath("POST", "/:organization/payments") should equal(Some("payment_form"))
+    flowMultiService.bodyTypeFromPath("POST", "/:organization/payments").map(_.name) should equal(Some("payment_form"))
   }
 
   it("resolves body when there are multiple variables in path") {
-    flowMultiService.bodyTypeFromPath("POST", "/:organization/shopify/orders/:number/authorizations") should equal(
-      Some("io.flow.payment.v0.unions.authorization_form")
+    flowMultiService.bodyTypeFromPath("POST", "/:organization/shipping/configuration/copies/:key").map(_.name) should equal(
+      Some("shipping_configuration_copy_form")
     )
   }
 
@@ -47,19 +47,19 @@ class MultiServiceSpec2 extends FunSpec with Matchers with helpers.Helpers {
     * validation methods (vs. correctly resolving service 1)
     */
   it("validates when path exists in both services with different available methods") {
-    flowMultiService.upcastOperationBody(
-      "POST",
-      "/:organization/payments",
-      Json.obj(
-        "discriminator" -> "merchant_of_record_payment_form",
-        "method" -> "paypal",
-        "order_number" -> "F1001",
-        "amount" -> 1.00,
-        "currency" -> "CAD"
+    rightOrErrors(
+      flowMultiService.upcastOperationBody(
+        "POST",
+        "/:organization/payments",
+        Json.obj(
+          "discriminator" -> "merchant_of_record_payment_form",
+          "method" -> "paypal",
+          "order_number" -> "F1001",
+          "amount" -> 1.00,
+          "currency" -> "CAD"
+        )
       )
-    ).right.getOrElse {
-      sys.error("Failed to validate payment_form")
-    }
+    )
   }
 
   it("validateResponseCode") {
@@ -93,7 +93,7 @@ class MultiServiceSpec2 extends FunSpec with Matchers with helpers.Helpers {
   }
 
   it("correctly parses required fields") {
-    val orgModel = flowMultiService.findType("io.flow", "organization").head.asInstanceOf[ApiBuilderType.Model].model
+    val orgModel = flowMultiService.findType("io.flow.v0", "organization").head.asInstanceOf[ApiBuilderType.Model].model
     orgModel.fields.find(_.name == "id").get.required should be(true)
     orgModel.fields.find(_.name == "parent").get.required should be(false)
   }

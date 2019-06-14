@@ -63,11 +63,9 @@ trait MultiService extends ResponseHelpers {
     * match the request method/path as needed.
     */
   final def upcast(apiBuilderOperation: ApiBuilderOperation, js: JsValue): Either[Seq[String], JsValue] = {
-    println(s"upcast op[${apiBuilderOperation.operation.path}] js: $js")
-
     findBodyType(apiBuilderOperation) match {
-      case None => println(s"No body type");Right(js)
-      case Some(bodyType) => println(s"body type: ${bodyType.name}");upcast(bodyType, js)
+      case None => Right(js)
+      case Some(bodyType) => upcast(bodyType, js)
     }
   }
 
@@ -85,10 +83,9 @@ trait MultiService extends ResponseHelpers {
   }
 
   final def upcastOperationBody(method: Method, path: String, js: JsValue): Either[Seq[String], JsValue] = {
-    println(s"upcast $method $path")
-    operation(method, path) match {
-      case None => Right(js)
-      case Some(op) => upcast(op, js)
+    validateOperation(method, path) match {
+      case Left(errors) => Left(errors)
+      case Right(op) => upcast(op, js)
     }
   }
 
@@ -114,13 +111,20 @@ trait MultiService extends ResponseHelpers {
         service.validate(method, path).right.map { op => ApiBuilderOperation(service.service, op) }
       }
       case None => {
-        val availableMethods = Method.all.filterNot(_ == method).filter { m =>
-          findService(m, path).isDefined
-        }
-        if (availableMethods.isEmpty) {
-          Left(Seq(s"HTTP Path '$path' is not defined"))
-        } else {
-          Left(Seq(s"HTTP method '$method' not defined for path '$path' - Available methods: ${availableMethods.map(_.toString).mkString(", ")}"))
+        method match {
+          case Method.UNDEFINED(name) => {
+            Left(Seq(s"HTTP method '$name' is invalid. Must be one of: " + Method.all.map(_.toString).mkString(", ")))
+          }
+          case _ => {
+            val availableMethods = Method.all.filterNot(_ == method).filter { m =>
+              findService(m, path).isDefined
+            }
+            if (availableMethods.isEmpty) {
+              Left(Seq(s"HTTP path '$path' is not defined"))
+            } else {
+              Left(Seq(s"HTTP method '$method' not defined for path '$path' - Available methods: ${availableMethods.map(_.toString).mkString(", ")}"))
+            }
+          }
         }
       }
     }

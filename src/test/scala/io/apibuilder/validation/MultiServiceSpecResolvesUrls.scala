@@ -9,7 +9,9 @@ class MultiServiceSpecResolvesUrls extends FunSpec with Matchers with Helpers {
 
   it("validates unknown methods") {
     flowMultiService.validateOperation("FOO", "/test-org/payments") should equal(
-      Left(Seq("HTTP method 'FOO' is invalid. Must be one of: " + Method.all.map(_.toString).mkString(", ")))
+      Left(Seq(
+        "HTTP method 'FOO' is invalid. Must be one of: " + Method.all.map(_.toString).mkString(", "))
+      )
     )
 
     flowMultiService.validateOperation("OPTIONS", "/test-org/payments") should equal(
