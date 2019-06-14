@@ -26,12 +26,20 @@ trait MultiService extends ResponseHelpers {
     *                 JSON. Note if the type is not found, the JSON returned
     *                 is unchanged.
     */
-  def findType(defaultNamespace: String, typeName: String): Option[ApiBuilderType]
+  def findType(typeName: TypeName): Option[ApiBuilderType]
 
   /**
     * Upcast the json value based on the specified type name, if it is defined. a No-op if not
     */
   def upcast(typ: ApiBuilderType, js: JsValue): Either[Seq[String], JsValue]
+
+  final def findType(defaultNamespace: String, typeName: String): Option[ApiBuilderType] = {
+    findType(TypeName.parse(name = typeName, defaultNamespace = defaultNamespace))
+  }
+
+  final def findType(fullyQualifiedName: String): Option[ApiBuilderType] = {
+    TypeName.parse(fullyQualifiedName).flatMap(findType)
+  }
 
   /**
     * If the specified method & path requires a body, returns the type of the body

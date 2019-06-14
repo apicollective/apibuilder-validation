@@ -42,7 +42,10 @@ case class JsonValidator(services: Seq[Service]) {
   }
 
   def findType(defaultNamespace: String, name: String): Seq[ApiBuilderType] = {
-    val typeName = TypeName.parse(defaultNamespace = defaultNamespace, name = name)
+    findType(TypeName.parse(defaultNamespace = defaultNamespace, name = name))
+  }
+
+  def findType(typeName: TypeName): Seq[ApiBuilderType] = {
     services.filter(_.namespace.equalsIgnoreCase(typeName.namespace)).flatMap { service =>
       findType(service, typeName.name)
     }
@@ -92,7 +95,7 @@ case class JsonValidator(services: Seq[Service]) {
         validateType(typ, js, prefix)
       }
 
-      case multiple => {
+      case _ => {
         // multiple types matches - insufficient data to validate
         Right(js)
       }

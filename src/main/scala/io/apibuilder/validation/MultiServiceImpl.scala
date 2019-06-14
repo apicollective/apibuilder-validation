@@ -27,11 +27,8 @@ case class MultiServiceImpl(
     }
   }
 
-  override def findType(defaultNamespace: String, typeName: String): Option[ApiBuilderType] = {
-    validator.findType(
-      name = typeName,
-      defaultNamespace = Some(defaultNamespace)
-    ).headOption
+  override def findType(typ: TypeName): Option[ApiBuilderType] = {
+    validator.findType(typ).headOption
   }
 
   override def upcast(typ: ApiBuilderType, js: JsValue): Either[Seq[String], JsValue] = {

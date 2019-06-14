@@ -18,4 +18,14 @@ class TypeNameSpec extends FunSpec with Matchers {
     )
   }
 
+  it("type name without namespace  ") {
+    TypeName.parse("foo") should be(None)
+
+    TypeName.parse(
+      "io.apibuilder.explicit.validation.core.v0.enums.gender"
+    ) should equal(
+      Some(TypeName("gender", "io.apibuilder.explicit.validation.core.v0"))
+    )
+  }
+
 }

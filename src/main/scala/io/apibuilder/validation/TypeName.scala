@@ -11,6 +11,21 @@ case class TypeName(
   */
 object TypeName {
 
+  def parse(name: String): Option[TypeName] = {
+    val parts = name.split("\\.").toList
+
+    if (parts.lengthCompare(2) >= 0) {
+      Some(
+        TypeName(
+          name = parts.last,
+          namespace = parts.slice(0, parts.length-2).mkString(".")
+        )
+      )
+    } else {
+      None
+    }
+  }
+
   def parse(name: String, defaultNamespace: String): TypeName = {
     val parts = name.split("\\.").toList
 
