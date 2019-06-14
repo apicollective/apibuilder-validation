@@ -52,14 +52,14 @@ class MultipleTypesWithSameNameSpec extends FunSpec with Matchers
     )
 
     multi.upcast(
-      mustFindModel(multi, "item"),
+      mustFindModel(multi, service1.namespace, "item"),
       Json.obj("value" -> Json.obj())
     ) should equal(
       Left(Seq("Missing required field for price: amount"))
     )
 
     multi.upcast(
-      mustFindModel(multi, "product"),
+      mustFindModel(multi, service2.namespace, "product"),
       Json.obj("value" -> Json.obj())
     ) should equal(
       Left(Seq("Missing required fields for price: amount, currency"))

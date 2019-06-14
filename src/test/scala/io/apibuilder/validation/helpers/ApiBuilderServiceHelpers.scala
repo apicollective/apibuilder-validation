@@ -95,16 +95,13 @@ trait ApiBuilderServiceHelpers {
     Info(license = license, contact = contact)
   }
 
-  def mustFindModel(multi: MultiService, name: String): ApiBuilderType.Model = {
-    multi.findType(defaultNamespace = "", name).toList match {
-      case Nil => sys.error(s"Cannot find type $name")
-      case one :: Nil => {
-        one match {
-          case m: ApiBuilderType.Model => m
-          case _ => sys.error(s"Type '$name' is not a model")
-        }
-      }
-      case multiple => sys.error(s"Cannot find type $name - multiple matches: $multiple")
+  def mustFindModel(multi: MultiService, namespace: String, name: String): ApiBuilderType.Model = {
+    val t = multi.findType(defaultNamespace = namespace, name).getOrElse {
+      sys.error(s"Cannot find namespace[$namespace] name[$name]")
+    }
+    t match {
+      case m: ApiBuilderType.Model => m
+      case _ => sys.error(s"Type '$name' is not a model")
     }
   }
 
