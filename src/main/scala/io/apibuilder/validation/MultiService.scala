@@ -138,6 +138,10 @@ object MultiService {
   // the order in which they are listed.
   private[this] val OrderByFileName: String = "order.txt"
 
+  def apply(services: List[ApiBuilderService]): MultiService = {
+    MultiServiceImpl(services)
+  }
+
   def fromUrl(url: String): Either[Seq[String], MultiService] = {
     fromUrls(urls = Seq(url))
   }
