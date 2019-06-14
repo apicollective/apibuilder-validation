@@ -2,7 +2,7 @@ package io.apibuilder.validation
 
 import io.apibuilder.spec.v0.models
 
-sealed trait ApibuilderType {
+sealed trait ApiBuilderType {
 
   def service: models.Service
 
@@ -19,16 +19,16 @@ sealed trait ApibuilderType {
   protected def typeDiscriminator: String
 }
 
-object ApibuilderType {
-  case class Enum(service: models.Service, enum: models.Enum) extends ApibuilderType {
+object ApiBuilderType {
+  case class Enum(service: models.Service, enum: models.Enum) extends ApiBuilderType {
     override val typeName: TypeName = TypeName.parse(name = enum.name, defaultNamespace = service.namespace)
     override val typeDiscriminator = "enums"
   }
-  case class Model(service: models.Service, model: models.Model) extends ApibuilderType {
+  case class Model(service: models.Service, model: models.Model) extends ApiBuilderType {
     override val typeName: TypeName = TypeName.parse(name = model.name, defaultNamespace = service.namespace)
     override val typeDiscriminator = "models"
   }
-  case class Union(service: models.Service, union: models.Union) extends ApibuilderType {
+  case class Union(service: models.Service, union: models.Union) extends ApiBuilderType {
     override val typeName: TypeName = TypeName.parse(name = union.name, defaultNamespace = service.namespace)
     override val typeDiscriminator = "unions"
   }

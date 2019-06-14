@@ -46,20 +46,20 @@ class MultipleTypesWithSameNameSpec extends FunSpec with Matchers
       )
     )
     val multi = MultiServiceImpl(
-      Seq(
+      List(
         ApiBuilderService(service1), ApiBuilderService(service2)
       )
     )
 
-    multi.validate(
-      mustFindModel(multi, "item"),
+    multi.upcast(
+      mustFindModel(multi, service1.namespace, "item"),
       Json.obj("value" -> Json.obj())
     ) should equal(
       Left(Seq("Missing required field for price: amount"))
     )
 
-    multi.validate(
-      mustFindModel(multi, "product"),
+    multi.upcast(
+      mustFindModel(multi, service2.namespace, "product"),
       Json.obj("value" -> Json.obj())
     ) should equal(
       Left(Seq("Missing required fields for price: amount, currency"))

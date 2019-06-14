@@ -14,6 +14,8 @@ class MultiServiceZipSpec extends FunSpec with Matchers
   with helpers.Helpers
 {
 
+  private[this] lazy val zipService = MultiService.fromUrl("https://cdn.flow.io/util/lib-apibuilder/specs.zip").right.get
+
   case class ServiceAndFile(service: Service, file: File)
 
   def createServiceAndWriteToFile(): ServiceAndFile = {
@@ -40,10 +42,10 @@ class MultiServiceZipSpec extends FunSpec with Matchers
       case Left(errors) => sys.error(s"Failed to load $zipFile: $errors")
       case Right(ms) => ms
     }
-    multiService.findType(service1.service.models.head.name).headOption.getOrElse {
+    multiService.findType(service1.service.namespace, service1.service.models.head.name).getOrElse {
       sys.error("Failed to find service 1 model")
     }
-    multiService.findType(service2.service.models.head.name).headOption.getOrElse {
+    multiService.findType(service2.service.namespace, service2.service.models.head.name).getOrElse {
       sys.error("Failed to find service 2 model")
     }
   }
@@ -56,17 +58,24 @@ class MultiServiceZipSpec extends FunSpec with Matchers
   }
 
   it("performance is similar") {
-    val zipService = MultiService.fromUrl("https://cdn.flow.io/util/lib-apibuilder/specs.zip").right.get
-    zipService.validate("GET", "/users").right.get
-    flowMultiService.validate("GET", "/users").right.get
+    zipService.validateOperation("GET", "/users").right.get
+    flowMultiService.validateOperation("GET", "/users").right.get
 
     def run(service: MultiService) = {
       time(1000) {
-        service.validate("GET", "/users")
+        service.validateOperation("GET", "/users")
       }
     }
     run(flowMultiService) < 50 should be(true)
     run(zipService) < 50 should be(true)
+  }
+
+  it("upcast") {
+    val op = zipService.operation("POST", "/users").get.operation
+    op.body.map(_.`type`) should equal(Some("user_form"))
+    zipService.upcastOperationBody("POST", "/users", Json.obj("name" -> "test")) should equal(
+      Left(Seq("user_form.name must be an object and not a string"))
+    )
   }
 
   private[this] def time(numberIterations: Int)(f: => Any): Long = {

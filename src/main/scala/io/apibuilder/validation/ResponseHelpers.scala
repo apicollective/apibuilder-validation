@@ -4,6 +4,10 @@ import io.apibuilder.spec.v0.models._
 
 trait ResponseHelpers {
 
+  def response(apibuilderOperation: ApiBuilderOperation, responseCode: Int): Option[Response] = {
+    response(apibuilderOperation.operation, responseCode)
+  }
+
   /**
     * Looks up the response for the given status code for this operation, or None
     * if there is no response documented for the status code
@@ -28,6 +32,10 @@ trait ResponseHelpers {
         }
       }
     }
+  }
+
+  def validateResponseCode(apiBuilderOperation: ApiBuilderOperation, responseCode: Int): Either[String, Response] = {
+    validateResponseCode(apiBuilderOperation.operation, responseCode)
   }
 
   /**

@@ -2,9 +2,9 @@ package io.apibuilder.validation
 
 import io.flow.v0.models.json._
 
-import io.flow.v0.models.{Image, ImageForm, ItemForm}
+import io.flow.v0.models.{ImageForm, ItemForm}
 import org.scalatest.{FunSpec, Matchers}
-import play.api.libs.json.{JsArray, JsObject, JsValue, Json}
+import play.api.libs.json.Json
 
 class SerializationSpec extends FunSpec with Matchers with helpers.Helpers {
 
@@ -34,7 +34,9 @@ class SerializationSpec extends FunSpec with Matchers with helpers.Helpers {
 
     val deserializedForm = rightOrErrors {
       flowMultiService.upcast(
-        "item_form",
+        flowMultiService.findType("io.flow.v0", "item_form").getOrElse {
+          sys.error("Could not find type")
+        },
         FormData.toJson(
           FormData.parseEncoded(encoded)
         )

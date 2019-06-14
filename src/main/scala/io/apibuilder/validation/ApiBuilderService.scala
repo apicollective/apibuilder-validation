@@ -27,7 +27,7 @@ case class ApiBuilderService(
     operation(method, path).flatMap(_.body.map(_.`type`))
   }
 
-  def findType(name: String): Option[ApibuilderType] = {
+  def findType(name: String): Option[ApiBuilderType] = {
     validator.findType(name, defaultNamespace = Some(service.namespace)).headOption
   }
 
