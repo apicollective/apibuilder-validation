@@ -16,15 +16,15 @@ case class MultiServiceImpl(
 
   private[this] val validator = JsonValidator(services.map(_.service))
 
-  def findType(name: String): Seq[ApibuilderType] = validator.findType(name, defaultNamespace = None)
+  def findType(name: String): Seq[ApiBuilderType] = validator.findType(name, defaultNamespace = None)
 
-  def findType(namespace: String, name: String): Seq[ApibuilderType] = validator.findType(namespace, name)
+  def findType(namespace: String, name: String): Seq[ApiBuilderType] = validator.findType(namespace, name)
 
   def upcast(typeName: String, js: JsValue): Either[Seq[String], JsValue] = {
     validator.validate(typeName, js, defaultNamespace = None)
   }
 
-  def upcast(typ: ApibuilderType, js: JsValue): Either[Seq[String], JsValue] = {
+  def upcast(typ: ApiBuilderType, js: JsValue): Either[Seq[String], JsValue] = {
     validator.validateType(typ, js)
   }
 
@@ -36,9 +36,9 @@ case class MultiServiceImpl(
   }
 
   def validate(
-    typ: ApibuilderType,
-    js: JsValue,
-    prefix: Option[String] = None
+                typ: ApiBuilderType,
+                js: JsValue,
+                prefix: Option[String] = None
   ): Either[Seq[String], JsValue] = {
     validator.validateType(typ, js, prefix)
   }

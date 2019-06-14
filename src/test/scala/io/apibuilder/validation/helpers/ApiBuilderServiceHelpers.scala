@@ -3,7 +3,7 @@ package io.apibuilder.validation.helpers
 import io.apibuilder.spec.v0.models._
 import java.util.UUID
 
-import io.apibuilder.validation.{ApibuilderType, MultiService}
+import io.apibuilder.validation.{ApiBuilderType, MultiService}
 
 trait ApiBuilderServiceHelpers {
   
@@ -95,12 +95,12 @@ trait ApiBuilderServiceHelpers {
     Info(license = license, contact = contact)
   }
 
-  def mustFindModel(multi: MultiService, name: String): ApibuilderType.Model = {
+  def mustFindModel(multi: MultiService, name: String): ApiBuilderType.Model = {
     multi.findType(name).toList match {
       case Nil => sys.error(s"Cannot find type $name")
       case one :: Nil => {
         one match {
-          case m: ApibuilderType.Model => m
+          case m: ApiBuilderType.Model => m
           case other => sys.error(s"Type '$name' is not a model")
         }
       }

@@ -4,12 +4,12 @@ import io.apibuilder.spec.v0.models.{Enum, Model, Union}
 import io.apibuilder.validation.helpers.Helpers
 import org.scalatest.{FunSpec, Matchers}
 
-class ApibuilderTypeSpec extends FunSpec with Matchers with Helpers {
+class ApiBuilderTypeSpec extends FunSpec with Matchers with Helpers {
 
   private[this] lazy val service = loadService("flow-api-service.json").service
-  private[this] lazy val enum = ApibuilderType.Enum(service, Enum("gender", "genders", values = Nil))
-  private[this] lazy val model = ApibuilderType.Model(service, Model("user", "users", fields = Nil))
-  private[this] lazy val union = ApibuilderType.Union(service, Union("test", "tests", types = Nil))
+  private[this] lazy val enum = ApiBuilderType.Enum(service, Enum("gender", "genders", values = Nil))
+  private[this] lazy val model = ApiBuilderType.Model(service, Model("user", "users", fields = Nil))
+  private[this] lazy val union = ApiBuilderType.Union(service, Union("test", "tests", types = Nil))
 
   it("typeName") {
     enum.typeName should equal(TypeName("gender", service.namespace))

@@ -14,6 +14,8 @@ class MultiServiceZipSpec extends FunSpec with Matchers
   with helpers.Helpers
 {
 
+  private[this] lazy val zipService = MultiService.fromUrl("https://cdn.flow.io/util/lib-apibuilder/specs.zip").right.get
+
   case class ServiceAndFile(service: Service, file: File)
 
   def createServiceAndWriteToFile(): ServiceAndFile = {
@@ -56,7 +58,6 @@ class MultiServiceZipSpec extends FunSpec with Matchers
   }
 
   it("performance is similar") {
-    val zipService = MultiService.fromUrl("https://cdn.flow.io/util/lib-apibuilder/specs.zip").right.get
     zipService.validate("GET", "/users").right.get
     flowMultiService.validate("GET", "/users").right.get
 
@@ -67,6 +68,14 @@ class MultiServiceZipSpec extends FunSpec with Matchers
     }
     run(flowMultiService) < 50 should be(true)
     run(zipService) < 50 should be(true)
+  }
+
+  it("upcast") {
+    val op = zipService.operation("POST", "/users").get
+    op.body.map(_.`type`) should equal(Some("user_form"))
+    zipService.upcast("POST", "/users", Json.obj("name" -> "test")) should equal(
+      Left(Seq("TODO"))
+    )
   }
 
   private[this] def time(numberIterations: Int)(f: => Any): Long = {
