@@ -8,7 +8,7 @@ import org.scalatest.{FunSpec, Matchers}
 class MultiServiceImplSpec extends FunSpec with Matchers with Helpers {
 
   private[this] lazy val multi = MultiServiceImpl(
-    Seq("flow-api-service.json", "apibuilder-api-service.json").map(loadService)
+    List("flow-api-service.json", "apibuilder-api-service.json").map(loadService)
   )
 
   it("loads multiple services") {
@@ -47,7 +47,7 @@ class MultiServiceImplSpec extends FunSpec with Matchers with Helpers {
 
   it("validate") {
     // path from flow api
-    multi.upcast(
+    multi.upcastOperationBody(
       "POST",
       "/:organization/webhooks",
       Json.obj("url" -> "https://test.flow.io")
@@ -56,7 +56,7 @@ class MultiServiceImplSpec extends FunSpec with Matchers with Helpers {
     )
 
     // path from apidoc api
-    multi.upcast(
+    multi.upcastOperationBody(
       "POST",
       "/:orgKey",
       Json.obj("url" -> "https://test.flow.io")
@@ -67,7 +67,7 @@ class MultiServiceImplSpec extends FunSpec with Matchers with Helpers {
 
   it("error on missing array indices") {
     // comes from decoding customer[address][streets][]=33b Bay St
-    multi.upcast(
+    multi.upcastOperationBody(
       "PUT",
       "/:organization/orders/:number",
       Json.parse(
@@ -106,7 +106,7 @@ class MultiServiceImplSpec extends FunSpec with Matchers with Helpers {
   it("url query example") {
     val form = FormData.parseEncoded("name=John%20Doe&expiration_month=12&expiration_year=2017&cvv=123&cipher=VnHzBw%2BbaGrKZL0fimklhKupHJeowxK2Mqa9LbECCnb3R%2FxIgS1vr0sFg2mUGsXR7bsNV61UURB91VrWr19V1g%3D%3D&challenge%5Btext%5D=Flow&challenge%5Bcipher%5D=df2BQZykhnTfIVIX6Vg9yjUmyEprz3dLmUYU0O8GeyCZ0t3pn1nXSP7DRDfsZAASwtNupqyYx3G4W%2BmGlWQreg%3D%3D&callback=__flowjsonp0&method=post")
 
-    val js = multi.upcast(
+    val js = multi.upcastOperationBody(
       "POST",
       "/:organization/cards",
       Json.toJson(form)
@@ -124,7 +124,7 @@ class MultiServiceImplSpec extends FunSpec with Matchers with Helpers {
       "events" -> 456
     )
 
-    val js = multi.upcast(
+    val js = multi.upcastOperationBody(
       "POST",
       "/:organization/webhooks",
       Json.toJson(form)
@@ -135,7 +135,7 @@ class MultiServiceImplSpec extends FunSpec with Matchers with Helpers {
   }
 
   it("offers validation error w/ verb replacement") {
-    multi.upcast(
+    multi.upcastOperationBody(
       "OPTIONS",
       "/:organization/webhooks",
       Json.obj("url" -> "https://test.flow.io", "events" -> "*")
@@ -145,7 +145,7 @@ class MultiServiceImplSpec extends FunSpec with Matchers with Helpers {
   }
 
   it("validate union type discriminator") {
-    multi.upcast(
+    multi.upcastOperationBody(
       "POST",
       "/:organization/authorizations",
       Json.obj("discriminator" -> "authorization_form")
@@ -157,7 +157,7 @@ class MultiServiceImplSpec extends FunSpec with Matchers with Helpers {
   }
 
   it("validate union type") {
-    multi.upcast(
+    multi.upcastOperationBody(
       "POST",
       "/:organization/authorizations",
       Json.obj(

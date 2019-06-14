@@ -436,7 +436,7 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
   }
 
   it("understands arrays are required") {
-    apibuilderMultiService.upcast(
+    apibuilderMultiService.upcastOperationBody(
       "POST", "/queries", Json.obj()
     ) should equal(
       Left(Seq("Missing required field for query_form: filters"))

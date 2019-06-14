@@ -1,5 +1,6 @@
 package io.apibuilder.validation
 
+import io.apibuilder.spec.v0.models.Method
 import play.api.libs.json.JsValue
 
 /**
@@ -8,10 +9,23 @@ import play.api.libs.json.JsValue
   * services define an http path, first one is selected.
   */
 case class MultiServiceImpl(
-  override val services: Seq[ApiBuilderService]
+  services: List[ApiBuilderService]
 ) extends MultiService {
 
   private[this] val validator = JsonValidator(services.map(_.service))
+  private[this] val serviceResolver = ServiceResolver(services)
+
+  override def findService(method: Method, path: String): Option[ApiBuilderService] = {
+    serviceResolver.resolve(method, path)
+  }
+
+  override def allOperations(): Seq[ApiBuilderOperation] = {
+    services.flatMap { apibuilderService =>
+      apibuilderService.service.resources.flatMap(_.operations).map { op =>
+        ApiBuilderOperation(apibuilderService.service, op)
+      }
+    }
+  }
 
   override def findType(defaultNamespace: String, typeName: String): Option[ApiBuilderType] = {
     validator.findType(

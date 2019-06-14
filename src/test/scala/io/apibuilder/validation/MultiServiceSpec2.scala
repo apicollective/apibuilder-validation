@@ -47,7 +47,7 @@ class MultiServiceSpec2 extends FunSpec with Matchers with helpers.Helpers {
     * validation methods (vs. correctly resolving service 1)
     */
   it("validates when path exists in both services with different available methods") {
-    flowMultiService.upcast(
+    flowMultiService.upcastOperationBody(
       "POST",
       "/:organization/payments",
       Json.obj(

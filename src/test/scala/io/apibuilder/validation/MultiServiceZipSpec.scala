@@ -73,7 +73,7 @@ class MultiServiceZipSpec extends FunSpec with Matchers
   it("upcast") {
     val op = zipService.operation("POST", "/users").get.operation
     op.body.map(_.`type`) should equal(Some("user_form"))
-    zipService.upcast("POST", "/users", Json.obj("name" -> "test")) should equal(
+    zipService.upcastOperationBody("POST", "/users", Json.obj("name" -> "test")) should equal(
       Left(Seq("TODO"))
     )
   }

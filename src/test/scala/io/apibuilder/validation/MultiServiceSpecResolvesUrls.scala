@@ -54,7 +54,7 @@ class MultiServiceSpecResolvesUrls extends FunSpec with Matchers with Helpers {
     * validation methods (vs. correctly resolving service 1)
     */
   it("validates when path exists in both services with different available methods") {
-    flowMultiService.upcast(
+    flowMultiService.upcastOperationBody(
       "POST",
       "/test-org/payments",
       Json.obj(

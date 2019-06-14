@@ -12,7 +12,9 @@ import play.api.libs.json._
   */
 trait MultiService extends ResponseHelpers {
 
-  def services: Seq[ApiBuilderService]
+  def allOperations(): Seq[ApiBuilderOperation]
+
+  def findService(method: Method, path: String): Option[ApiBuilderService]
 
   /**
     * Resolves the type specified
@@ -61,9 +63,11 @@ trait MultiService extends ResponseHelpers {
     * match the request method/path as needed.
     */
   final def upcast(apiBuilderOperation: ApiBuilderOperation, js: JsValue): Either[Seq[String], JsValue] = {
+    println(s"upcast op[${apiBuilderOperation.operation.path}] js: $js")
+
     findBodyType(apiBuilderOperation) match {
-      case None => Right(js)
-      case Some(bodyType) => upcast(bodyType, js)
+      case None => println(s"No body type");Right(js)
+      case Some(bodyType) => println(s"body type: ${bodyType.name}");upcast(bodyType, js)
     }
   }
 
@@ -76,11 +80,12 @@ trait MultiService extends ResponseHelpers {
     }
   }
 
-  final def upcast(method: String, path: String, js: JsValue): Either[Seq[String], JsValue] = {
-    upcast(Method(method), path, js)
+  final def upcastOperationBody(method: String, path: String, js: JsValue): Either[Seq[String], JsValue] = {
+    upcastOperationBody(Method(method), path, js)
   }
 
-  final def upcast(method: Method, path: String, js: JsValue): Either[Seq[String], JsValue] = {
+  final def upcastOperationBody(method: Method, path: String, js: JsValue): Either[Seq[String], JsValue] = {
+    println(s"upcast $method $path")
     operation(method, path) match {
       case None => Right(js)
       case Some(op) => upcast(op, js)
@@ -104,11 +109,13 @@ trait MultiService extends ResponseHelpers {
     * list of errors.
     */
   final def validateOperation(method: Method, path: String): Either[Seq[String], ApiBuilderOperation] = {
-    operation(method, path) match {
-      case Some(op) => Right(op)
+    findService(method, path) match {
+      case Some(service) => {
+        service.validate(method, path).right.map { op => ApiBuilderOperation(service.service, op) }
+      }
       case None => {
-        val availableMethods = Method.all.filter { m =>
-          operation(m, path).isDefined
+        val availableMethods = Method.all.filterNot(_ == method).filter { m =>
+          findService(m, path).isDefined
         }
         if (availableMethods.isEmpty) {
           Left(Seq(s"HTTP Path '$path' is not defined"))
@@ -157,7 +164,7 @@ object MultiService {
       case Nil => {
         Right(
           MultiServiceImpl(
-            services = eithers.map(_.right.get)
+            services = eithers.map(_.right.get).toList
           )
         )
       }

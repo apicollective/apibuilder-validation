@@ -77,10 +77,8 @@ case class JsonValidator(services: Seq[Service]) {
     defaultNamespace: Option[String],
     prefix: Option[String] = None
   ): Either[Seq[String], JsValue] = {
-    println(s"validate($typeName, $js, $defaultNamespace)")
     findType(typeName, defaultNamespace = defaultNamespace).toList match {
       case Nil => {
-        println(" - not found")
         // may be a primitive type like 'string'
         validateApiBuilderType(
           prefix.getOrElse(typeName),
@@ -91,14 +89,10 @@ case class JsonValidator(services: Seq[Service]) {
       }
 
       case typ :: Nil => {
-        println(" - found: $typ")
-
         validateType(typ, js, prefix)
       }
 
       case multiple => {
-        println(s" - found multiple: ${multiple.map(_.qualified)}")
-
         // multiple types matches - insufficient data to validate
         Right(js)
       }

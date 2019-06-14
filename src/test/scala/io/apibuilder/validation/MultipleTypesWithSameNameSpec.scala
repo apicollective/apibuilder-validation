@@ -46,7 +46,7 @@ class MultipleTypesWithSameNameSpec extends FunSpec with Matchers
       )
     )
     val multi = MultiServiceImpl(
-      Seq(
+      List(
         ApiBuilderService(service1), ApiBuilderService(service2)
       )
     )

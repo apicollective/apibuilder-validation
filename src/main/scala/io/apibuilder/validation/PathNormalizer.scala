@@ -10,7 +10,7 @@ object PathNormalizer {
   }
 
   def apply(multi: MultiService): PathNormalizer = {
-    apply(multi.services.flatMap(_.service.resources.flatMap(_.operations)))
+    apply(multi.allOperations().map(_.operation))
   }
 
   def apply(service: Service): PathNormalizer = {
