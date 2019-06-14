@@ -12,19 +12,12 @@ import play.api.libs.json._
   */
 trait MultiService extends ResponseHelpers {
 
-  def allOperations(): Seq[ApiBuilderOperation]
+  def services(): List[ApiBuilderService]
 
   def findService(method: Method, path: String): Option[ApiBuilderService]
 
   /**
     * Resolves the type specified
-    *
-    * @param defaultNamespace e.g. io.flow.user.v0 - used unless the type name
-    *                         is fully qualified already
-    * @param typeName e.g. 'user' - looks up the API Builder type with this name
-    *                 and if found, uses that type to validate and upcast the
-    *                 JSON. Note if the type is not found, the JSON returned
-    *                 is unchanged.
     */
   def findType(typeName: TypeName): Option[ApiBuilderType]
 
@@ -33,6 +26,14 @@ trait MultiService extends ResponseHelpers {
     */
   def upcast(typ: ApiBuilderType, js: JsValue): Either[Seq[String], JsValue]
 
+  /**
+    * @param defaultNamespace e.g. io.flow.user.v0 - used unless the type name
+    *                         is fully qualified already
+    * @param typeName e.g. 'user' - looks up the API Builder type with this name
+    *                 and if found, uses that type to validate and upcast the
+    *                 JSON. Note if the type is not found, the JSON returned
+    *                 is unchanged.
+    */
   final def findType(defaultNamespace: String, typeName: String): Option[ApiBuilderType] = {
     findType(TypeName.parse(name = typeName, defaultNamespace = defaultNamespace))
   }

@@ -9,7 +9,7 @@ import play.api.libs.json.JsValue
   * services define an http path, first one is selected.
   */
 case class MultiServiceImpl(
-  services: List[ApiBuilderService]
+  override val services: List[ApiBuilderService]
 ) extends MultiService {
 
   private[this] val validator = JsonValidator(services.map(_.service))
@@ -17,14 +17,6 @@ case class MultiServiceImpl(
 
   override def findService(method: Method, path: String): Option[ApiBuilderService] = {
     serviceResolver.resolve(method, path)
-  }
-
-  override def allOperations(): Seq[ApiBuilderOperation] = {
-    services.flatMap { apibuilderService =>
-      apibuilderService.service.resources.flatMap(_.operations).map { op =>
-        ApiBuilderOperation(apibuilderService.service, op)
-      }
-    }
   }
 
   override def findType(typ: TypeName): Option[ApiBuilderType] = {
