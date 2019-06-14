@@ -96,12 +96,12 @@ trait ApiBuilderServiceHelpers {
   }
 
   def mustFindModel(multi: MultiService, name: String): ApiBuilderType.Model = {
-    multi.findType(name).toList match {
+    multi.findType(defaultNamespace = "", name).toList match {
       case Nil => sys.error(s"Cannot find type $name")
       case one :: Nil => {
         one match {
           case m: ApiBuilderType.Model => m
-          case other => sys.error(s"Type '$name' is not a model")
+          case _ => sys.error(s"Type '$name' is not a model")
         }
       }
       case multiple => sys.error(s"Cannot find type $name - multiple matches: $multiple")

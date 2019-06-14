@@ -11,7 +11,25 @@ import play.api.libs.json._
   * services define an http path, first one is selected.
   */
 trait MultiService extends ResponseHelpers {
+
   def services: Seq[ApiBuilderService]
+
+  /**
+    * Resolves the type specified
+    *
+    * @param defaultNamespace e.g. io.flow.user.v0 - used unless the type name
+    *                         is fully qualified already
+    * @param typeName e.g. 'user' - looks up the API Builder type with this name
+    *                 and if found, uses that type to validate and upcast the
+    *                 JSON. Note if the type is not found, the JSON returned
+    *                 is unchanged.
+    */
+  def findType(defaultNamespace: String, typeName: String): Option[ApiBuilderType]
+
+  /**
+    * Upcast the json value based on the specified type name, if it is defined. a No-op if not
+    */
+  def upcast(typ: ApiBuilderType, js: JsValue): Either[Seq[String], JsValue]
 
   /**
     * If the specified method & path requires a body, returns the type of the body
@@ -42,14 +60,14 @@ trait MultiService extends ResponseHelpers {
     * Validates the js value across all services, upcasting types to
     * match the request method/path as needed.
     */
-  def upcast(apiBuilderOperation: ApiBuilderOperation, js: JsValue): Either[Seq[String], JsValue] = {
+  final def upcast(apiBuilderOperation: ApiBuilderOperation, js: JsValue): Either[Seq[String], JsValue] = {
     findBodyType(apiBuilderOperation) match {
       case None => Right(js)
       case Some(bodyType) => upcast(bodyType, js)
     }
   }
 
-  def findBodyType(apiBuilderOperation: ApiBuilderOperation): Option[ApiBuilderType] = {
+  final def findBodyType(apiBuilderOperation: ApiBuilderOperation): Option[ApiBuilderType] = {
     apiBuilderOperation.operation.body.flatMap { body =>
       findType(
         defaultNamespace = apiBuilderOperation.service.namespace,
@@ -57,11 +75,6 @@ trait MultiService extends ResponseHelpers {
       )
     }
   }
-
-  /**
-    * Upcast the json value based on the specified type name, if it is defined. a No-op if not
-    */
-  def upcast(typ: ApiBuilderType, js: JsValue): Either[Seq[String], JsValue]
 
   final def upcast(method: String, path: String, js: JsValue): Either[Seq[String], JsValue] = {
     upcast(Method(method), path, js)
@@ -81,18 +94,6 @@ trait MultiService extends ResponseHelpers {
     }
   }
 
-  /**
-    * Resolves the type specified
-    *
-    * @param defaultNamespace e.g. io.flow.user.v0 - used unless the type name
-    *                         is fully qualified already
-    * @param typeName e.g. 'user' - looks up the API Builder type with this name
-    *                 and if found, uses that type to validate and upcast the
-    *                 JSON. Note if the type is not found, the JSON returned
-    *                 is unchanged.
-    */
-  def findType(defaultNamespace: String, typeName: String): Option[ApiBuilderType]
-
   final def validateOperation(method: String, path: String): Either[Seq[String], ApiBuilderOperation] = {
     validateOperation(Method(method), path)
   }
@@ -102,7 +103,21 @@ trait MultiService extends ResponseHelpers {
     * If known, returns the corresponding operation. Otherwise returns a
     * list of errors.
     */
-  def validateOperation(method: Method, path: String): Either[Seq[String], ApiBuilderOperation]
+  final def validateOperation(method: Method, path: String): Either[Seq[String], ApiBuilderOperation] = {
+    operation(method, path) match {
+      case Some(op) => Right(op)
+      case None => {
+        val availableMethods = Method.all.filter { m =>
+          operation(m, path).isDefined
+        }
+        if (availableMethods.isEmpty) {
+          Left(Seq(s"HTTP Path '$path' is not defined"))
+        } else {
+          Left(Seq(s"HTTP method '$method' not defined for path '$path' - Available methods: ${availableMethods.map(_.toString).mkString(", ")}"))
+        }
+      }
+    }
+  }
 
 }
 

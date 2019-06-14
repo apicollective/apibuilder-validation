@@ -5,7 +5,7 @@ import io.apibuilder.validation.helpers.Helpers
 import play.api.libs.json._
 import org.scalatest.{FunSpec, Matchers}
 
-class MultiServiceImplImplSpec extends FunSpec with Matchers with Helpers {
+class MultiServiceImplSpec extends FunSpec with Matchers with Helpers {
 
   private[this] lazy val multi = MultiServiceImpl(
     Seq("flow-api-service.json", "apibuilder-api-service.json").map(loadService)
@@ -29,18 +29,18 @@ class MultiServiceImplImplSpec extends FunSpec with Matchers with Helpers {
   it("operation") {
     multi.operation("POST", "/foo/bar/baz") should be(None)
 
-    val op = multi.operation("POST", "/users").get
+    val op = multi.operation("POST", "/users").get.operation
     op.method should equal(Method.Post)
     op.path should equal("/users")
     op.parameters should be(Nil)
 
-    multi.operation("GET", "/users").get.parameters.map(_.name) should be(
+    multi.operation("GET", "/users").get.operation.parameters.map(_.name) should be(
       Seq("id", "email", "status", "limit", "offset", "sort")
     )
     println(
       multi.operation("GET", "/org/experiences/items").get
     )
-    multi.operation("GET", "/org/experiences/items").get.parameters.map(_.name) should be(
+    multi.operation("GET", "/org/experiences/items").get.operation.parameters.map(_.name) should be(
       Seq("organization", "number", "status", "experience", "country", "ip", "currency", "language", "limit", "offset", "sort")
     )
   }

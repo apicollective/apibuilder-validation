@@ -7,17 +7,17 @@ import org.scalatest.{FunSpec, Matchers}
 class MultiServiceSpec2 extends FunSpec with Matchers with helpers.Helpers {
 
   it("validates unknown operations") {
-    flowMultiService.validate("FOO", "/:organization/payments") should equal(
+    flowMultiService.validateOperation("FOO", "/:organization/payments") should equal(
       Left(Seq("HTTP method 'FOO' is invalid. Must be one of: " + Method.all.map(_.toString).mkString(", ")))
     )
 
-    flowMultiService.validate("OPTIONS", "/:organization/payments") should equal(
+    flowMultiService.validateOperation("OPTIONS", "/:organization/payments") should equal(
       Left(Seq("HTTP method 'OPTIONS' not supported for path /:organization/payments - Available methods: GET, POST"))
     )
   }
 
   it("validates unknown paths") {
-    flowMultiService.validate("GET", "/foo") should equal(
+    flowMultiService.validateOperation("GET", "/foo") should equal(
       Left(Seq("HTTP path '/foo' is not defined"))
     )
   }
@@ -64,12 +64,12 @@ class MultiServiceSpec2 extends FunSpec with Matchers with helpers.Helpers {
 
   it("validateResponseCode") {
     val op = rightOrErrors(
-      flowMultiService.validate("POST", "/:organization/payments")
+      flowMultiService.validateOperation("POST", "/:organization/payments")
     )
 
     Seq(201, 401, 422).foreach { code =>
       rightOrErrors {
-        flowMultiService.validateResponseCode(op, code)
+        flowMultiService.validateResponseCode(op.operation, code)
       }
     }
 
@@ -85,7 +85,7 @@ class MultiServiceSpec2 extends FunSpec with Matchers with helpers.Helpers {
 
   it("response") {
     val op = rightOrErrors(
-      flowMultiService.validate("POST", "/:organization/cards")
+      flowMultiService.validateOperation("POST", "/:organization/cards")
     )
 
     flowMultiService.response(op, 201).get.`type` should equal("card")
@@ -93,19 +93,9 @@ class MultiServiceSpec2 extends FunSpec with Matchers with helpers.Helpers {
   }
 
   it("correctly parses required fields") {
-    val orgModel = flowMultiService.findType("organization").headOption.get.asInstanceOf[ApiBuilderType.Model].model
+    val orgModel = flowMultiService.findType("io.flow", "organization").head.asInstanceOf[ApiBuilderType.Model].model
     orgModel.fields.find(_.name == "id").get.required should be(true)
     orgModel.fields.find(_.name == "parent").get.required should be(false)
   }
 
-  it("does not assume namespace") {
-    flowMultiService.findType(
-      "io.flow.shopify.external.v0.models",
-      "shopify_cart"
-    ) should be(Nil)
-
-    flowMultiService.findType(
-      "io.flow.shopify.external.v0.models.shopify_cart"
-    ) should be(Nil)
-  }
 }

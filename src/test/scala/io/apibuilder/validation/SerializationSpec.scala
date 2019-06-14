@@ -34,6 +34,7 @@ class SerializationSpec extends FunSpec with Matchers with helpers.Helpers {
 
     val deserializedForm = rightOrErrors {
       flowMultiService.upcast(
+        "io.flow.v0",
         "item_form",
         FormData.toJson(
           FormData.parseEncoded(encoded)

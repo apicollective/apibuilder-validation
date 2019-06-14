@@ -106,9 +106,9 @@ case class JsonValidator(services: Seq[Service]) {
   }
 
   def validateType(
-                    typ: ApiBuilderType,
-                    js: JsValue,
-                    prefix: Option[String] = None
+    typ: ApiBuilderType,
+    js: JsValue,
+    prefix: Option[String] = None
   ): Either[Seq[String], JsValue] = {
     typ match {
       case e: ApiBuilderType.Enum => {
