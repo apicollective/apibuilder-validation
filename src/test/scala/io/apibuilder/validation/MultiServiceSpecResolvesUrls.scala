@@ -15,7 +15,7 @@ class MultiServiceSpecResolvesUrls extends FunSpec with Matchers with Helpers {
     )
 
     flowMultiService.validateOperation("OPTIONS", "/test-org/payments") should equal(
-      Left(Seq("HTTP method 'OPTIONS' not supported for path /test-org/payments - Available methods: GET, POST"))
+      Left(Seq("HTTP method 'OPTIONS' not defined for path '/test-org/payments' - Available methods: GET, POST"))
     )
   }
 
@@ -27,17 +27,17 @@ class MultiServiceSpecResolvesUrls extends FunSpec with Matchers with Helpers {
 
   it("validates unknown method for a known path") {
     flowMultiService.validateOperation("OPTIONS", "/users") should equal(
-      Left(Seq("HTTP method 'OPTIONS' not supported for path /users - Available methods: GET, POST"))
+      Left(Seq("HTTP method 'OPTIONS' not defined for path '/users' - Available methods: GET, POST"))
     )
   }
 
   it("resolves body when path exists in both services") {
-    flowMultiService.bodyTypeFromPath("POST", "/test-org/payments") should equal(Some("payment_form"))
+    flowMultiService.bodyTypeFromPath("POST", "/test-org/payments").map(_.name) should equal(Some("payment_form"))
   }
 
   it("resolves body when there are multiple variables in path") {
-    flowMultiService.bodyTypeFromPath("POST", "/test-org/shopify/orders/123/authorizations") should equal(
-      Some("io.flow.payment.v0.unions.authorization_form")
+    flowMultiService.bodyTypeFromPath("POST", "/demo/shipping/configuration/copies/key").map(_.name) should equal(
+      Some("shipping_configuration_copy_form")
     )
   }
 
@@ -56,24 +56,24 @@ class MultiServiceSpecResolvesUrls extends FunSpec with Matchers with Helpers {
     * validation methods (vs. correctly resolving service 1)
     */
   it("validates when path exists in both services with different available methods") {
-    flowMultiService.upcastOperationBody(
-      "POST",
-      "/test-org/payments",
-      Json.obj(
-        "discriminator" -> "merchant_of_record_payment_form",
-        "method" -> "paypal",
-        "order_number" -> "F1001",
-        "amount" -> 1.00,
-        "currency" -> "CAD"
+    rightOrErrors {
+      flowMultiService.upcastOperationBody(
+        "POST",
+        "/test-org/payments",
+        Json.obj(
+          "discriminator" -> "merchant_of_record_payment_form",
+          "method" -> "paypal",
+          "order_number" -> "F1001",
+          "amount" -> 1.00,
+          "currency" -> "CAD"
+        )
       )
-    ).right.getOrElse {
-      sys.error("Failed to validate payment_form")
     }
   }
 
   it("resolves static methods over dynamic ones") {
     flowMultiService.asInstanceOf[MultiServiceImpl].validateOperation(Method.Post, "/demo/tokens").right.get.service.name should equal("API")
-    flowMultiService.bodyTypeFromPath("POST", "/:organization/tokens") should equal(
+    flowMultiService.bodyTypeFromPath("POST", "/:organization/tokens").map(_.name) should equal(
       Some("organization_token_form")
     )
 
