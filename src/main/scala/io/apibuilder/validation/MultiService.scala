@@ -14,7 +14,7 @@ trait MultiService extends ResponseHelpers {
 
   def services(): List[ApiBuilderService]
 
-  def findService(method: Method, path: String): Option[ApiBuilderService]
+  def findOperation(method: Method, path: String): Option[ApiBuilderOperation]
 
   /**
     * Resolves the type specified
@@ -81,7 +81,7 @@ trait MultiService extends ResponseHelpers {
   final def findBodyType(apiBuilderOperation: ApiBuilderOperation): Option[ApiBuilderType] = {
     apiBuilderOperation.operation.body.flatMap { body =>
       findType(
-        defaultNamespace = apiBuilderOperation.service.namespace,
+        defaultNamespace = apiBuilderOperation.service.service.namespace,
         typeName = body.`type`
       )
     }
@@ -115,10 +115,8 @@ trait MultiService extends ResponseHelpers {
     * list of errors.
     */
   final def validateOperation(method: Method, path: String): Either[Seq[String], ApiBuilderOperation] = {
-    findService(method, path) match {
-      case Some(service) => {
-        service.validate(method, path).right.map { op => ApiBuilderOperation(service.service, op) }
-      }
+    findOperation(method, path) match {
+      case Some(op) => Right(op)
       case None => {
         method match {
           case Method.UNDEFINED(name) => {
@@ -126,7 +124,7 @@ trait MultiService extends ResponseHelpers {
           }
           case _ => {
             val availableMethods = Method.all.filterNot(_ == method).filter { m =>
-              findService(m, path).isDefined
+              findOperation(m, path).nonEmpty
             }
             if (availableMethods.isEmpty) {
               Left(Seq(s"HTTP path '$path' is not defined"))
