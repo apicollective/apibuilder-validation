@@ -20,11 +20,19 @@ case class StaticRouteMap(routes: Seq[OperationWithRoute]) {
 
 case class DynamicRouteMap(routes: Seq[OperationWithRoute]) {
 
-  private[this] val byMethod: Map[Method, Seq[OperationWithRoute]] = routes.groupBy(_.route.method)
+  private[this] val lookup: Map[String, Seq[OperationWithRoute]] = routes.groupBy { r =>
+    key(r.route.method, r.route.path)
+  }
+
+  private[this] def numberSlashes(path: String): Int = path.count(_ == '/')
+
+  private[this] def key(method: Method, path: String): String = {
+    s"$method:${numberSlashes(path)}"
+  }
 
   // TODO: can we make constant time?
   def find(method: Method, path: String): Option[OperationWithRoute] = {
-    byMethod.get(method) match {
+    lookup.get(key(method, path)) match {
       case None => None
       case Some(all) => {
         all.find { opWithRoute =>
@@ -34,6 +42,3 @@ case class DynamicRouteMap(routes: Seq[OperationWithRoute]) {
     }
   }
 }
-
-
-

@@ -3,7 +3,7 @@ package io.apibuilder.validation
 import java.io.File
 
 import io.apibuilder.spec.v0.models.json._
-import io.apibuilder.spec.v0.models.Service
+import io.apibuilder.spec.v0.models.{Method, Service}
 import io.apibuilder.validation.zip.ZipFileBuilder
 import play.api.libs.json._
 import org.scalatest.{FunSpec, Matchers}
@@ -11,6 +11,7 @@ import org.scalatest.{FunSpec, Matchers}
 class MultiServiceZipSpec extends FunSpec with Matchers
   with helpers.ApiBuilderServiceHelpers
   with helpers.FileHelpers
+  with helpers.PerformanceHelpers
   with helpers.Helpers
 {
 
@@ -57,32 +58,27 @@ class MultiServiceZipSpec extends FunSpec with Matchers
     }
   }
 
-  it("performance is similar") {
-    zipService.validateOperation("GET", "/users").right.get
-    flowMultiService.validateOperation("GET", "/users").right.get
+  it("performance: validateOperation") {
+    println("performance: validateOperation")
+    zipService.findOperation("GET", "/users/1").get
+    flowMultiService.findOperation("GET", "/users/1").get
 
-    def run(service: MultiService) = {
-      time(1000) {
-        service.validateOperation("GET", "/users")
+    def run(testCase: String, service: MultiService) = {
+      val result = time(5000) { i =>
+        service.findOperation(Method.Get, s"/users/$i")
       }
+      println(s"$testCase: $result ms")
+      result
     }
-    run(flowMultiService) < 50 should be(true)
-    run(zipService) < 50 should be(true)
+    run("api", flowMultiService)
+    run("zip", zipService)
   }
 
   it("upcast") {
-    val op = zipService.operation("POST", "/users").get.operation
+    val op = zipService.findOperation("POST", "/users").get.operation
     op.body.map(_.`type`) should equal(Some("user_form"))
     zipService.upcastOperationBody("POST", "/users", Json.obj("name" -> "test")) should equal(
       Left(Seq("user_form.name must be an object and not a string"))
     )
-  }
-
-  private[this] def time(numberIterations: Int)(f: => Any): Long = {
-    val start = System.currentTimeMillis()
-    0.to(numberIterations).foreach { _ =>
-      f
-    }
-    System.currentTimeMillis() - start
   }
 }

@@ -5,9 +5,8 @@ import java.io.{BufferedInputStream, ByteArrayOutputStream, File, FileInputStrea
 import io.apibuilder.spec.v0.models.{Method, Operation, Service}
 import io.apibuilder.spec.v0.models.json._
 import java.nio.charset.StandardCharsets
-import java.util.concurrent.ConcurrentHashMap
 
-import io.apibuilder.validation.util.{StandardErrors, UrlDownloader}
+import io.apibuilder.validation.util.UrlDownloader
 import play.api.libs.json._
 
 /**
@@ -20,90 +19,17 @@ case class ApiBuilderService(
   private[this] val validator = JsonValidator(service)
   private[this] val normalizer = PathNormalizer(service)
 
-  /**
-    * If the specified method, path require a body, returns the type of the body
-    */
-  def bodyTypeFromPath(method: String, path: String): Option[String] = {
-    operation(method, path).flatMap(_.body.map(_.`type`))
-  }
+  val name: String = service.name
+  val namespace: String = service.namespace
 
   def findType(name: String): Option[ApiBuilderType] = {
     validator.findType(name, defaultNamespace = Some(service.namespace)).headOption
   }
 
-  /**
-    * Returns a map of the HTTP Methods available for the given path
-    */
-  def methodsFromPath(path: String): Seq[Method] = {
-    Method.all.filter { m =>
-      normalizer.resolve(m, path).isRight
-    }
-  }
-
-  def isDefinedAt(method: String, path: String): Boolean = {
-    isDefinedAt(Method(method), path)
-  }
-
-  def isDefinedAt(method: Method, path: String): Boolean = {
-    validate(method, path).isRight
-  }
-
-  def isPathDefinedAt(path: String): Boolean = {
-    Method.all.exists { m =>
-      normalizer.resolve(m, path).isRight
-    }
-  }
-
-  /**
-    * If the provided method and path are known, returns the associated
-    * operation. Otherwise returns an appropriate error message.
-    */
-  def validate(method: String, path: String): Either[Seq[String], Operation] = {
-    validate(Method(method), path)
-  }
-
-  private[this] val validateCache = new ConcurrentHashMap[String, Either[Seq[String], Operation]]()
-  def validate(method: Method, path: String): Either[Seq[String], Operation] = {
-    validateCache.computeIfAbsent(
-      s"$method$path",
-      _ => { doValidate(method, path) }
-    )
-  }
-
-  private[this] def doValidate(method: Method, path: String): Either[Seq[String], Operation] = {
+  def findOperation(method: Method, path: String): Option[Operation] = {
     normalizer.resolve(method, path) match {
-      case Right(op) => Right(op)
-      case Left(_) => {
-        // Provide a friendly error here
-        method match {
-          case Method.UNDEFINED(m) => Left(Seq(StandardErrors.invalidMethodError(m)))
-          case _ => {
-            methodsFromPath(path).toList match {
-              case Nil => {
-                Left(Seq(s"HTTP path $path is not defined"))
-              }
-
-              case available => {
-                Left(Seq(
-                  s"HTTP method '$method' not supported for path $path - Available methods: " +
-                    available.map(_.toString).mkString(", ")
-                ))
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  /**
-    * Returns the operation associated with the specified method
-    * and path, if any
-    */
-  def operation(method: String, path: String): Option[Operation] = {
-    normalizer.resolve(Method(method), path) match {
-      case Left(_) => None
       case Right(op) => Some(op)
+      case Left(_) => None
     }
   }
 

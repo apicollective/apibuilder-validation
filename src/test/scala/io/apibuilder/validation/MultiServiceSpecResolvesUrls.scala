@@ -8,31 +8,31 @@ import play.api.libs.json.Json
 class MultiServiceSpecResolvesUrls extends FunSpec with Matchers with Helpers {
 
   it("validates unknown methods") {
-    flowMultiService.validateOperation("FOO", "/test-org/payments") should equal(
+    flowMultiService.validateOperation(Method.UNDEFINED("FOO"), "/test-org/payments") should equal(
       Left(Seq(
-        "HTTP method 'FOO' is invalid. Must be one of: " + Method.all.map(_.toString).mkString(", "))
-      )
+        "HTTP method 'FOO' is invalid. Must be one of: " + Method.all.map(_.toString).mkString(", ")
+      ))
     )
 
-    flowMultiService.validateOperation("OPTIONS", "/test-org/payments") should equal(
+    flowMultiService.validateOperation(Method.Options, "/test-org/payments") should equal(
       Left(Seq("HTTP method 'OPTIONS' not defined for path '/test-org/payments' - Available methods: GET, POST"))
     )
   }
 
   it("validates unknown paths") {
-    flowMultiService.validateOperation("GET", "/foo") should equal(
+    flowMultiService.validateOperation(Method.Get, "/foo") should equal(
       Left(Seq("HTTP path '/foo' is not defined"))
     )
   }
 
   it("validates unknown method for a known path") {
-    flowMultiService.validateOperation("OPTIONS", "/users") should equal(
+    flowMultiService.validateOperation(Method.Options, "/users") should equal(
       Left(Seq("HTTP method 'OPTIONS' not defined for path '/users' - Available methods: GET, POST"))
     )
   }
 
   it("resolves body when path exists in both services") {
-    flowMultiService.bodyTypeFromPath("POST", "/test-org/payments").map(_.name) should equal(Some("payment_form"))
+    flowMultiService.bodyTypeFromPath(Method.Post, "/test-org/payments").map(_.name) should equal(Some("payment_form"))
   }
 
   it("resolves body when there are multiple variables in path") {
@@ -72,12 +72,12 @@ class MultiServiceSpecResolvesUrls extends FunSpec with Matchers with Helpers {
   }
 
   it("resolves static methods over dynamic ones") {
-    flowMultiService.asInstanceOf[MultiServiceImpl].validateOperation(Method.Post, "/demo/tokens").right.get.service.name should equal("API")
+    flowMultiService.asInstanceOf[MultiServiceImpl].findOperation(Method.Post, "/demo/tokens").get.service.name should equal("API")
     flowMultiService.bodyTypeFromPath("POST", "/:organization/tokens").map(_.name) should equal(
       Some("organization_token_form")
     )
 
-    flowMultiService.asInstanceOf[MultiServiceImpl].validateOperation(Method.Post, "/users/tokens").right.get.service.name should equal("API Internal")
+    flowMultiService.asInstanceOf[MultiServiceImpl].findOperation(Method.Post, "/users/tokens").get.service.name should equal("API Internal")
     flowMultiService.bodyTypeFromPath("POST", "/users/tokens") should equal(
       None
     )
