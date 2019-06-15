@@ -48,12 +48,6 @@ case class ApiBuilderService(
     validate(method, path).isRight
   }
 
-  def isPathDefinedAt(path: String): Boolean = {
-    Method.all.exists { m =>
-      normalizer.resolve(m, path).isRight
-    }
-  }
-
   /**
     * If the provided method and path are known, returns the associated
     * operation. Otherwise returns an appropriate error message.

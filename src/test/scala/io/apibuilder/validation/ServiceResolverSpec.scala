@@ -1,12 +1,6 @@
 package io.apibuilder.validation
 
-import java.io.File
-
-import io.apibuilder.spec.v0.models.Service
-import io.apibuilder.spec.v0.models.json._
-import io.apibuilder.validation.zip.ZipFileBuilder
 import org.scalatest.{FunSpec, Matchers}
-import play.api.libs.json._
 
 class ServiceResolverSpec extends FunSpec with Matchers
   with helpers.PerformanceHelpers
@@ -14,13 +8,15 @@ class ServiceResolverSpec extends FunSpec with Matchers
   private[this] lazy val zipService = MultiService.fromUrl("https://cdn.flow.io/util/lib-apibuilder/specs.zip").right.get
 
   it("performance: doResolveService") {
-    def run(testCase: String, service: MultiService) = {
-      val result = time(1000) {
-        service.services().flatMap(_.service.resources.flatMap(_.operations)).foreach { op =>
-          service.validateOperation(op.method, op.path)
+    def run(testCase: String, multi: MultiService) = {
+      val resolver = ServiceResolver(multi.services())
+      val operations = multi.services().flatMap(_.service.resources.flatMap(_.operations))
+      val result = time(100) {
+        operations.foreach { op =>
+          resolver.doResolveService(op.method, op.path)
         }
       }
-      println(s"$testCase: $result ms")
+      println(s"$testCase [${operations.length} operations]: $result ms")
       result
     }
 
