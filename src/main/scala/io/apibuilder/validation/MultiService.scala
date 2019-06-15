@@ -82,9 +82,9 @@ trait MultiService extends ResponseHelpers {
   }
 
   final def upcastOperationBody(method: Method, path: String, js: JsValue): Either[Seq[String], JsValue] = {
-    findOperation(method, path) match {
-      case None => Left(operationErrorMessage(method, path))
-      case Some(op) => upcast(op, js)
+    validateOperation(method, path) match {
+      case Left(errors) => Left(errors)
+      case Right(op) => upcast(op, js)
     }
   }
 
