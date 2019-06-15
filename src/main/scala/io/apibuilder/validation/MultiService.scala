@@ -140,21 +140,25 @@ trait MultiService extends ResponseHelpers {
   }
 
   final def allEnums(): Seq[ApiBuilderType.Enum] = {
-    services.map(_.service).flatMap { s =>
+    services().map(_.service).flatMap { s =>
       s.enums.map { m => ApiBuilderType.Enum(s, m) }
     }
   }
 
   final def allModels(): Seq[ApiBuilderType.Model] = {
-    services.map(_.service).flatMap { s =>
+    services().map(_.service).flatMap { s =>
       s.models.map { m => ApiBuilderType.Model(s, m) }
     }
   }
 
   final def allUnions(): Seq[ApiBuilderType.Union] = {
-    services.map(_.service).flatMap { s =>
+    services().map(_.service).flatMap { s =>
       s.unions.map { m => ApiBuilderType.Union(s, m) }
     }
+  }
+
+  final def allTypes(): Seq[ApiBuilderType] = {
+    allEnums() ++ allModels() ++ allUnions()
   }
 }
 
