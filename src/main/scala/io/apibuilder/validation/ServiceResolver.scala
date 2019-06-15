@@ -20,7 +20,7 @@ case class ServiceResolver(services: List[ApiBuilderService]) {
     )
   }
 
-  private[this] def doResolveService(method: Method, path: String): Option[ApiBuilderService] = {
+  private[validation] def doResolveService(method: Method, path: String): Option[ApiBuilderService] = {
     services.filter { s =>
       s.isDefinedAt(method = method, path = path)
     } match {

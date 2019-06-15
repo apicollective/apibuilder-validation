@@ -11,6 +11,7 @@ import org.scalatest.{FunSpec, Matchers}
 class MultiServiceZipSpec extends FunSpec with Matchers
   with helpers.ApiBuilderServiceHelpers
   with helpers.FileHelpers
+  with helpers.PerformanceHelpers
   with helpers.Helpers
 {
 
@@ -77,7 +78,7 @@ class MultiServiceZipSpec extends FunSpec with Matchers
     flowMultiService.validateOperation("GET", "/users").right.get
 
     def run(testCase: String, service: MultiService) = {
-      val result = time(100) {
+      val result = time(1000) {
         service.services().flatMap(_.service.resources.flatMap(_.operations)).foreach { op =>
           service.validateOperation(op.method, op.path)
         }
@@ -95,13 +96,5 @@ class MultiServiceZipSpec extends FunSpec with Matchers
     zipService.upcastOperationBody("POST", "/users", Json.obj("name" -> "test")) should equal(
       Left(Seq("user_form.name must be an object and not a string"))
     )
-  }
-
-  private[this] def time(numberIterations: Int)(f: => Any): Long = {
-    val start = System.currentTimeMillis()
-    0.to(numberIterations).foreach { _ =>
-      f
-    }
-    System.currentTimeMillis() - start
   }
 }
