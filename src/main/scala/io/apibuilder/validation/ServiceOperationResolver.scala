@@ -2,7 +2,18 @@ package io.apibuilder.validation
 
 import io.apibuilder.spec.v0.models._
 
-private[validation] case class ServiceOperationByTypeCache(
+/**
+  * A cache of all of the operations defined in the list of services. Allows
+  * for resolution from a Method and Path to the service in which that operation
+  * is defined.
+  *
+  * As paths can be dynamic, it's difficult to precache the exact resolution
+  * of a path to a service. This cache internally optimized by splitting the
+  * path on '/' - and using the number of parts to select only the subset
+  * of operations with the same number of parts. We then iterate through
+  * this subset to select the specific operation.
+  */
+private[validation] case class ServiceOperationCache(
   services: List[ApiBuilderService]
 )(
   acceptPath: String => Boolean
@@ -28,41 +39,29 @@ private[validation] case class ServiceOperationByTypeCache(
 
   private[this] def numberSlashes(path: String): Int = path.count(_ == '/')
 
-  def find(method: Method, path: String): Option[ApiBuilderOperation] = {
+  def findOperation(method: Method, path: String): Option[ApiBuilderOperation] = {
     entriesByNumberSlashes.getOrElse(numberSlashes(path), List.empty)
       .find(_.route.matches(method, path))
       .map(_.operation)
   }
 }
 
-private[validation] case class ServiceOperationCache(services: List[ApiBuilderService]) {
+case class ServiceOperationResolver(services: List[ApiBuilderService]) {
 
-  private[this] val static = ServiceOperationByTypeCache(services)(Route.isStatic)
-  private[this] val dynamic = ServiceOperationByTypeCache(services)(Route.isDynamic)
+  private[this] val static = ServiceOperationCache(services)(Route.isStatic)
+  private[this] val dynamic = ServiceOperationCache(services)(Route.isDynamic)
 
   // If we find a static path in any service, return that one.
   // Otherwise return the first matching service. This handles ambiguity:
   //   - service 1 defines POST /:organization/tokens
   //   - service 2 defines POST /users/tokens
   // We want to return service 2 when the path is /users/tokens
-  def find(method: Method, path: String): Option[ApiBuilderOperation] = {
-    static.find(method, path).orElse {
-      dynamic.find(method, path)
+  def findOperation(method: Method, path: String): Option[ApiBuilderOperation] = {
+    static.findOperation(method, path).orElse {
+      dynamic.findOperation(method, path)
     }
   }
-}
 
-case class ServiceOperationResolver(services: List[ApiBuilderService]) {
-
-  private[this] val cache = ServiceOperationCache(services)
-
-  /**
-    * resolve the API Builder service & operation defined at the provided
-    * method, path.
-    */
-  def findOperation(method: Method, path: String): Option[ApiBuilderOperation] = {
-    cache.find(method, path)
-  }
 }
 
 
