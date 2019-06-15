@@ -21,13 +21,13 @@ class MultiServiceSpecResolvesUrls extends FunSpec with Matchers with Helpers {
 
   it("validates unknown paths") {
     flowMultiService.operationErrorMessage(Method.Get, "/foo") should equal(
-      Left(Seq("HTTP path '/foo' is not defined"))
+      Seq("HTTP path '/foo' is not defined")
     )
   }
 
   it("validates unknown method for a known path") {
     flowMultiService.operationErrorMessage(Method.Options, "/users") should equal(
-      Left(Seq("HTTP method 'OPTIONS' not defined for path '/users' - Available methods: GET, POST"))
+      Seq("HTTP method 'OPTIONS' not defined for path '/users' - Available methods: GET, POST")
     )
   }
 
