@@ -20,21 +20,16 @@ case class StaticRouteMap(routes: Seq[OperationWithRoute]) {
 
 case class OperationWithRouteSet(routes: Seq[OperationWithRoute]) {
 
-  private[this] val byNumberSlashes: Map[Int, Seq[OperationWithRoute]] = routes.groupBy { r =>
-    numberSlashes(r.route.path)
-  }
+  private[this] val byNormalizedPath: Map[String, OperationWithRoute] = Map(
+    routes.map { r =>
+      r.route.path -> r
+    }: _*
+  )
 
-  private[this] def numberSlashes(path: String): Int = 0//path.count(_ == '/')
+  byNormalizedPath.take(10).foreach { case (k,_) => println(k)}
 
   def find(method: Method, path: String): Option[OperationWithRoute] = {
-    byNumberSlashes.get(numberSlashes(path)) match {
-      case None => None
-      case Some(candidateRoutes) => {
-        candidateRoutes.find { opWithRoute =>
-          opWithRoute.route.matches(method, path.trim)
-        }
-      }
-    }
+    None
   }
 }
 
