@@ -1,7 +1,7 @@
 package io.apibuilder.validation
 
 import io.apibuilder.spec.v0.models._
-import io.apibuilder.validation.util.FileOrder
+import io.apibuilder.validation.util.{FileOrder, StandardErrors}
 import io.apibuilder.validation.zip.ZipFileReader
 import play.api.libs.json._
 
@@ -122,7 +122,7 @@ trait MultiService extends ResponseHelpers {
       case None => {
         method match {
           case Method.UNDEFINED(name) => {
-            Left(Seq(s"HTTP method '$name' is invalid. Must be one of: " + Method.all.map(_.toString).mkString(", ")))
+            Left(Seq(StandardErrors.invalidMethodError(name)))
           }
           case _ => {
             val availableMethods = Method.all.filterNot(_ == method).filter { m =>
