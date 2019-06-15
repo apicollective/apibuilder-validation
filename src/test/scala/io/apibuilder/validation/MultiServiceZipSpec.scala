@@ -61,13 +61,15 @@ class MultiServiceZipSpec extends FunSpec with Matchers
     zipService.validateOperation("GET", "/users").right.get
     flowMultiService.validateOperation("GET", "/users").right.get
 
-    def run(service: MultiService) = {
-      time(1000) {
+    def run(testCase: String, service: MultiService) = {
+      val result = time(10000000) {
         service.validateOperation("GET", "/users")
       }
+      println(s"$testCase: $result ms")
+      result
     }
-    run(flowMultiService) < 50 should be(true)
-    run(zipService) < 50 should be(true)
+    run("api", flowMultiService)
+    run("zip", zipService)
   }
 
   it("upcast") {

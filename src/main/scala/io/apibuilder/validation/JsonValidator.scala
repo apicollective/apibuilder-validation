@@ -1,5 +1,7 @@
 package io.apibuilder.validation
 
+import java.util.concurrent.ConcurrentHashMap
+
 import io.apibuilder.spec.v0.models.{Service, UnionType}
 import org.joda.time.format.ISODateTimeFormat
 import play.api.libs.json._
@@ -20,10 +22,10 @@ object Booleans {
 }
 
 object JsonValidator {
-  def apply(service: Service): JsonValidator = JsonValidator(Seq(service))
+  def apply(service: Service): JsonValidator = JsonValidator(List(service))
 }
 
-case class JsonValidator(services: Seq[Service]) {
+case class JsonValidator(services: List[Service]) {
   assert(services.nonEmpty, s"Must have at least one service")
 
   def findType(name: String, defaultNamespace: Option[String]): Seq[ApiBuilderType] = {
@@ -45,10 +47,16 @@ case class JsonValidator(services: Seq[Service]) {
     findType(TypeName.parse(defaultNamespace = defaultNamespace, name = name))
   }
 
+  private[this] val cache = new ConcurrentHashMap[TypeName, Seq[ApiBuilderType]]()
   def findType(typeName: TypeName): Seq[ApiBuilderType] = {
-    services.filter(_.namespace.equalsIgnoreCase(typeName.namespace)).flatMap { service =>
-      findType(service, typeName.name)
-    }
+    cache.computeIfAbsent(
+      typeName,
+      _ => {
+        services.filter(_.namespace.equalsIgnoreCase(typeName.namespace)).flatMap { service =>
+          findType(service, typeName.name)
+        }
+      }
+    )
   }
 
   private[this] def findType(service: Service, typeName: String): Option[ApiBuilderType] = {
@@ -152,9 +160,9 @@ case class JsonValidator(services: Seq[Service]) {
   }
 
   private[this] def validateEnum(
-                                  prefix: String,
-                                  typ: ApiBuilderType.Enum,
-                                  js: JsValue
+    prefix: String,
+    typ: ApiBuilderType.Enum,
+    js: JsValue
   ): Either[Seq[String], JsValue] = {
     validateString(prefix, js) match {
       case Left(errors) => Left(errors)
@@ -177,9 +185,9 @@ case class JsonValidator(services: Seq[Service]) {
   }
 
   private[this] def validateModel(
-                                   typ: ApiBuilderType.Model,
-                                   js: JsObject,
-                                   prefix: Option[String]
+    typ: ApiBuilderType.Model,
+    js: JsObject,
+    prefix: Option[String]
   ): Either[Seq[String], JsValue] = {
     var updated = Json.obj()
 
@@ -226,9 +234,9 @@ case class JsonValidator(services: Seq[Service]) {
   }
 
   private[this] def validateUnion(
-                                   typ: ApiBuilderType.Union,
-                                   js: JsObject,
-                                   prefix: Option[String]
+    typ: ApiBuilderType.Union,
+    js: JsObject,
+    prefix: Option[String]
   ): Either[Seq[String], JsValue] = {
     typ.union.discriminator match {
       case None => {
