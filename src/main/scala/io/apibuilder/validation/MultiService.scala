@@ -95,11 +95,19 @@ trait MultiService extends ResponseHelpers {
     }
   }
 
+  final def validateOperation(method: Method, path: String): Either[Seq[String], ApiBuilderOperation] = {
+    findOperation(method, path) match {
+      case Some(op) => Right(op)
+      case None => Left(operationErrorMessage(method, path))
+    }
+  }
+
+
   /**
     * Returns a nice error message explaining that this method is unavailable
     * with hints as to what may be (e.g. alternate methods)
     */
-  final def operationErrorMessage(method: Method, path: String): Seq[String] = {
+  private[this] def operationErrorMessage(method: Method, path: String): Seq[String] = {
     method match {
       case Method.UNDEFINED(name) => {
         Seq(StandardErrors.invalidMethodError(name))

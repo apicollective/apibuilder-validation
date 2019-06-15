@@ -8,26 +8,26 @@ import play.api.libs.json.Json
 class MultiServiceSpecResolvesUrls extends FunSpec with Matchers with Helpers {
 
   it("validates unknown methods") {
-    flowMultiService.operationErrorMessage(Method.UNDEFINED("FOO"), "/test-org/payments") should equal(
-      Seq(
+    flowMultiService.validateOperation(Method.UNDEFINED("FOO"), "/test-org/payments") should equal(
+      Left(Seq(
         "HTTP method 'FOO' is invalid. Must be one of: " + Method.all.map(_.toString).mkString(", ")
-      )
+      ))
     )
 
-    flowMultiService.operationErrorMessage(Method.Options, "/test-org/payments") should equal(
-      Seq("HTTP method 'OPTIONS' not defined for path '/test-org/payments' - Available methods: GET, POST")
+    flowMultiService.validateOperation(Method.Options, "/test-org/payments") should equal(
+      Left(Seq("HTTP method 'OPTIONS' not defined for path '/test-org/payments' - Available methods: GET, POST"))
     )
   }
 
   it("validates unknown paths") {
-    flowMultiService.operationErrorMessage(Method.Get, "/foo") should equal(
-      Seq("HTTP path '/foo' is not defined")
+    flowMultiService.validateOperation(Method.Get, "/foo") should equal(
+      Left(Seq("HTTP path '/foo' is not defined"))
     )
   }
 
   it("validates unknown method for a known path") {
-    flowMultiService.operationErrorMessage(Method.Options, "/users") should equal(
-      Seq("HTTP method 'OPTIONS' not defined for path '/users' - Available methods: GET, POST")
+    flowMultiService.validateOperation(Method.Options, "/users") should equal(
+      Left(Seq("HTTP method 'OPTIONS' not defined for path '/users' - Available methods: GET, POST"))
     )
   }
 
