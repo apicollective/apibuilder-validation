@@ -9,13 +9,13 @@ class MultiServiceSpecResolvesUrls extends FunSpec with Matchers with Helpers {
 
   it("validates unknown methods") {
     flowMultiService.operationErrorMessage(Method.UNDEFINED("FOO"), "/test-org/payments") should equal(
-      Left(Seq(
-        "HTTP method 'FOO' is invalid. Must be one of: " + Method.all.map(_.toString).mkString(", "))
+      Seq(
+        "HTTP method 'FOO' is invalid. Must be one of: " + Method.all.map(_.toString).mkString(", ")
       )
     )
 
     flowMultiService.operationErrorMessage(Method.Options, "/test-org/payments") should equal(
-      Left(Seq("HTTP method 'OPTIONS' not defined for path '/test-org/payments' - Available methods: GET, POST"))
+      Seq("HTTP method 'OPTIONS' not defined for path '/test-org/payments' - Available methods: GET, POST")
     )
   }
 
