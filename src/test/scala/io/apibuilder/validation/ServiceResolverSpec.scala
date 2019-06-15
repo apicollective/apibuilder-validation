@@ -11,9 +11,9 @@ class ServiceResolverSpec extends FunSpec with Matchers
     def run(testCase: String, multi: MultiService) = {
       val resolver = ServiceResolver(multi.services())
       val operations = multi.services().flatMap(_.service.resources.flatMap(_.operations))
-      val result = time(100) {
+      val result = time(10) { i =>
         operations.foreach { op =>
-          resolver.doResolveService(op.method, op.path)
+          resolver.resolve(op.method, op.path.replaceAll(":organization", i.toString))
         }
       }
       println(s"$testCase [${operations.length} operations]: $result ms")

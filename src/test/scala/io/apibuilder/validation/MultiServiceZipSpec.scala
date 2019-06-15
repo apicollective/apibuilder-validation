@@ -63,8 +63,8 @@ class MultiServiceZipSpec extends FunSpec with Matchers
     flowMultiService.validateOperation("GET", "/users").right.get
 
     def run(testCase: String, service: MultiService) = {
-      val result = time(1000000) {
-        service.validateOperation("GET", "/users")
+      val result = time(1000) { i =>
+        service.validateOperation("GET", s"/users/$i")
       }
       println(s"$testCase: $result ms")
       result
@@ -74,12 +74,13 @@ class MultiServiceZipSpec extends FunSpec with Matchers
   }
 
   it("performance: resolving large number of operations") {
-    zipService.validateOperation("GET", "/users").right.get
-    flowMultiService.validateOperation("GET", "/users").right.get
+    zipService.validateOperation("GET", "/users/1").right.get
+    flowMultiService.validateOperation("GET", "/users/1").right.get
 
     def run(testCase: String, service: MultiService) = {
-      val result = time(1000) {
-        service.services().flatMap(_.service.resources.flatMap(_.operations)).foreach { op =>
+      val ops = service.services().flatMap(_.service.resources.flatMap(_.operations))
+      val result = time(1000) { _ =>
+        ops.foreach { op =>
           service.validateOperation(op.method, op.path)
         }
       }

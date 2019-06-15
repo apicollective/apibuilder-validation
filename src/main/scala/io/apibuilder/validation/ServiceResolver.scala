@@ -1,12 +1,8 @@
 package io.apibuilder.validation
 
-import java.util.concurrent.ConcurrentHashMap
-
 import io.apibuilder.spec.v0.models._
 
 case class ServiceResolver(services: List[ApiBuilderService]) {
-
-  private[this] val cache = new ConcurrentHashMap[String, Option[ApiBuilderService]]()
 
   /**
     * resolve the API Builder service defined at the provided method, path.
@@ -14,13 +10,6 @@ case class ServiceResolver(services: List[ApiBuilderService]) {
     * the provided function on the API Builder service.
     */
   def resolve(method: Method, path: String): Option[ApiBuilderService] = {
-    cache.computeIfAbsent(
-      s"$method$path",
-      _ => { doResolveService(method, path) }
-    )
-  }
-
-  private[validation] def doResolveService(method: Method, path: String): Option[ApiBuilderService] = {
     services.filter { s =>
       s.isDefinedAt(method = method, path = path)
     } match {

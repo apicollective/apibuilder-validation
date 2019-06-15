@@ -20,7 +20,7 @@ case class StaticRouteMap(routes: Seq[OperationWithRoute]) {
 
 case class DynamicRouteMap(routes: Seq[OperationWithRoute]) {
 
-  private[this] val byMethod: Map[String, Seq[OperationWithRoute]] = routes.groupBy { r =>
+  private[this] val lookup: Map[String, Seq[OperationWithRoute]] = routes.groupBy { r =>
     key(r.route.method, r.route.path)
   }
 
@@ -32,7 +32,7 @@ case class DynamicRouteMap(routes: Seq[OperationWithRoute]) {
 
   // TODO: can we make constant time?
   def find(method: Method, path: String): Option[OperationWithRoute] = {
-    byMethod.get(key(method, path)) match {
+    lookup.get(key(method, path)) match {
       case None => None
       case Some(all) => {
         all.find { opWithRoute =>
