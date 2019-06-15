@@ -26,6 +26,10 @@ trait MultiService extends ResponseHelpers {
     */
   def upcast(typ: ApiBuilderType, js: JsValue): Either[Seq[String], JsValue]
 
+  final def findOperation(method: String, path: String): Option[ApiBuilderOperation] = {
+    findOperation(Method(method), path)
+  }
+
   /**
     * @param defaultNamespace e.g. io.flow.user.v0 - used unless the type name
     *                         is fully qualified already
@@ -50,21 +54,7 @@ trait MultiService extends ResponseHelpers {
   }
 
   final def bodyTypeFromPath(method: Method, path: String): Option[ApiBuilderType] = {
-    operation(method, path).flatMap(findBodyType)
-  }
-
-  /**
-    * For the given method & path, returns the defined operation, if any
-    */
-  final def operation(method: String, path: String): Option[ApiBuilderOperation] = {
-    operation(Method(method), path)
-  }
-
-  final def operation(method: Method, path: String): Option[ApiBuilderOperation] = {
-    validateOperation(method, path) match {
-      case Left(_) => None
-      case Right(op) => Some(op)
-    }
+    findOperation(method, path).flatMap(findBodyType)
   }
 
   /**
@@ -92,9 +82,9 @@ trait MultiService extends ResponseHelpers {
   }
 
   final def upcastOperationBody(method: Method, path: String, js: JsValue): Either[Seq[String], JsValue] = {
-    validateOperation(method, path) match {
-      case Left(errors) => Left(errors)
-      case Right(op) => upcast(op, js)
+    findOperation(method, path) match {
+      case None => Left(operationErrorMessage(method, path))
+      case Some(op) => upcast(op, js)
     }
   }
 
@@ -105,59 +95,47 @@ trait MultiService extends ResponseHelpers {
     }
   }
 
-  final def validateOperation(method: String, path: String): Either[Seq[String], ApiBuilderOperation] = {
-    validateOperation(Method(method), path)
-  }
-
   /**
-    * Validates that the path is known and the method is supported for the path.
-    * If known, returns the corresponding operation. Otherwise returns a
-    * list of errors.
+    * Returns a nice error message explaining that this method is unavailable
+    * with hints as to what may be (e.g. alternate methods)
     */
-  final def validateOperation(method: Method, path: String): Either[Seq[String], ApiBuilderOperation] = {
-    findOperation(method, path) match {
-      case Some(op) => Right(op)
-      case None => {
-        method match {
-          case Method.UNDEFINED(name) => {
-            Left(Seq(StandardErrors.invalidMethodError(name)))
-          }
-          case _ => {
-            val availableMethods = Method.all.filterNot(_ == method).filter { m =>
-              findOperation(m, path).nonEmpty
-            }
-            if (availableMethods.isEmpty) {
-              Left(Seq(s"HTTP path '$path' is not defined"))
-            } else {
-              Left(Seq(s"HTTP method '$method' not defined for path '$path' - Available methods: ${availableMethods.map(_.toString).mkString(", ")}"))
-            }
-          }
+  final def operationErrorMessage(method: Method, path: String): Seq[String] = {
+    method match {
+      case Method.UNDEFINED(name) => {
+        Seq(StandardErrors.invalidMethodError(name))
+      }
+      case _ => {
+        val availableMethods = Method.all.filterNot(_ == method).filter { m =>
+          findOperation(m, path).nonEmpty
+        }
+        if (availableMethods.isEmpty) {
+          Seq(s"HTTP path '$path' is not defined")
+        } else {
+          Seq(s"HTTP method '$method' not defined for path '$path' - Available methods: ${availableMethods.map(_.toString).mkString(", ")}")
         }
       }
     }
   }
 
-  final def allEnums(): Seq[ApiBuilderType.Enum] = {
+  final val allEnums: Seq[ApiBuilderType.Enum] = {
     services().map(_.service).flatMap { s =>
       s.enums.map { m => ApiBuilderType.Enum(s, m) }
     }
   }
 
-  final def allModels(): Seq[ApiBuilderType.Model] = {
+  final val allModels: Seq[ApiBuilderType.Model] = {
     services().map(_.service).flatMap { s =>
       s.models.map { m => ApiBuilderType.Model(s, m) }
     }
   }
 
-  final def allUnions(): Seq[ApiBuilderType.Union] = {
+  final val allUnions: Seq[ApiBuilderType.Union] = {
     services().map(_.service).flatMap { s =>
       s.unions.map { m => ApiBuilderType.Union(s, m) }
     }
   }
 
-  final def allTypes(): Seq[ApiBuilderType] = {
-    allEnums() ++ allModels() ++ allUnions()
-  }
+  final val allTypes: Seq[ApiBuilderType] = allEnums ++ allModels ++ allUnions
 }
 
 object MultiService {

@@ -7,17 +7,17 @@ import org.scalatest.{FunSpec, Matchers}
 class MultiServiceSpec2 extends FunSpec with Matchers with helpers.Helpers {
 
   it("validates unknown operations") {
-    flowMultiService.validateOperation("FOO", "/:organization/payments") should equal(
+    flowMultiService.operationErrorMessage(Method.UNDEFINED("FOO"), "/:organization/payments") should equal(
       Left(Seq("HTTP method 'FOO' is invalid. Must be one of: " + Method.all.map(_.toString).mkString(", ")))
     )
 
-    flowMultiService.validateOperation("OPTIONS", "/:organization/payments") should equal(
+    flowMultiService.operationErrorMessage(Method.Options, "/:organization/payments") should equal(
       Left(Seq("HTTP method 'OPTIONS' not defined for path '/:organization/payments' - Available methods: GET, POST"))
     )
   }
 
   it("validates unknown paths") {
-    flowMultiService.validateOperation("GET", "/foo") should equal(
+    flowMultiService.operationErrorMessage(Method.Get, "/foo") should equal(
       Left(Seq("HTTP path '/foo' is not defined"))
     )
   }
@@ -63,9 +63,7 @@ class MultiServiceSpec2 extends FunSpec with Matchers with helpers.Helpers {
   }
 
   it("validateResponseCode") {
-    val op = rightOrErrors(
-      flowMultiService.validateOperation("POST", "/:organization/payments")
-    )
+    val op = flowMultiService.findOperation("POST", "/:organization/payments").get
 
     Seq(201, 401, 422).foreach { code =>
       rightOrErrors {
@@ -84,10 +82,7 @@ class MultiServiceSpec2 extends FunSpec with Matchers with helpers.Helpers {
   }
 
   it("response") {
-    val op = rightOrErrors(
-      flowMultiService.validateOperation("POST", "/:organization/cards")
-    )
-
+    val op = flowMultiService.findOperation("POST", "/:organization/cards").get
     flowMultiService.response(op, 201).get.`type` should equal("card")
     flowMultiService.response(op, 499) should be(None)
   }

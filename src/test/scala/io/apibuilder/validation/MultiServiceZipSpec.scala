@@ -3,7 +3,7 @@ package io.apibuilder.validation
 import java.io.File
 
 import io.apibuilder.spec.v0.models.json._
-import io.apibuilder.spec.v0.models.Service
+import io.apibuilder.spec.v0.models.{Method, Service}
 import io.apibuilder.validation.zip.ZipFileBuilder
 import play.api.libs.json._
 import org.scalatest.{FunSpec, Matchers}
@@ -59,12 +59,13 @@ class MultiServiceZipSpec extends FunSpec with Matchers
   }
 
   it("performance: validateOperation") {
-    zipService.validateOperation("GET", "/users").right.get
-    flowMultiService.validateOperation("GET", "/users").right.get
+    println("performance: validateOperation")
+    zipService.findOperation("GET", "/users").get
+    flowMultiService.findOperation("GET", "/users").get
 
     def run(testCase: String, service: MultiService) = {
       val result = time(10) { i =>
-        service.validateOperation("GET", s"/users/$i")
+        service.findOperation(Method.Get, s"/users/$i")
       }
       println(s"$testCase: $result ms")
       result
@@ -74,14 +75,15 @@ class MultiServiceZipSpec extends FunSpec with Matchers
   }
 
   it("performance: resolving large number of operations") {
-    zipService.validateOperation("GET", "/users/1").right.get
-    flowMultiService.validateOperation("GET", "/users/1").right.get
+    println("performance: resolving large number of operations")
+    zipService.findOperation("GET", "/users/1").get
+    flowMultiService.findOperation("GET", "/users/1").get
 
     def run(testCase: String, service: MultiService) = {
       val ops = service.services().flatMap(_.service.resources.flatMap(_.operations))
       val result = time(1) { _ =>
         ops.foreach { op =>
-          service.validateOperation(op.method, op.path)
+          service.findOperation(op.method, op.path)
         }
       }
       println(s"$testCase: $result ms")
@@ -92,7 +94,7 @@ class MultiServiceZipSpec extends FunSpec with Matchers
   }
 
   it("upcast") {
-    val op = zipService.operation("POST", "/users").get.operation
+    val op = zipService.findOperation("POST", "/users").get.operation
     op.body.map(_.`type`) should equal(Some("user_form"))
     zipService.upcastOperationBody("POST", "/users", Json.obj("name" -> "test")) should equal(
       Left(Seq("user_form.name must be an object and not a string"))
