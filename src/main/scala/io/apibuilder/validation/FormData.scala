@@ -58,6 +58,7 @@ object FormData {
   ): String = {
     def urlEncode(s: String): String = java.net.URLEncoder.encode(s, Encoding)
     def encodeIt(value: String, keys: Seq[String]): String = encode(urlEncode(value), keys)
+
     js match {
       case o: JsObject => {
         o.value.map { case (key, value) =>
@@ -247,8 +248,6 @@ object FormData {
   // }
   @tailrec
   private[this] def toJsonObject(key: String, value: JsValue): JsObject = {
-    // println(s"toJsonObject key[$key] value: $value")
-
     key match {
       case EndsWithIndexInBrackets(prefix, index) => {
         // Fill in JsNull up to our desired index to preserve the explicit
@@ -300,7 +299,13 @@ object FormData {
         Try {
           BigDecimal(value)
         } match {
-          case Success(num) => Some(num)
+          case Success(num) => {
+            if (num.toString == value) {
+              Some(num)
+            } else {
+              None
+            }
+          }
           case Failure(_) => None
         }
       }
