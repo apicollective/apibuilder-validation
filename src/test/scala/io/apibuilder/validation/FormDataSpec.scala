@@ -1,19 +1,27 @@
 package io.apibuilder.validation
 
-import java.io.File
-
 import org.scalatest.{FunSpec, Matchers}
 import play.api.libs.json._
 
 class FormDataSpec extends FunSpec with Matchers {
 
-  it("toNumber") {
-    FormData.toNumber("") should be(None)
-    FormData.toNumber("a") should be(None)
-    FormData.toNumber("1") should be(Some(1))
-    FormData.toNumber("-1") should be(Some(-1))
-    FormData.toNumber("1999") should be(Some(1999))
-    FormData.toNumber("-1999") should be(Some(-1999))
+  it("toInteger") {
+    FormData.toLong("") should be(None)
+    FormData.toLong("a") should be(None)
+    FormData.toLong("1") should be(Some(1))
+    FormData.toLong("-1") should be(Some(-1))
+    FormData.toLong("1999") should be(Some(1999))
+    FormData.toLong("-1999") should be(Some(-1999))
+    FormData.toLong("0101") should be(None)
+    FormData.toLong("0101.") should be(None)
+    FormData.toLong("0101.00") should be(None)
+    FormData.toLong("0101.10") should be(None)
+    FormData.toLong("-0101.00") should be(None)
+    FormData.toLong("-0101.10") should be(None)
+    FormData.toLong("1999.10") should be(None)
+    FormData.toLong("1999.00") should be(None)
+    FormData.toLong("-1999.10") should be(None)
+    FormData.toLong("-1999.00") should be(None)
   }
 
   it("parseEncoded") {
@@ -179,6 +187,23 @@ class FormDataSpec extends FunSpec with Matchers {
     it("handles empty strings") {
       val res = FormData.toJson(data).fields.find(_._1 == "anEmptyString")
       res should be(Some("anEmptyString" -> JsNull))
+    }
+
+    it("preserve leading zeroes") {
+      FormData.normalize(
+        Seq(
+          ("number1", "0100"),
+          ("number1", "0100."),
+          ("number2", "0100.10")
+        ),
+        options = Set(EncodingOptions.OmitArrayIndexes)
+      ) should equal(
+        Seq(
+          ("number1", "0100"),
+          ("number1", "0100."),
+          ("number2", "0100.10")
+        )
+      )
     }
 
     it("toJson for seq of tuples handles array bracket format") {

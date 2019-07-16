@@ -58,6 +58,7 @@ object FormData {
   ): String = {
     def urlEncode(s: String): String = java.net.URLEncoder.encode(s, Encoding)
     def encodeIt(value: String, keys: Seq[String]): String = encode(urlEncode(value), keys)
+
     js match {
       case o: JsObject => {
         o.value.map { case (key, value) =>
@@ -247,8 +248,6 @@ object FormData {
   // }
   @tailrec
   private[this] def toJsonObject(key: String, value: JsValue): JsObject = {
-    // println(s"toJsonObject key[$key] value: $value")
-
     key match {
       case EndsWithIndexInBrackets(prefix, index) => {
         // Fill in JsNull up to our desired index to preserve the explicit
@@ -284,7 +283,7 @@ object FormData {
       case "true" => JsBoolean(true)
       case "false" => JsBoolean(false)
       case other => {
-        toNumber(other) match {
+        toLong(other) match {
           case Some(v) => JsNumber(v)
           case None => JsString(other)
         }
@@ -294,13 +293,19 @@ object FormData {
 
   private[this] val AcceptableRegexp = """^\-?[0-9]+$""".r
 
-  def toNumber(value: String): Option[BigDecimal] = {
+  def toLong(value: String): Option[Long] = {
     value match {
       case AcceptableRegexp() => {
         Try {
-          BigDecimal(value)
+          value.toLong
         } match {
-          case Success(num) => Some(num)
+          case Success(num) => {
+            if (num.toString == value) {
+              Some(num)
+            } else {
+              None
+            }
+          }
           case Failure(_) => None
         }
       }
