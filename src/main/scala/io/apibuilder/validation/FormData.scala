@@ -283,7 +283,7 @@ object FormData {
       case "true" => JsBoolean(true)
       case "false" => JsBoolean(false)
       case other => {
-        toNumber(other) match {
+        toLong(other) match {
           case Some(v) => JsNumber(v)
           case None => JsString(other)
         }
@@ -293,11 +293,11 @@ object FormData {
 
   private[this] val AcceptableRegexp = """^\-?[0-9]+$""".r
 
-  def toNumber(value: String): Option[BigDecimal] = {
+  def toLong(value: String): Option[Long] = {
     value match {
       case AcceptableRegexp() => {
         Try {
-          BigDecimal(value)
+          value.toLong
         } match {
           case Success(num) => {
             if (num.toString == value) {
