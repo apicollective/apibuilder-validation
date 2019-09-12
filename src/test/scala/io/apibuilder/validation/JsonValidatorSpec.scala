@@ -107,6 +107,7 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
   it("validates a double") {
     validate("double", Json.parse("123.45")).right.get.as[Double] should equal(123.45)
     validate("double", Json.parse("123")).right.get.as[Double] should equal(123)
+    validate("double", JsString("NaN")) should equal(Left(List("double must be a valid double")))
     validate("double", JsString(" ")) should equal(Left(List("double must be a valid double")))
   }
 
