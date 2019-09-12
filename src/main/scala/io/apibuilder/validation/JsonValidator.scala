@@ -414,7 +414,9 @@ case class JsonValidator(services: List[Service]) {
       case _: JsObject => Left(Seq(s"$prefix must be a double and not an object"))
       case v: JsString => {
         Try {
+          // String must be convertible to Double *and* BigDecimal, to catch "NaN".
           v.value.toDouble
+          BigDecimal(v.value)
         } match {
           case Success(num) => Right(JsNumber(num))
           case Failure(_) => Left(Seq(s"$prefix must be a valid double"))
