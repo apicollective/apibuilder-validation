@@ -176,7 +176,7 @@ case class JsonValidator(services: List[Service]) {
             Left(
               Seq(
                 s"$prefix invalid value '${incomingValue}'. Valid values for the enum '${typ.enum.name}' are: " +
-                  valid.mkString("'", "', '", "'")
+                  valid.distinct.mkString("'", "', '", "'")
               )
             )
           }
