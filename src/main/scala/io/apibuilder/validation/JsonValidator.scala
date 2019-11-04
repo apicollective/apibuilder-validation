@@ -168,7 +168,9 @@ case class JsonValidator(services: List[Service]) {
       case Left(errors) => Left(errors)
       case Right(jsString) => {
         val incomingValue = jsString.value.trim
-        val valid = typ.enum.values.map(_.name)
+        val valid = typ.enum.values.flatMap { e =>
+          Seq(e.name) ++ e.value.toSeq
+        }
         valid.find { _.toLowerCase.trim == incomingValue.toLowerCase } match {
           case None => {
             Left(
