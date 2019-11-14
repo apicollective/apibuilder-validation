@@ -347,7 +347,7 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
       }
     }
   }
-  
+
   it("returns appropriate error messages from maps") {
     val form = Json.obj(
       "number" -> "sku-1",
@@ -441,6 +441,25 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
       "POST", "/queries", Json.obj()
     ) should equal(
       Left(Seq("Missing required field for query_form: filters"))
+    )
+  }
+
+  it("can deserialize an object if all of its fields are optional") {
+    val typ = flowMultiService.findType("io.flow.internal.v0.models.browser_bundle_feature_form").getOrElse(
+      sys.error("Missing browser_bundle_feature_form type")
+    )
+    rightOrErrors {
+      flowMultiService.upcast(
+        typ,
+        Json.obj(
+          "keys" -> Seq("a")
+        )
+      )
+    } should equal(
+      Json.obj(
+        "keys" -> Seq("a"),
+        "context" -> Json.obj()
+      )
     )
   }
 }
