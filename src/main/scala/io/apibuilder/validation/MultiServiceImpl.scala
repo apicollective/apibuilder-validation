@@ -33,11 +33,9 @@ case class MultiServiceImpl(
   }
 
   private[this] def injectModelsWithOptionalFields(typ: ApiBuilderType.Model, incoming: JsObject): JsObject = {
-    println(s"injectModelsWithOptionalFields ${typ.model.name}: ${incoming}")
     typ.requiredFields.filter { f =>
       (incoming \ f.name).toOption.isEmpty
     }.foldLeft(incoming) { case (js, field) =>
-      println(s"field: ${field.name}")
       createDefault(typ.service, field.`type`) match {
         case None => js
         case Some(defaultJs) => js ++ Json.obj(field.name -> defaultJs)
