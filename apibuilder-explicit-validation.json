@@ -55,6 +55,32 @@
       "fields": [
         { "name": "items", "type": "[single_cart_add_form]" }
       ]
+    },
+
+    "example_form": {
+      "fields": [
+        { "name": "number", "type": "string" },
+        { "name": "context", "type": "context_form" }
+      ]
+    },
+
+    "context_form": {
+      "fields": [
+        { "name": "country", "type": "string", "required": false }
+      ]
+    },
+
+    "example_form_nested": {
+      "fields": [
+        { "name": "number", "type": "string" },
+        { "name": "parent", "type": "parent_context_form" }
+      ]
+    },
+
+    "parent_context_form": {
+      "fields": [
+        { "name": "context", "type": "context_form" }
+      ]
     }
   },
 

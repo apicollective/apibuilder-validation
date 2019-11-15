@@ -1,7 +1,8 @@
 package io.apibuilder.validation
 
+import io.apibuilder.spec.v0.models
 import io.apibuilder.spec.v0.models.Method
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsObject, JsValue, Json}
 
 /**
   * Wrapper to work with multiple API Builder services.
@@ -24,7 +25,41 @@ case class MultiServiceImpl(
   }
 
   override def upcast(typ: ApiBuilderType, js: JsValue): Either[Seq[String], JsValue] = {
-    validator.validateType(typ, js)
+    val finalJs = (typ, js) match {
+      case (m: ApiBuilderType.Model, j: JsObject) => injectModelsWithOptionalFields(m, j)
+      case _ => js
+    }
+    validator.validateType(typ, finalJs)
   }
 
+  private[this] def injectModelsWithOptionalFields(typ: ApiBuilderType.Model, incoming: JsObject): JsObject = {
+    typ.requiredFields.filter { f =>
+      (incoming \ f.name).toOption.isEmpty
+    }.foldLeft(incoming) { case (js, field) =>
+      createDefault(typ.service, field.`type`) match {
+        case None => js
+        case Some(defaultJs) => js ++ Json.obj(field.name -> defaultJs)
+      }
+    }
+  }
+
+  private[this] def createDefault(service: models.Service, typ: String): Option[JsObject] = {
+    findType(service.namespace, typ).flatMap {
+      case m: ApiBuilderType.Model => createDefault(m)
+      case _: ApiBuilderType.Enum | _: ApiBuilderType.Union => None
+    }
+  }
+
+  private[this] def createDefault(typ: ApiBuilderType.Model): Option[JsObject] = {
+    val all = typ.requiredFields.map { f =>
+      createDefault(typ.service, f.`type`).map { d => Json.obj(f.name -> d) }
+    }
+    if (all.exists(_.isEmpty)) {
+      None
+    } else {
+      Some(
+        all.flatten.foldLeft(Json.obj()) { case (a, b) => a ++ b }
+      )
+    }
+  }
 }

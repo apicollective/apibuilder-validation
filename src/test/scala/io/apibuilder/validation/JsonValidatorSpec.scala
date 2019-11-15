@@ -261,7 +261,9 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
     val form = Json.obj(
       "name" -> JsString("Test item"),
       "number" -> JsString("sku-1"),
-      "categories" -> JsArray(Seq(JsString("a"), JsNumber(123)))
+      "categories" -> JsArray(Seq(JsString("a"), JsNumber(123))),
+      "currency" -> "CAD",
+      "price" -> 123,
     )
 
     form.validate[HarmonizedItemForm] match {
@@ -269,7 +271,9 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
       case _: JsError => //
     }
 
-    val converted: JsValue = validate("harmonized_item_form", form).right.get
+    val converted: JsValue = rightOrErrors {
+      validate("harmonized_item_form", form)
+    }
 
     converted.validate[HarmonizedItemForm] match {
       case s: JsSuccess[HarmonizedItemForm] => {
@@ -294,7 +298,9 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
           Json.obj(),
           JsNull
         )
-      )
+      ),
+      "currency" -> "CAD",
+      "price" -> 123,
     )
 
     form.validate[HarmonizedItemForm] match {
@@ -347,7 +353,7 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
       }
     }
   }
-  
+
   it("returns appropriate error messages from maps") {
     val form = Json.obj(
       "number" -> "sku-1",
@@ -441,6 +447,46 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
       "POST", "/queries", Json.obj()
     ) should equal(
       Left(Seq("Missing required field for query_form: filters"))
+    )
+  }
+
+  it("can default a model that is required but where all fields are optional") {
+    val typ = apibuilderMultiService.findType("io.apibuilder.explicit.validation.v0.models.example_form").getOrElse(
+      sys.error("Missing example_form type")
+    )
+    rightOrErrors {
+      apibuilderMultiService.upcast(
+        typ,
+        Json.obj(
+          "number" -> "1",
+        )
+      )
+    } should equal(
+      Json.obj(
+        "number" -> "1",
+        "context" -> Json.obj(),
+      )
+    )
+  }
+
+  it("can default a nested model that is required but where all fields are optional") {
+    val typ = apibuilderMultiService.findType("io.apibuilder.explicit.validation.v0.models.example_form_nested").getOrElse(
+      sys.error("Missing example_form_nested type")
+    )
+    rightOrErrors {
+      apibuilderMultiService.upcast(
+        typ,
+        Json.obj(
+          "number" -> "1",
+        )
+      )
+    } should equal(
+      Json.obj(
+        "number" -> "1",
+        "parent" -> Json.obj(
+          "context" -> Json.obj()
+        )
+      )
     )
   }
 }

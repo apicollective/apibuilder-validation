@@ -1,6 +1,7 @@
 package io.apibuilder.validation
 
 import io.apibuilder.spec.v0.models
+import io.apibuilder.spec.v0.models.Field
 
 sealed trait ApiBuilderType {
 
@@ -27,6 +28,7 @@ object ApiBuilderType {
   case class Model(service: models.Service, model: models.Model) extends ApiBuilderType {
     override val typeName: TypeName = TypeName.parse(name = model.name, defaultNamespace = service.namespace)
     override val typeDiscriminator = "models"
+    val requiredFields: Seq[Field] = model.fields.filter(_.required)
   }
   case class Union(service: models.Service, union: models.Union) extends ApiBuilderType {
     override val typeName: TypeName = TypeName.parse(name = union.name, defaultNamespace = service.namespace)
