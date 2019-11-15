@@ -450,43 +450,4 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
     )
   }
 
-  it("can default a model that is required but where all fields are optional") {
-    val typ = apibuilderMultiService.findType("io.apibuilder.explicit.validation.v0.models.example_form").getOrElse(
-      sys.error("Missing example_form type")
-    )
-    rightOrErrors {
-      apibuilderMultiService.upcast(
-        typ,
-        Json.obj(
-          "number" -> "1",
-        )
-      )
-    } should equal(
-      Json.obj(
-        "number" -> "1",
-        "context" -> Json.obj(),
-      )
-    )
-  }
-
-  it("can default a nested model that is required but where all fields are optional") {
-    val typ = apibuilderMultiService.findType("io.apibuilder.explicit.validation.v0.models.example_form_nested").getOrElse(
-      sys.error("Missing example_form_nested type")
-    )
-    rightOrErrors {
-      apibuilderMultiService.upcast(
-        typ,
-        Json.obj(
-          "number" -> "1",
-        )
-      )
-    } should equal(
-      Json.obj(
-        "number" -> "1",
-        "parent" -> Json.obj(
-          "context" -> Json.obj()
-        )
-      )
-    )
-  }
 }
