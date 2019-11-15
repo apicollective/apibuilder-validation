@@ -25,38 +25,43 @@ case class MultiServiceImpl(
   }
 
   override def upcast(typ: ApiBuilderType, js: JsValue): Either[Seq[String], JsValue] = {
-    val finalJs = typ match {
-      case m: ApiBuilderType.Model => {
-        js match {
-          case j: JsObject => injectModelsWithOptionalFields(m, j)
-          case _ => js
-        }
-      }
-      case _: ApiBuilderType.Enum |  _: ApiBuilderType.Union => js
+    val finalJs = (typ, js) match {
+      case (m: ApiBuilderType.Model, j: JsObject) => injectModelsWithOptionalFields(m, j)
+      case _ => js
     }
     validator.validateType(typ, finalJs)
   }
 
-
-  private[this] def injectModelsWithOptionalFields(typ: ApiBuilderType.Model, js: JsObject): JsObject = {
+  private[this] def injectModelsWithOptionalFields(typ: ApiBuilderType.Model, incoming: JsObject): JsObject = {
+    println(s"injectModelsWithOptionalFields ${typ.model.name}: ${incoming}")
     typ.requiredFields.filter { f =>
-      (js \ f.name).toOption.isEmpty
-    }.foldLeft(js) { case (js, field) =>
-      if (isFieldModelWithAllRequiredFields(typ.service, field.`type`)) {
-        js ++ Json.obj(field.name -> Json.obj())
-      } else {
-        js
+      (incoming \ f.name).toOption.isEmpty
+    }.foldLeft(incoming) { case (js, field) =>
+      println(s"field: ${field.name}")
+      createDefault(typ.service, field.`type`) match {
+        case None => js
+        case Some(defaultJs) => js ++ Json.obj(field.name -> defaultJs)
       }
     }
   }
 
-  private[this] def isFieldModelWithAllRequiredFields(service: models.Service, typ: String): Boolean = {
-    findType(service.namespace, typ) match {
-      case None => false
-      case Some(t) => t match {
-        case m: ApiBuilderType.Model => !m.model.fields.exists(_.required)
-        case _: ApiBuilderType.Enum | _: ApiBuilderType.Union => false
-      }
+  private[this] def createDefault(service: models.Service, typ: String): Option[JsObject] = {
+    findType(service.namespace, typ).flatMap {
+      case m: ApiBuilderType.Model => createDefault(m)
+      case _: ApiBuilderType.Enum | _: ApiBuilderType.Union => None
+    }
+  }
+
+  private[this] def createDefault(typ: ApiBuilderType.Model): Option[JsObject] = {
+    val all = typ.requiredFields.map { f =>
+      createDefault(typ.service, f.`type`).map { d => Json.obj(f.name -> d) }
+    }
+    if (all.exists(_.isEmpty)) {
+      None
+    } else {
+      Some(
+        all.flatten.foldLeft(Json.obj()) { case (a, b) => a ++ b }
+      )
     }
   }
 }

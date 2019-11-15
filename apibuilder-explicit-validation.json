@@ -68,6 +68,19 @@
       "fields": [
         { "name": "country", "type": "string", "required": false }
       ]
+    },
+
+    "example_form_nested": {
+      "fields": [
+        { "name": "number", "type": "string" },
+        { "name": "parent", "type": "parent_context_form" }
+      ]
+    },
+
+    "parent_context_form": {
+      "fields": [
+        { "name": "context", "type": "context_form" }
+      ]
     }
   },
 
