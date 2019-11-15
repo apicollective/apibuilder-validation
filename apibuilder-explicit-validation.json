@@ -81,7 +81,21 @@
       "fields": [
         { "name": "context", "type": "context_form" }
       ]
+    },
+
+    "browser_bundle_form": {
+      "fields": [
+        { "name": "feature", "type": "browser_bundle_feature_form", "required": false }
+      ]
+    },
+
+    "browser_bundle_feature_form": {
+      "fields": [
+        { "name":  "keys", "type": "[string]", "description": "The feature keys for which you would like to return data" },
+        { "name":  "context", "type": "context_form" }
+      ]
     }
+
   },
 
   "resources": {
