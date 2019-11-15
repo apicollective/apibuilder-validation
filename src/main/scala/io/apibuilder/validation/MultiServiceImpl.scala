@@ -26,40 +26,35 @@ case class MultiServiceImpl(
 
   override def upcast(typ: ApiBuilderType, js: JsValue): Either[Seq[String], JsValue] = {
     val finalJs = (typ, js) match {
-      case (m: ApiBuilderType.Model, j: JsObject) => injectModelsWithOptionalFields(m, j)
+      case (m: ApiBuilderType.Model, j: JsObject) => {
+        println(s"Model[${typ.qualified}] defaults: ${createDefault(m)}")
+        val updated = createDefault(m) ++ j
+        println(s"  - old: $js")
+        println(s"  - new: $updated")
+        updated
+      }
       case _ => js
     }
     validator.validateType(typ, finalJs)
   }
 
-  private[this] def injectModelsWithOptionalFields(typ: ApiBuilderType.Model, incoming: JsObject): JsObject = {
-    typ.requiredFields.filter { f =>
-      (incoming \ f.name).toOption.isEmpty
-    }.foldLeft(incoming) { case (js, field) =>
-      createDefault(typ.service, field.`type`) match {
-        case None => js
-        case Some(defaultJs) => js ++ Json.obj(field.name -> defaultJs)
-      }
-    }
-  }
-
   private[this] def createDefault(service: models.Service, typ: String): Option[JsObject] = {
     findType(service.namespace, typ).flatMap {
-      case m: ApiBuilderType.Model => createDefault(m)
+      case m: ApiBuilderType.Model => Some(createDefault(m))
       case _: ApiBuilderType.Enum | _: ApiBuilderType.Union => None
     }
   }
 
-  private[this] def createDefault(typ: ApiBuilderType.Model): Option[JsObject] = {
-    val all = typ.requiredFields.map { f =>
-      createDefault(typ.service, f.`type`).map { d => Json.obj(f.name -> d) }
-    }
-    if (all.exists(_.isEmpty)) {
-      None
-    } else {
-      Some(
-        all.flatten.foldLeft(Json.obj()) { case (a, b) => a ++ b }
-      )
+  /**
+   * Creates a json object representing the default values
+   * for any models with optional fields.
+   */
+  private[this] def createDefault(typ: ApiBuilderType.Model): JsObject = {
+    typ.model.fields.foldLeft(Json.obj()) { case (js, f) =>
+      createDefault(typ.service, f.`type`) match {
+        case None => js
+        case Some(defaults) => js ++ Json.obj(f.name -> defaults)
+      }
     }
   }
 }
