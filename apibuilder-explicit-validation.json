@@ -55,6 +55,19 @@
       "fields": [
         { "name": "items", "type": "[single_cart_add_form]" }
       ]
+    },
+
+    "example_form": {
+      "fields": [
+        { "name": "number", "type": "string" },
+        { "name": "context", "type": "context_form" }
+      ]
+    },
+
+    "context_form": {
+      "fields": [
+        { "name": "country", "type": "string", "required": false }
+      ]
     }
   },
 

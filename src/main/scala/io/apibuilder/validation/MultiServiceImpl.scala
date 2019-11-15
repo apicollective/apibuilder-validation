@@ -52,14 +52,10 @@ case class MultiServiceImpl(
   }
 
   private[this] def isFieldModelWithAllRequiredFields(service: models.Service, typ: String): Boolean = {
-    println(s"type: ${findType(service.namespace, typ)}")
     findType(service.namespace, typ) match {
       case None => false
       case Some(t) => t match {
-        case m: ApiBuilderType.Model => {
-          println(s"model: ${m.name}")
-          true
-        }
+        case m: ApiBuilderType.Model => !m.model.fields.exists(_.required)
         case _: ApiBuilderType.Enum | _: ApiBuilderType.Union => false
       }
     }

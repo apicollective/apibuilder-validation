@@ -445,11 +445,11 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
   }
 
   it("can deserialize an object if all of its fields are optional") {
-    val typ = flowMultiService.findType("io.flow.internal.v0.models.browser_bundle_feature_form").getOrElse(
-      sys.error("Missing browser_bundle_feature_form type")
+    val typ = apibuilderMultiService.findType("example_form").getOrElse(
+      sys.error("Missing example_form type")
     )
     rightOrErrors {
-      flowMultiService.upcast(
+      apibuilderMultiService.upcast(
         typ,
         Json.obj(
           "keys" -> Seq("a")
