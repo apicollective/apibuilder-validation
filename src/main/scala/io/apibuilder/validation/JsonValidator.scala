@@ -193,7 +193,7 @@ case class JsonValidator(services: List[Service]) {
   ): Either[Seq[String], JsValue] = {
     var updated = Json.obj()
 
-    val missingFields = typ.model.fields.filter(_.required).filter { f =>
+    val missingFields = typ.requiredFields.filter { f =>
       (js \ f.name).toOption.isEmpty
     }.map(_.name).toList match {
       case Nil => Nil

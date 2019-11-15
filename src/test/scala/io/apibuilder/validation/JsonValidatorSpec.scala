@@ -261,7 +261,9 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
     val form = Json.obj(
       "name" -> JsString("Test item"),
       "number" -> JsString("sku-1"),
-      "categories" -> JsArray(Seq(JsString("a"), JsNumber(123)))
+      "categories" -> JsArray(Seq(JsString("a"), JsNumber(123))),
+      "currency" -> "CAD",
+      "price" -> 123,
     )
 
     form.validate[HarmonizedItemForm] match {
@@ -269,7 +271,9 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
       case _: JsError => //
     }
 
-    val converted: JsValue = validate("harmonized_item_form", form).right.get
+    val converted: JsValue = rightOrErrors {
+      validate("harmonized_item_form", form)
+    }
 
     converted.validate[HarmonizedItemForm] match {
       case s: JsSuccess[HarmonizedItemForm] => {
@@ -294,7 +298,9 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
           Json.obj(),
           JsNull
         )
-      )
+      ),
+      "currency" -> "CAD",
+      "price" -> 123,
     )
 
     form.validate[HarmonizedItemForm] match {
@@ -444,7 +450,7 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
     )
   }
 
-  it("can deserialize an object if all of its fields are optional") {
+  it("can default a model that is required but where all fields are optional") {
     val typ = apibuilderMultiService.findType("example_form").getOrElse(
       sys.error("Missing example_form type")
     )
@@ -452,13 +458,13 @@ class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
       apibuilderMultiService.upcast(
         typ,
         Json.obj(
-          "keys" -> Seq("a")
+          "number" -> "1",
         )
       )
     } should equal(
       Json.obj(
-        "keys" -> Seq("a"),
-        "context" -> Json.obj()
+        "number" -> "1",
+        "context" -> Json.obj(),
       )
     )
   }

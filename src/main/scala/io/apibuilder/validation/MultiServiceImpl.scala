@@ -39,10 +39,9 @@ case class MultiServiceImpl(
 
 
   private[this] def injectModelsWithOptionalFields(typ: ApiBuilderType.Model, js: JsObject): JsObject = {
-    typ.model.fields.filter(_.required).filter { f =>
+    typ.requiredFields.filter { f =>
       (js \ f.name).toOption.isEmpty
     }.foldLeft(js) { case (js, field) =>
-      println(s"field: ${field.name} type[${field.`type`}]")
       if (isFieldModelWithAllRequiredFields(typ.service, field.`type`)) {
         js ++ Json.obj(field.name -> Json.obj())
       } else {
