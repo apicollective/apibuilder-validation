@@ -59,7 +59,6 @@ class MultiServiceZipSpec extends FunSpec with Matchers
   }
 
   it("performance: validateOperation") {
-    println("performance: validateOperation")
     zipService.findOperation("GET", "/users/1").get
     flowMultiService.findOperation("GET", "/users/1").get
 
@@ -67,7 +66,7 @@ class MultiServiceZipSpec extends FunSpec with Matchers
       val result = time(5000) { i =>
         service.findOperation(Method.Get, s"/users/$i")
       }
-      println(s"$testCase: $result ms")
+      println(s"performance: validateOperation: $testCase: $result ms")
       result
     }
     run("api", flowMultiService)
