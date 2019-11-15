@@ -27,22 +27,20 @@ case class MultiServiceImpl(
   override def upcast(typ: ApiBuilderType, js: JsValue): Either[Seq[String], JsValue] = {
     val finalJs = (typ, js) match {
       case (m: ApiBuilderType.Model, j: JsObject) => {
-        println(s"Model[${typ.qualified}] defaults: ${createDefault(m)}")
-        val updated = createDefault(m) ++ j
-        println(s"  - old: $js")
-        println(s"  - new: $updated")
-        updated
+        val updated = createDefault(m).deepMerge(j)
+        if (js != updated && validator.validateType(m, updated).isRight) {
+          // Note we only merge here if the merged object itself is valid.
+          // This is important as it ensures that any validation messages
+          // are clear (highest node) and that we don't inject a default
+          // for a nested optional object that does not validate
+          updated
+        } else {
+          js
+        }
       }
       case _ => js
     }
     validator.validateType(typ, finalJs)
-  }
-
-  private[this] def createDefault(service: models.Service, typ: String): Option[JsObject] = {
-    findType(service.namespace, typ).flatMap {
-      case m: ApiBuilderType.Model => Some(createDefault(m))
-      case _: ApiBuilderType.Enum | _: ApiBuilderType.Union => None
-    }
   }
 
   /**
@@ -55,6 +53,13 @@ case class MultiServiceImpl(
         case None => js
         case Some(defaults) => js ++ Json.obj(f.name -> defaults)
       }
+    }
+  }
+
+  private[this] def createDefault(service: models.Service, typ: String): Option[JsObject] = {
+    findType(service.namespace, typ).flatMap {
+      case m: ApiBuilderType.Model => Some(createDefault(m))
+      case _: ApiBuilderType.Enum | _: ApiBuilderType.Union => None
     }
   }
 }
