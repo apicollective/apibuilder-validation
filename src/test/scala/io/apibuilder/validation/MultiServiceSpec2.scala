@@ -6,6 +6,10 @@ import org.scalatest.{FunSpec, Matchers}
 
 class MultiServiceSpec2 extends FunSpec with Matchers with helpers.Helpers {
 
+  private[this] lazy val browserBundleFormType = apibuilderMultiService.findType("io.apibuilder.explicit.validation.v0.models.browser_bundle_form").getOrElse(
+    sys.error("Missing browser_bundle_form type")
+  )
+
   it("validates unknown operations") {
     flowMultiService.validateOperation(Method.UNDEFINED("FOO"), "/:organization/payments") should equal(
       Left(Seq("HTTP method 'FOO' is invalid. Must be one of: " + Method.all.map(_.toString).mkString(", ")))
@@ -133,13 +137,27 @@ class MultiServiceSpec2 extends FunSpec with Matchers with helpers.Helpers {
     )
   }
 
-  it("can default a nested model that is required, where all fields are optional, and some fields specified") {
-    val typ = apibuilderMultiService.findType("io.apibuilder.explicit.validation.v0.models.browser_bundle_form").getOrElse(
-      sys.error("Missing browser_bundle_form type")
-    )
+  it("sets defaults from query parameters") {
+    val q = "feature[keys][0]=tst-606c1605131f4c31b53f57a475d75498&"
     rightOrErrors {
       apibuilderMultiService.upcast(
-        typ,
+        browserBundleFormType,
+        FormData.parseEncodedToJsObject(q)
+      )
+    } should equal(
+      Json.obj(
+        "feature" -> Json.obj(
+          "keys" -> Seq("tst-606c1605131f4c31b53f57a475d75498"),
+          "context" -> Json.obj(),
+        )
+      )
+    )
+  }
+
+  it("can default a nested model that is required, where all fields are optional, and some fields specified") {
+    rightOrErrors {
+      apibuilderMultiService.upcast(
+        browserBundleFormType,
         Json.obj(
           "feature" -> Json.obj(
             "keys" -> Seq("1"),
