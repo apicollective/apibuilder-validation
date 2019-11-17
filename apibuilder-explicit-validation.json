@@ -66,7 +66,8 @@
 
     "context_form": {
       "fields": [
-        { "name": "country", "type": "string", "required": false }
+        { "name": "experience_key", "type": "string", "required": false },
+        { "name": "geo", "type": "feature_geo_form", "required": false }
       ]
     },
 
@@ -89,10 +90,46 @@
       ]
     },
 
+    "browser_bundle_form": {
+      "fields": [
+        { "name": "optin", "type": "browser_bundle_optin_form", "required": false },
+        { "name": "country_picker", "type": "browser_bundle_country_picker_form", "required": false },
+        { "name": "feature", "type": "browser_bundle_feature_form", "required": false },
+        { "name": "payment_method", "type": "browser_bundle_payment_method_form", "required": false}
+      ]
+    },
+
+    "browser_bundle_payment_method_form": {
+      "fields": [
+        { "name": "experience_key", "type": "string", "description": "Experience key associated with the session of the browser bundle" },
+        { "name": "country", "type": "string", "description": "The iso code of the expected destination country." }
+      ]
+    },
+    "browser_bundle_optin_form": {
+      "fields": [
+        { "name":  "country", "type": "string", "description": "The iso code of the expected destination country." }
+      ]
+    },
+    "browser_bundle_country_picker_form": {
+      "fields": [
+        { "name":  "country", "type": "string", "description": "If specified, we ensure that this country is in the returned list of countries", "required": false },
+        { "name":  "ip", "type": "string", "description": "The user's IP Address. If specified, we will geolocate the IP Address of the user and if found, include the country from which the user is browsing in the returned list of countries", "required": false },
+        { "name":  "is_destination", "type": "boolean", "default": false, "description": "If set to true the country picker will display all destination countries for the organization. For example, an experience for World will result in displaying available countries to users. This option defaults to false. See https://docs.flow.io/guides/country-picker" }
+      ]
+    },
     "browser_bundle_feature_form": {
       "fields": [
         { "name":  "keys", "type": "[string]", "description": "The feature keys for which you would like to return data" },
         { "name":  "context", "type": "context_form" }
+      ]
+    },
+    "feature_geo_form": {
+      "fields": [
+        { "name": "country", "type": "string", "required": false },
+        { "name": "currency", "type": "string", "required": false },
+        { "name": "language", "type": "string", "required": false },
+        { "name": "locale", "type": "string", "required": false },
+        { "name": "region", "type": "string", "required": false }
       ]
     }
 

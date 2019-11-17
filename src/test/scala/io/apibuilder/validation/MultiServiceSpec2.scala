@@ -6,9 +6,7 @@ import org.scalatest.{FunSpec, Matchers}
 
 class MultiServiceSpec2 extends FunSpec with Matchers with helpers.Helpers {
 
-  private[this] lazy val browserBundleFormType = apibuilderMultiService.findType("io.apibuilder.explicit.validation.v0.models.browser_bundle_form").getOrElse(
-    sys.error("Missing browser_bundle_form type")
-  )
+  private[this] lazy val browserBundleFormType = mustFindType(apibuilderMultiService, "io.apibuilder.explicit.validation.v0.models.browser_bundle_form")
 
   it("validates unknown operations") {
     flowMultiService.validateOperation(Method.UNDEFINED("FOO"), "/:organization/payments") should equal(
@@ -92,15 +90,13 @@ class MultiServiceSpec2 extends FunSpec with Matchers with helpers.Helpers {
   }
 
   it("correctly parses required fields") {
-    val orgModel = flowMultiService.findType("io.flow.v0", "organization").head.asInstanceOf[ApiBuilderType.Model].model
+    val orgModel = mustFindModelType(flowMultiService, "io.flow.v0.models.organization").model
     orgModel.fields.find(_.name == "id").get.required should be(true)
     orgModel.fields.find(_.name == "parent").get.required should be(false)
   }
 
   it("can default a model that is required but where all fields are optional") {
-    val typ = apibuilderMultiService.findType("io.apibuilder.explicit.validation.v0.models.example_form").getOrElse(
-      sys.error("Missing example_form type")
-    )
+    val typ = mustFindType(apibuilderMultiService, "io.apibuilder.explicit.validation.v0.models.example_form")
     rightOrErrors {
       apibuilderMultiService.upcast(
         typ,
@@ -117,9 +113,7 @@ class MultiServiceSpec2 extends FunSpec with Matchers with helpers.Helpers {
   }
 
   it("can default a nested model that is required but where all fields are optional") {
-    val typ = apibuilderMultiService.findType("io.apibuilder.explicit.validation.v0.models.example_form_nested").getOrElse(
-      sys.error("Missing example_form_nested type")
-    )
+    val typ = mustFindType(apibuilderMultiService, "io.apibuilder.explicit.validation.v0.models.example_form_nested")
     rightOrErrors {
       apibuilderMultiService.upcast(
         typ,
