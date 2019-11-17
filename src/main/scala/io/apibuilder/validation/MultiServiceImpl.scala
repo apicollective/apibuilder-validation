@@ -51,7 +51,16 @@ case class MultiServiceImpl(
     typ.model.fields.foldLeft(Json.obj()) { case (js, f) =>
       createDefault(typ.service, f.`type`) match {
         case None => js
-        case Some(defaults) => js ++ Json.obj(f.name -> defaults)
+        case Some(defaults) => {
+          if (defaults.keys.isEmpty && !f.required) {
+            // if defaults is an empty object and is optional,
+            // do not include as including it may trigger other
+            // validation
+            js
+          } else {
+            js ++ Json.obj(f.name -> defaults)
+          }
+        }
       }
     }
   }
