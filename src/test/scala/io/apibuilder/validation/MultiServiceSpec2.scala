@@ -167,4 +167,18 @@ class MultiServiceSpec2 extends FunSpec with Matchers with helpers.Helpers {
       )
     )
   }
+
+  it("xxx") {
+    val json = Json.obj(
+      "items" -> Seq(
+        Json.obj("number" -> "123", "quantity" -> 1)
+      )
+    )
+    rightOrErrors {
+      flowMultiService.upcast(
+        mustFindType(flowMultiService, "io.flow.v0.models.order_put_form"),
+        json
+      )
+    } should equal(json)
+  }
 }
