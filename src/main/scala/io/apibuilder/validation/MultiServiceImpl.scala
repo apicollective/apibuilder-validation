@@ -1,8 +1,7 @@
 package io.apibuilder.validation
 
-import io.apibuilder.spec.v0.models
 import io.apibuilder.spec.v0.models.Method
-import play.api.libs.json.{JsObject, JsValue, Json}
+import play.api.libs.json.JsValue
 
 /**
   * Wrapper to work with multiple API Builder services.

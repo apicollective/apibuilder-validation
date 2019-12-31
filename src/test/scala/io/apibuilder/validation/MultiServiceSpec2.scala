@@ -6,8 +6,6 @@ import org.scalatest.{FunSpec, Matchers}
 
 class MultiServiceSpec2 extends FunSpec with Matchers with helpers.Helpers {
 
-  private[this] lazy val browserBundleFormType = mustFindType(apibuilderMultiService, "io.apibuilder.explicit.validation.v0.models.browser_bundle_form")
-
   it("validates unknown operations") {
     flowMultiService.validateOperation(Method.UNDEFINED("FOO"), "/:organization/payments") should equal(
       Left(Seq("HTTP method 'FOO' is invalid. Must be one of: " + Method.all.map(_.toString).mkString(", ")))
