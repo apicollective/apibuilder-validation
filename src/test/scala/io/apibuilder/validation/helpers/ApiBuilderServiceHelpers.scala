@@ -53,9 +53,7 @@ trait ApiBuilderServiceHelpers {
   
   def makeModel(
     name: String = random(),
-    plural: String = random(),
     fields: Seq[Field] = Nil,
-    namespace: String = "test.apicollective",
   ): Model = {
     Model(
       name = name,

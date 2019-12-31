@@ -1,6 +1,6 @@
 package io.apibuilder.validation
 
-import java.net.{URLDecoder, URLEncoder}
+import java.net.URLDecoder
 
 import play.api.libs.json._
 
@@ -83,7 +83,7 @@ object FormData {
     }
   }
 
-  private[this] def encode(value: String, keys: Seq[String] = Nil): String = {
+  private[this] def encode(value: String, keys: Seq[String]): String = {
     keys.toList match {
       case Nil => value
       case one :: rest => {

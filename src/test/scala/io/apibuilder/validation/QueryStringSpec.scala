@@ -2,7 +2,7 @@ package io.apibuilder.validation
 
 import java.io.File
 import org.scalatest.{FunSpec, Matchers}
-import play.api.libs.json.{JsArray, JsObject, JsValue, JsNull, Json}
+import play.api.libs.json.{JsArray, JsObject, JsValue, Json}
 
 class QueryStringSpec extends FunSpec with Matchers {
 

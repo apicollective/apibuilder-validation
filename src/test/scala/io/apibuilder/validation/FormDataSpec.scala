@@ -139,7 +139,7 @@ class FormDataSpec extends FunSpec with Matchers {
 
     it("returns JsValue") {
       FormData.toJson(data) match {
-        case res: JsValue => assert(true)
+        case _: JsValue => assert(true)
         case _ => assert(false)
       }
     }
