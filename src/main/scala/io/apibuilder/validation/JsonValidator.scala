@@ -328,11 +328,13 @@ case class JsonValidator(services: List[Service]) {
       case v: JsArray => {
         val eithers = v.value.zipWithIndex.map { case (el, index) =>
           validate(internalType, el, defaultNamespace = defaultNamespace, prefix = Some(prefix + s" element in position[$index]"))
-        }
+        }.toSeq
         if (eithers.forall(_.isRight)) {
-          Right(JsArray(eithers.map(_.right.get)))
+          val jsValues = eithers.collect { case Right(r) => r }
+          Right(JsArray(jsValues))
         } else {
-          Left(eithers.filter(_.isLeft).flatMap(_.left.get))
+          val errors = eithers.collect { case Left(l) => l }.flatten
+          Left(errors)
         }
       }
       case JsNull => Left(Seq(s"$prefix must be an array and not null"))
@@ -360,13 +362,13 @@ case class JsonValidator(services: List[Service]) {
             case Left(errors) => Left(errors)
             case Right(json) => Right(Json.obj(name -> json))
           }
-        }
+        }.toSeq
         if (eithers.forall(_.isRight)) {
-          Right(
-            eithers.map(_.right.get).foldLeft(v) { case (a, b) => a ++ b }
-          )
+          val jsObject = eithers.collect { case Right(r) => r }.foldLeft(v)(_ ++ _)
+          Right(jsObject)
         } else {
-          Left(eithers.filter(_.isLeft).flatMap(_.left.get))
+          val errors = eithers.collect { case Left(l) => l }.flatten
+          Left(errors)
         }
       }
       case _: JsString => Left(Seq(s"$prefix must be an object and not a string"))
