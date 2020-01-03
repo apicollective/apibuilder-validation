@@ -110,9 +110,7 @@ object FormData {
   }
 
   def parseEncoded(value: String): Map[String, Seq[String]] = {
-    parseEncodedToSeq(value).groupBy(_._1).map { case (key, values) =>
-      key -> values.map(_._2)
-    }
+    parseEncodedToSeq(value).groupBy(_._1).view.mapValues(_.map(_._2)).toMap
   }
 
   /**
@@ -140,7 +138,7 @@ object FormData {
   }
 
   def toJson(data: Map[String, Seq[String]]): JsObject = {
-    toJson(data.keys.toSeq, data)
+    toJson(data.keys.toSeq.sorted, data)
   }
 
   def toJsonFromSimpleMap(data: Map[String, String]): JsObject = {

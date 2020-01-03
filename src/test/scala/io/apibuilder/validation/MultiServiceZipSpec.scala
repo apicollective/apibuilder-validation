@@ -15,7 +15,7 @@ class MultiServiceZipSpec extends FunSpec with Matchers
   with helpers.Helpers
 {
 
-  private[this] lazy val zipService = MultiService.fromUrl("https://cdn.flow.io/util/lib-apibuilder/specs.zip").right.get
+  private[this] lazy val zipService = MultiService.fromUrl("https://cdn.flow.io/util/lib-apibuilder/specs.zip").rightValue
 
   case class ServiceAndFile(service: Service, file: File)
 

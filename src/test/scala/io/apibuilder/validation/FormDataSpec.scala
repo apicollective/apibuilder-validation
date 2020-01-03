@@ -106,7 +106,7 @@ class FormDataSpec extends FunSpec with Matchers {
     val data = Map("foo" -> Seq("a", "b"), "foo2" -> Seq("c"))
     val js = FormData.toJson(data)
 
-    val foo: Seq[String] = (js \ "foo").as[JsArray].value.map(_.asInstanceOf[JsString].value)
+    val foo: Seq[String] = (js \ "foo").as[JsArray].value.map(_.asInstanceOf[JsString].value).toSeq
     foo should equal(Seq("a", "b"))
 
     val foo2: String = (js \ "foo2").as[JsString].value
