@@ -110,7 +110,9 @@ object FormData {
   }
 
   def parseEncoded(value: String): Map[String, Seq[String]] = {
-    parseEncodedToSeq(value).groupBy(_._1).view.mapValues(_.map(_._2)).toMap
+    parseEncodedToSeq(value).groupBy(_._1).map { case (key, values) =>
+      key -> values.map(_._2)
+    }
   }
 
   /**
