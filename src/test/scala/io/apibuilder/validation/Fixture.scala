@@ -41,7 +41,7 @@ object Fixture {
   }
 
   private[this] def parseParameters(file: File, value: String): Seq[(String, String)] = {
-    value.split("\n").map(_.trim).filter(_.nonEmpty).map { v =>
+    value.split("\n").toSeq.map(_.trim).filter(_.nonEmpty).map { v =>
       v.split("=").toList match {
         case k :: Nil => (k, "")
         case k :: v :: Nil => (k, v)

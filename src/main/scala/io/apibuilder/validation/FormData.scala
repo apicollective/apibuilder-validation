@@ -140,7 +140,7 @@ object FormData {
   }
 
   def toJson(data: Map[String, Seq[String]]): JsObject = {
-    toJson(data.keys.toSeq, data)
+    toJson(data.keys.toSeq.sorted, data)
   }
 
   def toJsonFromSimpleMap(data: Map[String, String]): JsObject = {
