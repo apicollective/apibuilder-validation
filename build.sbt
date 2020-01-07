@@ -2,9 +2,9 @@ name := "apibuilder-validation"
 
 organization := "io.flow"
 
-scalaVersion in ThisBuild := "2.12.10"
+scalaVersion in ThisBuild := "2.13.1"
 
-crossScalaVersions := Seq("2.12.10")
+crossScalaVersions := Seq("2.12.10", "2.13.1")
 
 lazy val root = project
   .in(file("."))
@@ -13,9 +13,9 @@ lazy val root = project
       "com.typesafe.play" %% "play-json" % "2.7.4",
       "org.apache.commons" % "commons-compress" % "1.18",
       "org.typelevel" %% "cats-core" % "2.0.0",
-      "org.scalatest" %% "scalatest" % "3.0.5" % Test,
-      compilerPlugin("com.github.ghik" %% "silencer-plugin" % "1.4.2"),
-      "com.github.ghik" %% "silencer-lib" % "1.4.2" % Provided,
+      "org.scalatest" %% "scalatest" % "3.0.8" % Test,
+      compilerPlugin("com.github.ghik" %% "silencer-plugin" % "1.4.4" cross CrossVersion.full),
+      "com.github.ghik" %% "silencer-lib" % "1.4.4" % Provided cross CrossVersion.full,
     ),
     credentials += Credentials(
       "Artifactory Realm",
@@ -35,4 +35,4 @@ publishTo := {
     Some("Artifactory Realm" at s"$host/libs-release-local")
   }
 }
-version := "0.4.14"
+version := "0.4.15"

@@ -12,18 +12,14 @@ import io.apibuilder.validation.zip.FileUtil
 case class FileOrder(file: Option[File]) {
   private[this] val nameToOrder: Map[String, Int] = file match {
     case None => Map.empty
-    case Some(f) => {
-      Map(
-        FileUtil
-          .readFileAsString(f)
-          .split("\n")
-          .map(_.trim)
-          .filterNot(_.isEmpty)
-          .zipWithIndex.map { case (name, i) =>
-            name.trim.toLowerCase() -> i
-        }: _*
-      )
-    }
+    case Some(f) =>
+      FileUtil
+        .readFileAsString(f)
+        .split("\n")
+        .map(_.trim.toLowerCase)
+        .filter(_.nonEmpty)
+        .zipWithIndex
+        .toMap
   }
 
   def sort(names: Seq[String]): List[String] = {

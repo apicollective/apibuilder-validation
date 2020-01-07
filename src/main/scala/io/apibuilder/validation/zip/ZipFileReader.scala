@@ -62,7 +62,7 @@ case class ZipFileReader(inputStream: InputStream) {
     }
     zis.closeEntry()
     zis.close()
-    all
+    all.toSeq
   }
 
   private[this] def newFile(zipEntry: ZipEntry): File = {

@@ -15,11 +15,11 @@ class PathNormalizerSpec extends FunSpec with Matchers with Helpers {
       Left(Seq("HTTP Operation 'GET /non/existent/route/should/not/match' is not defined"))
     )
 
-    val getUsers = normalizer.resolve(Method.Get, "/users").right.get
+    val getUsers = normalizer.resolve(Method.Get, "/users").rightValue
     getUsers.method should equal(Method.Get)
     getUsers.path should equal("/users")
 
-    val postOrganizations = normalizer.resolve(Method.Post, "/organizations").right.get
+    val postOrganizations = normalizer.resolve(Method.Post, "/organizations").rightValue
     postOrganizations.method should equal(Method.Post)
     postOrganizations.path should equal("/organizations")
   }
@@ -29,11 +29,11 @@ class PathNormalizerSpec extends FunSpec with Matchers with Helpers {
       Left(Seq("HTTP Operation 'GET /non/:foo/route/should/not/match' is not defined"))
     )
 
-    val getUsersByGuid = normalizer.resolve(Method.Get, "/users/123").right.get
+    val getUsersByGuid = normalizer.resolve(Method.Get, "/users/123").rightValue
     getUsersByGuid.method should equal(Method.Get)
     getUsersByGuid.path should equal("/users/:guid")
 
-    val putOrganizationsByGuid = normalizer.resolve(Method.Put, "/apicollective/apibuilder-api").right.get
+    val putOrganizationsByGuid = normalizer.resolve(Method.Put, "/apicollective/apibuilder-api").rightValue
     putOrganizationsByGuid.method should equal(Method.Put)
     putOrganizationsByGuid.path should equal("/:orgKey/:applicationKey")
   }

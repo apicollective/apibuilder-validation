@@ -184,11 +184,8 @@ object MultiService {
 
     eithers.flatMap(_.left.getOrElse(Nil)).toList match {
       case Nil => {
-        Right(
-          MultiServiceImpl(
-            services = eithers.map(_.right.get).toList
-          )
-        )
+        val services = eithers.collect { case Right(r) => r }
+        Right(MultiServiceImpl(services.toList))
       }
       case errors => Left(errors)
     }

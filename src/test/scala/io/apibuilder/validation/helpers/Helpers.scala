@@ -59,4 +59,11 @@ trait Helpers {
     }
   }
 
+  implicit def toEitherValuable[L, R](either: Either[L, R]): EitherValuable[L, R] = EitherValuable(either)
+
+}
+
+case class EitherValuable[L, R](either: Either[L, R]) {
+  def leftValue: L = either.left.getOrElse(throw new NoSuchElementException)
+  def rightValue: R = either.getOrElse(throw new NoSuchElementException)
 }
