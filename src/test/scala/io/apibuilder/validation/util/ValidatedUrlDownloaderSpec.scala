@@ -6,7 +6,7 @@ import cats.implicits._
 import io.apibuilder.validation.helpers
 import org.scalatest.{FunSpec, Matchers}
 
-class ValidatedValidatedUrlDownloaderSpec extends FunSpec with Matchers with helpers.FileHelpers {
+class ValidatedUrlDownloaderSpec extends FunSpec with Matchers with helpers.FileHelpers {
   describe("java.net.URL") {
     it("handles the happy path") {
       val urlStr = writeToTempFile("").toURI.toURL
