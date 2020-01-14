@@ -3,20 +3,30 @@ package io.apibuilder.validation.util
 import java.io.{BufferedInputStream, InputStream}
 import java.net.URL
 
+import cats.data.ValidatedNec
+import cats.implicits._
+
 import scala.util.{Failure, Success, Try}
 
-object UrlDownloader {
-
-  def withInputStream[T](url: String)(f: InputStream => Either[Seq[String], T]): Either[Seq[String], T] = {
+object ValidatedUrlDownloader {
+  def validateUrl(url: String): ValidatedNec[String, URL] = {
     Try {
       new URL(url)
     } match {
-      case Success(u) => withInputStream(u)(f)
-      case Failure(ex) => Left(Seq(s"Invalid URL: ${ex.getMessage}"))
+      case Success(u) => u.validNec
+      case Failure(ex) => s"Invalid URL: ${ex.getMessage}".invalidNec
     }
   }
 
-  def withInputStream[T](url: URL)(f: InputStream => Either[Seq[String], T]): Either[Seq[String], T] = {
+  def withInputStream[T](url: String)(f: InputStream => ValidatedNec[String, T]): ValidatedNec[String, T] = {
+    validateUrl(url).andThen(withInputStream(_)(f))
+  }
+
+  def withInputStream[T](url: URL)(f: InputStream => ValidatedNec[String, T]): ValidatedNec[String, T] = {
+    withInputStream(url, f, _.invalidNec)
+  }
+
+  private[util] def withInputStream[T](url: URL, f: InputStream => T, e: String => T): T = {
     Try {
       val connection = url.openConnection()
       // add a request property to allow access to the net
@@ -29,7 +39,17 @@ object UrlDownloader {
       }
     } match {
       case Success(r) => r
-      case Failure(ex) => Left(Seq(s"Error downloading URL '$url': ${ex.getMessage}"))
+      case Failure(ex) => e(s"Error downloading URL '$url': ${ex.getMessage}")
     }
   }
+}
+
+object UrlDownloader {
+  import io.apibuilder.validation.util.Implicits._
+
+  def withInputStream[T](url: String)(f: InputStream => Either[Seq[String], T]): Either[Seq[String], T] =
+    ValidatedUrlDownloader.validateUrl(url).toEither.leftToSeq.flatMap(ValidatedUrlDownloader.withInputStream(_, f, e => Left(Seq(e))))
+
+  def withInputStream[T](url: URL)(f: InputStream => Either[Seq[String], T]): Either[Seq[String], T] =
+    ValidatedUrlDownloader.withInputStream(url, f, e => Left(Seq(e)))
 }
