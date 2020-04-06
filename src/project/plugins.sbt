@@ -4,4 +4,4 @@ logLevel := Level.Warn
 // Artifactory credentials
 credentials += Credentials(Path.userHome / ".ivy2" / ".artifactory")
 
-resolvers += "Artifactory" at "https://flow.artifactoryonline.com/flow/libs-release-local/"
+resolvers += "Artifactory" at "https://flow.jfrog.io/flow/libs-release-local/"
