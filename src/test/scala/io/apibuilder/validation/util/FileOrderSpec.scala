@@ -1,9 +1,10 @@
 package io.apibuilder.validation.util
 
 import io.apibuilder.validation.helpers
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.funspec.AnyFunSpec
 
-class FileOrderSpec extends FunSpec with Matchers
+class FileOrderSpec extends AnyFunSpec with Matchers
   with helpers.FileHelpers
 {
   it("sortOrder with no ordering file is alphabetical") {

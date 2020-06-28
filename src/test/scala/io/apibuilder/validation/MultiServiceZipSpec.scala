@@ -6,9 +6,10 @@ import io.apibuilder.spec.v0.models.json._
 import io.apibuilder.spec.v0.models.{Method, Service}
 import io.apibuilder.validation.zip.ZipFileBuilder
 import play.api.libs.json._
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.funspec.AnyFunSpec
 
-class MultiServiceZipSpec extends FunSpec with Matchers
+class MultiServiceZipSpec extends AnyFunSpec with Matchers
   with helpers.ApiBuilderServiceHelpers
   with helpers.FileHelpers
   with helpers.PerformanceHelpers

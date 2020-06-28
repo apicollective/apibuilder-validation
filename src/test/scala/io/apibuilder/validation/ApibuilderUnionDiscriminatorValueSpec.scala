@@ -1,10 +1,11 @@
 package io.apibuilder.validation
 
 import io.apibuilder.validation.helpers.Helpers
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.funspec.AnyFunSpec
 import play.api.libs.json.Json
 
-class ApibuilderUnionDiscriminatorValueSpec extends FunSpec with Matchers with Helpers {
+class ApibuilderUnionDiscriminatorValueSpec extends AnyFunSpec with Matchers with Helpers {
 
   private[this] lazy val validator = JsonValidator(
     loadService("apibuilder-union-discriminator-value.json").service

@@ -2,9 +2,10 @@ package io.apibuilder.validation
 
 import io.apibuilder.validation.helpers.Helpers
 import play.api.libs.json.Json
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.funspec.AnyFunSpec
 
-class ExplicitValidatorSpec extends FunSpec with Matchers with Helpers {
+class ExplicitValidatorSpec extends AnyFunSpec with Matchers with Helpers {
 
   private[this] lazy val validator = JsonValidator(
     loadService("apibuilder-explicit-validation-service.json").service

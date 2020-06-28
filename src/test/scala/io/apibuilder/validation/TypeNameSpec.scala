@@ -1,8 +1,9 @@
 package io.apibuilder.validation
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.funspec.AnyFunSpec
 
-class TypeNameSpec extends FunSpec with Matchers {
+class TypeNameSpec extends AnyFunSpec with Matchers {
 
   it("flat type name") {
     TypeName.parse("person", defaultNamespace = "io.flow") should equal(TypeName("person", "io.flow"))

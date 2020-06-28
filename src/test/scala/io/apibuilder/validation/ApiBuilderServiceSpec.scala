@@ -2,9 +2,10 @@ package io.apibuilder.validation
 
 import io.apibuilder.spec.v0.models.Method
 import io.apibuilder.validation.helpers.Helpers
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.funspec.AnyFunSpec
 
-class ApiBuilderServiceSpec extends FunSpec with Matchers with Helpers {
+class ApiBuilderServiceSpec extends AnyFunSpec with Matchers with Helpers {
 
   private[this] lazy val service = loadService("flow-api-service.json")
 

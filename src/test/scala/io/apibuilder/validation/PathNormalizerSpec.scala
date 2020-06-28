@@ -2,9 +2,10 @@ package io.apibuilder.validation
 
 import io.apibuilder.spec.v0.models.Method
 import io.apibuilder.validation.helpers.Helpers
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.funspec.AnyFunSpec
 
-class PathNormalizerSpec extends FunSpec with Matchers with Helpers {
+class PathNormalizerSpec extends AnyFunSpec with Matchers with Helpers {
 
   private[this] lazy val apibuilderApiService = loadService("apibuilder-api-service.json")
 

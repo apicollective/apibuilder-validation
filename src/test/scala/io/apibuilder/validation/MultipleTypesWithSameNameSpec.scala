@@ -1,9 +1,10 @@
 package io.apibuilder.validation
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.funspec.AnyFunSpec
 import play.api.libs.json.Json
 
-class MultipleTypesWithSameNameSpec extends FunSpec with Matchers
+class MultipleTypesWithSameNameSpec extends AnyFunSpec with Matchers
   with helpers.Helpers
   with helpers.ApiBuilderServiceHelpers
 {

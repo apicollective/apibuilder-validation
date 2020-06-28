@@ -5,9 +5,10 @@ import io.flow.v0.models.{CardForm, HarmonizedItemForm, ItemForm}
 import io.flow.v0.models.json._
 import play.api.libs.json._
 import org.joda.time.DateTime
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.funspec.AnyFunSpec
 
-class JsonValidatorSpec extends FunSpec with Matchers with Helpers {
+class JsonValidatorSpec extends AnyFunSpec with Matchers with Helpers {
 
   private[this] lazy val validator: JsonValidator = JsonValidator(
     loadService("flow-api-service.json").service

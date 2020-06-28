@@ -3,10 +3,11 @@ package io.apibuilder.validation
 import io.flow.v0.models.json._
 
 import io.flow.v0.models.{ImageForm, ItemForm}
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.funspec.AnyFunSpec
 import play.api.libs.json.Json
 
-class SerializationSpec extends FunSpec with Matchers with helpers.Helpers {
+class SerializationSpec extends AnyFunSpec with Matchers with helpers.Helpers {
 
   it("serialize and deserialize item form") {
     val form = ItemForm(

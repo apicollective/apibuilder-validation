@@ -1,9 +1,10 @@
 package io.apibuilder.validation
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.funspec.AnyFunSpec
 import play.api.libs.json.{JsObject, Json}
 
-class EnumValuesSpec extends FunSpec with Matchers with helpers.Helpers {
+class EnumValuesSpec extends AnyFunSpec with Matchers with helpers.Helpers {
 
   def makeFraudReview(riskEvaluation: String = "Pending"): JsObject = {
     Json.obj(

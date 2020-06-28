@@ -13,7 +13,7 @@ lazy val root = project
       "com.typesafe.play" %% "play-json" % "2.7.4",
       "org.apache.commons" % "commons-compress" % "1.18",
       "org.typelevel" %% "cats-core" % "2.0.0",
-      "org.scalatest" %% "scalatest" % "3.0.8" % Test,
+      "org.scalatest" %% "scalatest" % "3.2.0" % Test,
       compilerPlugin("com.github.ghik" %% "silencer-plugin" % "1.4.4" cross CrossVersion.full),
       "com.github.ghik" %% "silencer-lib" % "1.4.4" % Provided cross CrossVersion.full,
     ),

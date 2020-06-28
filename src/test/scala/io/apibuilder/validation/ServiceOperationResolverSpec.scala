@@ -1,8 +1,9 @@
 package io.apibuilder.validation
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.funspec.AnyFunSpec
 
-class ServiceOperationResolverSpec extends FunSpec with Matchers
+class ServiceOperationResolverSpec extends AnyFunSpec with Matchers
   with helpers.PerformanceHelpers
   with helpers.Helpers
 {

@@ -1,10 +1,11 @@
 package io.apibuilder.validation
 
 import io.apibuilder.validation.helpers.Helpers
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.funspec.AnyFunSpec
 import play.api.libs.json.Json
 
-class MultiServiceApicollectiveSpec extends FunSpec with Matchers with Helpers {
+class MultiServiceApicollectiveSpec extends AnyFunSpec with Matchers with Helpers {
 
   it("validates imported enums") {
     apibuilderMultiService.upcastOperationBody(

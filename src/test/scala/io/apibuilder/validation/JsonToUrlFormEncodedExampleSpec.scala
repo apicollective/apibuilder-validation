@@ -1,9 +1,10 @@
 package io.apibuilder.validation
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.funspec.AnyFunSpec
 import play.api.libs.json._
 
-class JsonToUrlFormEncodedExampleSpec extends FunSpec with Matchers {
+class JsonToUrlFormEncodedExampleSpec extends AnyFunSpec with Matchers {
 
   it("example") {
     val item = Json.parse(

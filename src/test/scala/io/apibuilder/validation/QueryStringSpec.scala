@@ -1,10 +1,11 @@
 package io.apibuilder.validation
 
 import java.io.File
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.funspec.AnyFunSpec
 import play.api.libs.json.{JsArray, JsObject, JsValue, Json}
 
-class QueryStringSpec extends FunSpec with Matchers {
+class QueryStringSpec extends AnyFunSpec with Matchers {
 
   private[this] val QueryStringDir: File = {
     val d = new File("src/test/resources/querystring")

@@ -2,9 +2,10 @@ package io.apibuilder.validation
 
 import io.apibuilder.spec.v0.models.{Enum, Model, Union}
 import io.apibuilder.validation.helpers.Helpers
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.funspec.AnyFunSpec
 
-class ApiBuilderTypeSpec extends FunSpec with Matchers with Helpers {
+class ApiBuilderTypeSpec extends AnyFunSpec with Matchers with Helpers {
 
   private[this] lazy val service = loadService("flow-api-service.json").service
   private[this] lazy val enum = ApiBuilderType.Enum(service, Enum("gender", "genders", values = Nil))

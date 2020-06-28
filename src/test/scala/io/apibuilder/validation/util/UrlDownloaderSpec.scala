@@ -1,9 +1,10 @@
 package io.apibuilder.validation.util
 
 import io.apibuilder.validation.helpers
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.funspec.AnyFunSpec
 
-class UrlDownloaderSpec extends FunSpec with Matchers with helpers.FileHelpers {
+class UrlDownloaderSpec extends AnyFunSpec with Matchers with helpers.FileHelpers {
   describe("java.net.URL") {
     it("handles the happy path") {
       val urlStr = writeToTempFile("").toURI.toURL

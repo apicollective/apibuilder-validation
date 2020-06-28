@@ -2,10 +2,11 @@ package io.apibuilder.validation
 
 import io.apibuilder.spec.v0.models.Method
 import io.apibuilder.validation.helpers.Helpers
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.funspec.AnyFunSpec
 import play.api.libs.json.Json
 
-class MultiServiceSpecResolvesUrls extends FunSpec with Matchers with Helpers {
+class MultiServiceSpecResolvesUrls extends AnyFunSpec with Matchers with Helpers {
 
   it("validates unknown methods") {
     flowMultiService.validateOperation(Method.UNDEFINED("FOO"), "/test-org/payments") should equal(

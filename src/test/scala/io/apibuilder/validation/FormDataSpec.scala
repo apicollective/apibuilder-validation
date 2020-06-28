@@ -1,9 +1,10 @@
 package io.apibuilder.validation
 
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.funspec.AnyFunSpec
 import play.api.libs.json._
 
-class FormDataSpec extends FunSpec with Matchers {
+class FormDataSpec extends AnyFunSpec with Matchers {
 
   it("toInteger") {
     FormData.toLong("") should be(None)
