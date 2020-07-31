@@ -2,20 +2,20 @@ name := "apibuilder-validation"
 
 organization := "io.apibuilder"
 
-scalaVersion in ThisBuild := "2.13.1"
+scalaVersion in ThisBuild := "2.13.3"
 
-crossScalaVersions := Seq("2.12.10", "2.13.1")
+crossScalaVersions := Seq("2.12.10", "2.13.3")
 
 lazy val root = project
   .in(file("."))
   .settings(
     libraryDependencies ++= Seq(
-      "com.typesafe.play" %% "play-json" % "2.7.4",
-      "org.apache.commons" % "commons-compress" % "1.18",
-      "org.typelevel" %% "cats-core" % "2.0.0",
+      "com.typesafe.play" %% "play-json" % "2.9.0",
+      "org.apache.commons" % "commons-compress" % "1.20",
+      "org.typelevel" %% "cats-core" % "2.1.1",
       "org.scalatest" %% "scalatest" % "3.2.0" % Test,
-      compilerPlugin("com.github.ghik" %% "silencer-plugin" % "1.4.4" cross CrossVersion.full),
-      "com.github.ghik" %% "silencer-lib" % "1.4.4" % Provided cross CrossVersion.full,
+      compilerPlugin("com.github.ghik" %% "silencer-plugin" % "1.6.0" cross CrossVersion.full),
+      "com.github.ghik" %% "silencer-lib" % "1.6.0" % Provided cross CrossVersion.full,
     ),
     credentials += Credentials(
       "Artifactory Realm",
