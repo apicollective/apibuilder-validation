@@ -16,4 +16,6 @@ apibuilder download apicollective apibuilder-explicit-validation latest service 
 apibuilder download flow api latest service > ./src/test/resources/flow-api-service.json
 
 apibuilder download flow api-internal latest service > ./src/test/resources/flow-api-internal-service.json
+
+apibuilder download apicollective apibuilder-common latest service > ./src/test/resources/apibuilder-common-service.json
 ```
