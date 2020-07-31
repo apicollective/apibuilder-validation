@@ -2,15 +2,16 @@ name := "apibuilder-validation"
 
 organization := "io.apibuilder"
 
-scalaVersion in ThisBuild := "2.13.3"
+scalaVersion in ThisBuild := "2.13.2"
 
-crossScalaVersions := Seq("2.12.10", "2.13.3")
+crossScalaVersions := Seq("2.12.10", "2.13.2")
 
 lazy val root = project
   .in(file("."))
   .settings(
     libraryDependencies ++= Seq(
       "com.typesafe.play" %% "play-json" % "2.9.0",
+      "com.typesafe.play" %% "play-json-joda" % "2.9.0",
       "org.apache.commons" % "commons-compress" % "1.20",
       "org.typelevel" %% "cats-core" % "2.1.1",
       "org.scalatest" %% "scalatest" % "3.2.0" % Test,
