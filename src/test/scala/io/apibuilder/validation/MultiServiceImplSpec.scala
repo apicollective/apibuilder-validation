@@ -149,11 +149,10 @@ class MultiServiceImplSpec extends AnyFunSpec with Matchers with Helpers {
       "POST",
       "/:organization/authorizations",
       Json.obj("discriminator" -> "authorization_form")
-    ) should equal(
-      Left(Seq(
-        "Invalid discriminator 'authorization_form' for union type 'authorization_form': must be one of 'authorization_copy_form', 'direct_authorization_form', 'merchant_of_record_authorization_form', 'paypal_authorization_form', 'redirect_authorization_form', 'inline_authorization_form', 'ach_authorization_form', 'card_payment_source_authorization_form'"
-      ))
-    )
+    ) match {
+      case Left(errors) => errors.head.contains("Invalid discriminator 'authorization_form'") should be(true)
+      case Right(_) => sys.error("Expected error")
+    }
   }
 
   it("validate union type") {
