@@ -31,16 +31,16 @@ object JsonValidator {
 case class JsonValidator(validator: ValidatedJsonValidator) {
   import io.apibuilder.validation.util.Implicits._
 
-  def findType(name: String, defaultNamespace: Option[String]): Seq[ApiBuilderType] =
+  def findType(name: String, defaultNamespace: Option[String]): Seq[AnyType] =
     validator.findType(name, defaultNamespace)
 
-  def findType(defaultNamespace: String, name: String): Seq[ApiBuilderType] =
+  def findType(defaultNamespace: String, name: String): Seq[AnyType] =
     validator.findType(defaultNamespace, name)
 
   def validate(typeName: String, js: JsValue, defaultNamespace: Option[String], prefix: Option[String] = None): Either[Seq[String], JsValue] =
     validator.validate(typeName, js, defaultNamespace, prefix).toEither.leftToSeq
 
-  def validateType(typ: ApiBuilderType, js: JsValue, prefix: Option[String] = None): Either[Seq[String], JsValue] =
+  def validateType(typ: AnyType, js: JsValue, prefix: Option[String] = None): Either[Seq[String], JsValue] =
     validator.validateType(typ, js, prefix).toEither.leftToSeq
 
   def validateString(prefix: String, js: JsValue): Either[Seq[String], JsString] =
@@ -84,7 +84,7 @@ object ValidatedJsonValidator {
 case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
   assert(services.nonEmpty, s"Must have at least one service")
 
-  def findType(name: String, defaultNamespace: Option[String]): Seq[ApiBuilderType] = {
+  def findType(name: String, defaultNamespace: Option[String]): Seq[AnyType] = {
     defaultNamespace match {
       case None => {
         services.map { service =>
@@ -99,13 +99,13 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
     }
   }
 
-  def findType(defaultNamespace: String, name: String): Seq[ApiBuilderType] = {
+  def findType(defaultNamespace: String, name: String): Seq[AnyType] = {
     findType(TypeName.parse(defaultNamespace = defaultNamespace, name = name))
   }
 
-  private[this] val cache = new ConcurrentHashMap[TypeName, Seq[ApiBuilderType]]()
+  private[this] val cache = new ConcurrentHashMap[TypeName, Seq[AnyType]]()
 
-  private[this] def findType(typeName: TypeName): Seq[ApiBuilderType] = {
+  private[this] def findType(typeName: TypeName): Seq[AnyType] = {
     cache.computeIfAbsent(
       typeName,
       _ => {
@@ -116,7 +116,7 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
     )
   }
 
-  private[this] def findType(service: ApiBuilderService, typeName: String): Option[ApiBuilderType] = {
+  private[this] def findType(service: ApiBuilderService, typeName: String): Option[AnyType] = {
     service.enums.find(_.name.equalsIgnoreCase(typeName)) orElse {
       service.models.find(_.name.equalsIgnoreCase(typeName)) orElse {
         service.unions.find(_.name.equalsIgnoreCase(typeName))
@@ -159,11 +159,13 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
   }
 
   def validateType(
-    typ: ApiBuilderType,
+    typ: AnyType,
     js: JsValue,
     prefix: Option[String] = None
   ): ValidatedNec[String, JsValue] = {
     typ match {
+      case _: ScalarType => js.validNec
+
       case e: ApiBuilderType.Enum => {
         validateEnum(prefix.getOrElse("Body"), e, js)
       }

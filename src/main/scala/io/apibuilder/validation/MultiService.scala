@@ -19,12 +19,12 @@ trait MultiService extends ResponseHelpers {
   /**
     * Resolves the type specified
     */
-  def findType(typeName: TypeName): Option[ApiBuilderType]
+  def findType(typeName: TypeName): Option[AnyType]
 
   /**
     * Upcast the json value based on the specified type name, if it is defined. a No-op if not
     */
-  def upcast(typ: ApiBuilderType, js: JsValue): Either[Seq[String], JsValue]
+  def upcast(typ: AnyType, js: JsValue): Either[Seq[String], JsValue]
 
   final def findOperation(method: String, path: String): Option[ApiBuilderOperation] = {
     findOperation(Method(method), path)
@@ -36,22 +36,22 @@ trait MultiService extends ResponseHelpers {
     * @param typeName e.g. 'user' - looks up the API Builder type with this name
     *                 and if found
     */
-  final def findType(defaultNamespace: String, typeName: String): Option[ApiBuilderType] = {
+  final def findType(defaultNamespace: String, typeName: String): Option[AnyType] = {
     findType(TypeName.parse(name = typeName, defaultNamespace = defaultNamespace))
   }
 
-  final def findType(fullyQualifiedName: String): Option[ApiBuilderType] = {
+  final def findType(fullyQualifiedName: String): Option[AnyType] = {
     TypeName.parse(fullyQualifiedName).flatMap(findType)
   }
 
   /**
     * If the specified method & path requires a body, returns the type of the body
     */
-  final def bodyTypeFromPath(method: String, path: String): Option[ApiBuilderType] = {
+  final def bodyTypeFromPath(method: String, path: String): Option[AnyType] = {
     bodyTypeFromPath(Method(method), path)
   }
 
-  final def bodyTypeFromPath(method: Method, path: String): Option[ApiBuilderType] = {
+  final def bodyTypeFromPath(method: Method, path: String): Option[AnyType] = {
     findOperation(method, path).flatMap(findBodyType)
   }
 
@@ -66,7 +66,7 @@ trait MultiService extends ResponseHelpers {
     }
   }
 
-  final def findBodyType(apiBuilderOperation: ApiBuilderOperation): Option[ApiBuilderType] = {
+  final def findBodyType(apiBuilderOperation: ApiBuilderOperation): Option[AnyType] = {
     apiBuilderOperation.operation.body.flatMap { body =>
       findType(
         defaultNamespace = apiBuilderOperation.service.service.namespace,
@@ -129,7 +129,7 @@ trait MultiService extends ResponseHelpers {
 
   final val allUnions: Seq[ApiBuilderType.Union] = services().flatMap(_.unions)
 
-  final val allTypes: Seq[ApiBuilderType] = allEnums ++ allModels ++ allUnions
+  final val allTypes: Seq[AnyType] = allEnums ++ allModels ++ allUnions
 }
 
 object MultiService {

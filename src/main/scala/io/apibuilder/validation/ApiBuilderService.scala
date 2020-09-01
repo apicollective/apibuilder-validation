@@ -26,9 +26,9 @@ case class ApiBuilderService(
   final lazy val models: Seq[ApiBuilderType.Model] = service.models.map { m => ApiBuilderType.Model(this, m) }
   final lazy val unions: Seq[ApiBuilderType.Union] = service.unions.map { u => ApiBuilderType.Union(this, u) }
 
-  final lazy val allTypes: Seq[ApiBuilderType] = enums ++ models ++ unions
+  final lazy val allTypes: Seq[AnyType] = enums ++ models ++ unions
 
-  def findType(name: String): Option[ApiBuilderType] = {
+  def findType(name: String): Option[AnyType] = {
     validator.findType(name, defaultNamespace = Some(service.namespace)).headOption
   }
 

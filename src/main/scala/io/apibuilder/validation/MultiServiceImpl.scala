@@ -19,14 +19,14 @@ case class MultiServiceImpl(
     serviceResolver.findOperation(method, path)
   }
 
-  override def findType(typ: TypeName): Option[ApiBuilderType] = {
+  override def findType(typ: TypeName): Option[AnyType] = {
     validator.findType(
       defaultNamespace = typ.namespace,
       name = typ.name,
     ).headOption
   }
 
-  override def upcast(typ: ApiBuilderType, js: JsValue): Either[Seq[String], JsValue] = {
+  override def upcast(typ: AnyType, js: JsValue): Either[Seq[String], JsValue] = {
     validator.validateType(typ, js)
   }
 
