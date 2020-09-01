@@ -14,7 +14,7 @@ sealed trait ScalarType extends AnyType
  */
 object ScalarType {
   case object BooleanType extends ScalarType { override val name = "boolean" }
-  case object IntType extends ScalarType { override val name = "integer" }
+  case object IntegerType extends ScalarType { override val name = "integer" }
   case object StringType extends ScalarType { override val name = "string" }
   case object DecimalType extends ScalarType { override val name = "decimal" }
   case object FloatType extends ScalarType { override val name = "double" }
@@ -25,7 +25,7 @@ object ScalarType {
   case object DateTimeIso8601Type extends ScalarType { override val name = "date-time-iso8601" }
   case object UnitType extends ScalarType { override val name = "unit" }
 
-  val all: scala.List[ScalarType] = scala.List(BooleanType, IntType, StringType, DecimalType, FloatType, LongType, JsonType, ObjectType, DateIso8601Type, DateTimeIso8601Type, UnitType)
+  val all: scala.List[ScalarType] = scala.List(BooleanType, IntegerType, StringType, DecimalType, FloatType, LongType, JsonType, ObjectType, DateIso8601Type, DateTimeIso8601Type, UnitType)
 
   private[this] val byName: Map[String, ScalarType] = all.map(x => x.name.toLowerCase -> x).toMap
 
