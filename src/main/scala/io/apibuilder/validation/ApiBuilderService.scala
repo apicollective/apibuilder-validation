@@ -16,13 +16,19 @@ import play.api.libs.json._
 case class ApiBuilderService(
   service: Service
 ) {
-  private[this] val validator = JsonValidator(service)
+  private[this] lazy val validator = JsonValidator(this)
   private[this] val normalizer = PathNormalizer(service)
 
   val name: String = service.name
   val namespace: String = service.namespace
 
-  def findType(name: String): Option[ApiBuilderType] = {
+  final lazy val enums: Seq[ApiBuilderType.Enum] = service.enums.map { e => ApiBuilderType.Enum(this, e) }
+  final lazy val models: Seq[ApiBuilderType.Model] = service.models.map { m => ApiBuilderType.Model(this, m) }
+  final lazy val unions: Seq[ApiBuilderType.Union] = service.unions.map { u => ApiBuilderType.Union(this, u) }
+
+  final lazy val allTypes: Seq[AnyType] = enums ++ models ++ unions
+
+  def findType(name: String): Option[AnyType] = {
     validator.findType(name, defaultNamespace = Some(service.namespace)).headOption
   }
 
@@ -77,5 +83,5 @@ object ApiBuilderService {
       case e: JsError => Left(Seq(s"Error parsing service: $e"))
     }
   }
-  
+
 }

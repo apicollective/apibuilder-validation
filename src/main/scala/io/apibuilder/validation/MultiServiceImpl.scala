@@ -12,18 +12,21 @@ case class MultiServiceImpl(
   override val services: List[ApiBuilderService]
 ) extends MultiService {
 
-  private[this] val validator = JsonValidator(services.map(_.service))
+  private[this] val validator = JsonValidator(services)
   private[this] val serviceResolver = ServiceOperationResolver(services)
 
   override def findOperation(method: Method, path: String): Option[ApiBuilderOperation] = {
     serviceResolver.findOperation(method, path)
   }
 
-  override def findType(typ: TypeName): Option[ApiBuilderType] = {
-    validator.findType(typ).headOption
+  override def findType(typ: TypeName): Option[AnyType] = {
+    validator.findType(
+      defaultNamespace = typ.namespace,
+      name = typ.name,
+    ).headOption
   }
 
-  override def upcast(typ: ApiBuilderType, js: JsValue): Either[Seq[String], JsValue] = {
+  override def upcast(typ: AnyType, js: JsValue): Either[Seq[String], JsValue] = {
     validator.validateType(typ, js)
   }
 

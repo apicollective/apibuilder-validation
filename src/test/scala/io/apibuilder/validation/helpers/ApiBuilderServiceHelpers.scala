@@ -6,7 +6,7 @@ import java.util.UUID
 import io.apibuilder.validation.{ApiBuilderType, MultiService}
 
 trait ApiBuilderServiceHelpers {
-  
+
   private[this] def random(): String = {
     UUID.randomUUID().toString
   }
@@ -50,7 +50,7 @@ trait ApiBuilderServiceHelpers {
       annotations = annotations
     )
   }
-  
+
   def makeModel(
     name: String = random(),
     fields: Seq[Field] = Nil,
