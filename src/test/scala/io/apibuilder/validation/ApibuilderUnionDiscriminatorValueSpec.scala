@@ -8,7 +8,7 @@ import play.api.libs.json.Json
 class ApibuilderUnionDiscriminatorValueSpec extends AnyFunSpec with Matchers with Helpers {
 
   private[this] lazy val validator = JsonValidator(
-    loadService("apibuilder-union-discriminator-value.json").service
+    loadService("apibuilder-union-discriminator-value.json")
   )
 
   it("uses discriminator values") {

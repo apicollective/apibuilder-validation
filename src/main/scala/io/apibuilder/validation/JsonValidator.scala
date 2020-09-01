@@ -4,7 +4,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 import cats.implicits._
 import cats.data.ValidatedNec
-import io.apibuilder.spec.v0.models.{Service, UnionType}
+import io.apibuilder.spec.v0.models.UnionType
 import org.joda.time.format.ISODateTimeFormat
 import play.api.libs.json._
 
@@ -24,21 +24,18 @@ object Booleans {
 }
 
 object JsonValidator {
-  def apply(service: Service): JsonValidator = new JsonValidator(ValidatedJsonValidator(service))
-  def apply(services: List[Service]): JsonValidator = new JsonValidator(ValidatedJsonValidator(services))
+  def apply(service: ApiBuilderService): JsonValidator = new JsonValidator(ValidatedJsonValidator(service))
+  def apply(services: List[ApiBuilderService]): JsonValidator = new JsonValidator(ValidatedJsonValidator(services))
 }
 
 case class JsonValidator(validator: ValidatedJsonValidator) {
   import io.apibuilder.validation.util.Implicits._
 
-  def findType(name: String, defaultNamespace: Option[String]) =
+  def findType(name: String, defaultNamespace: Option[String]): Seq[ApiBuilderType] =
     validator.findType(name, defaultNamespace)
 
-  def findType(defaultNamespace: String, name: String) =
+  def findType(defaultNamespace: String, name: String): Seq[ApiBuilderType] =
     validator.findType(defaultNamespace, name)
-
-  def findType(typeName: TypeName): Seq[ApiBuilderType] =
-    validator.findType(typeName)
 
   def validate(typeName: String, js: JsValue, defaultNamespace: Option[String], prefix: Option[String] = None): Either[Seq[String], JsValue] =
     validator.validate(typeName, js, defaultNamespace, prefix).toEither.leftToSeq
@@ -81,10 +78,10 @@ case class JsonValidator(validator: ValidatedJsonValidator) {
 }
 
 object ValidatedJsonValidator {
-  def apply(service: Service): ValidatedJsonValidator = ValidatedJsonValidator(List(service))
+  def apply(service: ApiBuilderService): ValidatedJsonValidator = ValidatedJsonValidator(List(service))
 }
 
-case class ValidatedJsonValidator(services: List[Service]) {
+case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
   assert(services.nonEmpty, s"Must have at least one service")
 
   def findType(name: String, defaultNamespace: Option[String]): Seq[ApiBuilderType] = {
@@ -108,7 +105,7 @@ case class ValidatedJsonValidator(services: List[Service]) {
 
   private[this] val cache = new ConcurrentHashMap[TypeName, Seq[ApiBuilderType]]()
 
-  def findType(typeName: TypeName): Seq[ApiBuilderType] = {
+  private[this] def findType(typeName: TypeName): Seq[ApiBuilderType] = {
     cache.computeIfAbsent(
       typeName,
       _ => {
@@ -119,19 +116,10 @@ case class ValidatedJsonValidator(services: List[Service]) {
     )
   }
 
-  private[this] def findType(service: Service, typeName: String): Option[ApiBuilderType] = {
-    service.enums.find(_.name.equalsIgnoreCase(typeName)) match {
-      case Some(e) => Some(ApiBuilderType.Enum(service, e))
-      case None => {
-        service.models.find(_.name.equalsIgnoreCase(typeName)) match {
-          case Some(m) => Some(ApiBuilderType.Model(service, m))
-          case None => {
-            service.unions.find(_.name.equalsIgnoreCase(typeName)) match {
-              case Some(u) => Some(ApiBuilderType.Union(service, u))
-              case None => None
-            }
-          }
-        }
+  private[this] def findType(service: ApiBuilderService, typeName: String): Option[ApiBuilderType] = {
+    service.enums.find(_.name.equalsIgnoreCase(typeName)) orElse {
+      service.models.find(_.name.equalsIgnoreCase(typeName)) orElse {
+        service.unions.find(_.name.equalsIgnoreCase(typeName))
       }
     }
   }
@@ -237,7 +225,7 @@ case class ValidatedJsonValidator(services: List[Service]) {
     prefix: Option[String]
   ): ValidatedNec[String, JsValue] = {
 
-    val missingFields = typ.requiredFields.filter { f =>
+    val missingFields = typ.fields.map(_.field).filter(_.required).filter { f =>
       (js \ f.name).toOption.isEmpty
     }.map(_.name).toList
 
@@ -544,7 +532,7 @@ case class ValidatedJsonValidator(services: List[Service]) {
         Try {
           ISODateTimeFormat.yearMonthDay.parseLocalDate(v.value)
         } match {
-          case Success(_) => JsString(v.value.toString).validNec
+          case Success(_) => JsString(v.value).validNec
           case Failure(_) => s"$prefix must be a valid ISO 8601 date. Example: '2017-07-24'".invalidNec
         }
       }

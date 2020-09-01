@@ -34,9 +34,7 @@ trait MultiService extends ResponseHelpers {
     * @param defaultNamespace e.g. io.flow.user.v0 - used unless the type name
     *                         is fully qualified already
     * @param typeName e.g. 'user' - looks up the API Builder type with this name
-    *                 and if found, uses that type to validate and upcast the
-    *                 JSON. Note if the type is not found, the JSON returned
-    *                 is unchanged.
+    *                 and if found
     */
   final def findType(defaultNamespace: String, typeName: String): Option[ApiBuilderType] = {
     findType(TypeName.parse(name = typeName, defaultNamespace = defaultNamespace))
@@ -125,23 +123,11 @@ trait MultiService extends ResponseHelpers {
     }
   }
 
-  final val allEnums: Seq[ApiBuilderType.Enum] = {
-    services().map(_.service).flatMap { s =>
-      s.enums.map { m => ApiBuilderType.Enum(s, m) }
-    }
-  }
+  final val allEnums: Seq[ApiBuilderType.Enum] = services().flatMap(_.enums)
 
-  final val allModels: Seq[ApiBuilderType.Model] = {
-    services().map(_.service).flatMap { s =>
-      s.models.map { m => ApiBuilderType.Model(s, m) }
-    }
-  }
+  final val allModels: Seq[ApiBuilderType.Model] = services().flatMap(_.models)
 
-  final val allUnions: Seq[ApiBuilderType.Union] = {
-    services().map(_.service).flatMap { s =>
-      s.unions.map { m => ApiBuilderType.Union(s, m) }
-    }
-  }
+  final val allUnions: Seq[ApiBuilderType.Union] = services().flatMap(_.unions)
 
   final val allTypes: Seq[ApiBuilderType] = allEnums ++ allModels ++ allUnions
 }
