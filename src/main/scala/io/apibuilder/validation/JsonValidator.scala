@@ -11,11 +11,11 @@ import play.api.libs.json._
 import scala.util.{Failure, Success, Try}
 
 /**
-  * We auto convert strings to booleans based on common, well known
-  * values from various frameworks. For example, the string 'true' or
-  * 't' will result in the boolean true - see TrueValues and
-  * FalseValues for all supported strings.
-  */
+ * We auto convert strings to booleans based on common, well known
+ * values from various frameworks. For example, the string 'true' or
+ * 't' will result in the boolean true - see TrueValues and
+ * FalseValues for all supported strings.
+ */
 object Booleans {
 
   val TrueValues: Seq[String] = Seq("t", "true", "y", "yes", "on", "1", "trueclass")
@@ -87,10 +87,15 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
   def findType(name: String, defaultNamespace: Option[String]): Seq[AnyType] = {
     defaultNamespace match {
       case None => {
-        services.map { service =>
-          TypeName.parse(defaultNamespace = service.namespace, name = name)
-        }.distinct.flatMap { typeName =>
-          findType(defaultNamespace = typeName.namespace, name = typeName.name)
+        ScalarType.fromName(name) match {
+          case Some(st) => Seq(st)
+          case None => {
+            services.map { service =>
+              TypeName.parse(defaultNamespace = service.namespace, name = name)
+            }.distinct.flatMap { typeName =>
+              findType(defaultNamespace = typeName.namespace, name = typeName.name)
+            }
+          }
         }
       }
       case Some(ns) => {
@@ -109,8 +114,13 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
     cache.computeIfAbsent(
       typeName,
       _ => {
-        services.filter(_.namespace.equalsIgnoreCase(typeName.namespace)).flatMap { service =>
-          findType(service, typeName.name)
+        ScalarType.fromName(typeName.name) match {
+          case Some(st) => Seq(st)
+          case None => {
+            services.filter(_.namespace.equalsIgnoreCase(typeName.namespace)).flatMap { service =>
+              findType(service, typeName.name)
+            }
+          }
         }
       }
     )
@@ -125,11 +135,11 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
   }
 
   /**
-    * Validates the incoming JsValue against the API Builder schema,
-    * returning either human friendly validation errors or a new
-    * JsValue with any conversions applied (e.g. strings to booleans,
-    * numbers to string, etc. as dictated by the schema).
-    */
+   * Validates the incoming JsValue against the API Builder schema,
+   * returning either human friendly validation errors or a new
+   * JsValue with any conversions applied (e.g. strings to booleans,
+   * numbers to string, etc. as dictated by the schema).
+   */
   def validate(
     typeName: String,
     js: JsValue,
@@ -138,9 +148,9 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
   ): ValidatedNec[String, JsValue] = {
     findType(typeName, defaultNamespace = defaultNamespace).toList match {
       case Nil => {
-        // may be a primitive type like 'string'
-        validateApiBuilderType(
-          prefix.getOrElse(typeName),
+        // may be a collection type like '[string]'
+        validateTypeFromName(
+          prefix.getOrElse("value"),
           typeName,
           js,
           defaultNamespace
@@ -164,7 +174,7 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
     prefix: Option[String] = None
   ): ValidatedNec[String, JsValue] = {
     typ match {
-      case _: ScalarType => js.validNec
+      case st: ScalarType => validateScalar(prefix.getOrElse("value"), st, js)
 
       case e: ApiBuilderType.Enum => {
         validateEnum(prefix.getOrElse("Body"), e, js)
@@ -315,25 +325,40 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
   /**
     * Validates the JS Value based on the expected API Builder type.
     */
-  private[this] def validateApiBuilderType(
+  private[this] def validateTypeFromName(
     prefix: String,
     typ: String,
     js: JsValue,
     defaultNamespace: Option[String]
   ): ValidatedNec[String, JsValue] = {
-    typ.trim.toLowerCase match {
-      case "string" => validateString(prefix, js)
-      case "integer" => validateInteger(prefix, js)
-      case "long" => validateLong(prefix, js)
-      case "boolean" => validateBoolean(prefix, js)
-      case "double" => validateDouble(prefix, js)
-      case "decimal" => validateDecimal(prefix, js)
-      case "uuid" => validateUuid(prefix, js)
-      case "date-iso8601" => validateDateIso8601(prefix, js)
-      case "date-time-iso8601" => validateDateTimeIso8601(prefix, js)
+    typ match {
       case ArrayPattern(internalType) => validateArray(prefix + s" of type '[$internalType]':", internalType, js, defaultNamespace)
       case ObjectPattern(internalType) => validateObject(prefix + s" of type 'map[$internalType]':", internalType, js, defaultNamespace)
-      case _ => js.validNec
+      case _ => {
+        ScalarType.fromName(typ) match {
+          case None => js.validNec
+          case Some(st) => validateScalar(prefix, st, js)
+        }
+      }
+    }
+  }
+
+  private[this] def validateScalar(prefix: String, scalarType: ScalarType, js: JsValue): ValidatedNec[String, JsValue] = {
+    import ScalarType._
+    scalarType match {
+      case FloatType | JsonType | ObjectType | UnitType => {
+        // TODO: Add validation for these types
+        js.validNec
+      }
+      case StringType => validateString(prefix, js)
+      case IntegerType => validateInteger(prefix, js)
+      case LongType => validateLong(prefix, js)
+      case BooleanType => validateBoolean(prefix, js)
+      case DoubleType => validateDouble(prefix, js)
+      case DecimalType => validateDecimal(prefix, js)
+      case UuidType => validateUuid(prefix, js)
+      case DateIso8601Type => validateDateIso8601(prefix, js)
+      case DateTimeIso8601Type => validateDateTimeIso8601(prefix, js)
     }
   }
 

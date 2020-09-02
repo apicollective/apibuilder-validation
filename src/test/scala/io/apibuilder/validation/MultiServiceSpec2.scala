@@ -23,6 +23,14 @@ class MultiServiceSpec2 extends AnyFunSpec with Matchers with helpers.Helpers {
     )
   }
 
+  it("findType can resolve a scalar") {
+    flowMultiService.findType("string").get should equal(ScalarType.StringType)
+    flowMultiService.findType("STRING").get should equal(ScalarType.StringType)
+    ScalarType.all.forall { t =>
+      flowMultiService.findType(t.name).isDefined
+    } should be(true)
+  }
+
   it("resolves body when path exists in both services") {
     flowMultiService.bodyTypeFromPath("POST", "/:organization/payments").map(_.name) should equal(Some("payment_form"))
   }
