@@ -18,7 +18,7 @@ object ScalarType {
   case object IntegerType extends ScalarType { override val name = "integer" }
   case object StringType extends ScalarType { override val name = "string" }
   case object DecimalType extends ScalarType { override val name = "decimal" }
-  case object FloatType extends ScalarType { override val name = "double" }
+  case object FloatType extends ScalarType { override val name = "float" }
   case object LongType extends ScalarType { override val name = "long" }
   case object JsonType extends ScalarType { override val name = "json" }
   case object ObjectType extends ScalarType { override val name = "object" }

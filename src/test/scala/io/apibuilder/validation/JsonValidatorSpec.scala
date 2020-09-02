@@ -119,13 +119,6 @@ class JsonValidatorSpec extends AnyFunSpec with Matchers with Helpers {
     validate("double", JsString(" ")) should equal(Left(List("value must be a valid double")))
   }
 
-  it("validates a float") {
-    validate("float", Json.parse("123.45")).rightValue.as[Float] should equal(123.45)
-    validate("float", Json.parse("123")).rightValue.as[Float] should equal(123)
-    validate("float", JsString("NaN")) should equal(Left(List("value must be a valid float")))
-    validate("float", JsString(" ")) should equal(Left(List("value must be a valid float")))
-  }
-
   it("validates a decimal") {
     validate("decimal", Json.parse("123.45")).rightValue.as[BigDecimal] should equal(123.45)
     validate("decimal", Json.parse("123")).rightValue.as[BigDecimal] should equal(123)

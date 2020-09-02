@@ -131,11 +131,11 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
    * numbers to string, etc. as dictated by the schema).
    */
   def validate(
-                typeName: String,
-                js: JsValue,
-                defaultNamespace: Option[String],
-                prefix: Option[String] = None
-              ): ValidatedNec[String, JsValue] = {
+    typeName: String,
+    js: JsValue,
+    defaultNamespace: Option[String],
+    prefix: Option[String] = None
+  ): ValidatedNec[String, JsValue] = {
     findType(typeName, defaultNamespace = defaultNamespace).toList match {
       case Nil => {
         // may be a collection type like '[string]'
