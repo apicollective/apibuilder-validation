@@ -41,7 +41,9 @@ trait MultiService extends ResponseHelpers {
   }
 
   final def findType(fullyQualifiedName: String): Option[AnyType] = {
-    TypeName.parse(fullyQualifiedName).flatMap(findType)
+    TypeName.parse(fullyQualifiedName).flatMap(findType) orElse {
+      ScalarType.fromName(fullyQualifiedName)
+    }
   }
 
   /**
