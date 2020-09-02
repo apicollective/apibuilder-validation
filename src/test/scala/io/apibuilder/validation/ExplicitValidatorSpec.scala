@@ -23,7 +23,7 @@ class ExplicitValidatorSpec extends AnyFunSpec with Matchers with Helpers {
       case Left(errors) => errors should equal(
         Seq("object_with_price_form.price.amount must be a valid decimal")
       )
-      case Right(_) => sys.error(s"Expected errors but got none")
+      case Right(_) => sys.error("Expected errors but got none")
     }
   }
 }

@@ -31,4 +31,12 @@ class ApiBuilderServiceSpec extends AnyFunSpec with Matchers with Helpers {
       Seq("id", "email", "status", "limit", "offset", "sort")
     )
   }
+
+  it("findType can resolve a scalar") {
+    service.findType("string").get should equal(ScalarType.StringType)
+    service.findType("STRING").get should equal(ScalarType.StringType)
+    ScalarType.all.forall { t =>
+      service.findType(t.name).isDefined
+    } should be(true)
+  }
 }
