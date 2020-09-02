@@ -11,11 +11,11 @@ import play.api.libs.json._
 import scala.util.{Failure, Success, Try}
 
 /**
-  * We auto convert strings to booleans based on common, well known
-  * values from various frameworks. For example, the string 'true' or
-  * 't' will result in the boolean true - see TrueValues and
-  * FalseValues for all supported strings.
-  */
+ * We auto convert strings to booleans based on common, well known
+ * values from various frameworks. For example, the string 'true' or
+ * 't' will result in the boolean true - see TrueValues and
+ * FalseValues for all supported strings.
+ */
 object Booleans {
 
   val TrueValues: Seq[String] = Seq("t", "true", "y", "yes", "on", "1", "trueclass")
@@ -125,22 +125,22 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
   }
 
   /**
-    * Validates the incoming JsValue against the API Builder schema,
-    * returning either human friendly validation errors or a new
-    * JsValue with any conversions applied (e.g. strings to booleans,
-    * numbers to string, etc. as dictated by the schema).
-    */
+   * Validates the incoming JsValue against the API Builder schema,
+   * returning either human friendly validation errors or a new
+   * JsValue with any conversions applied (e.g. strings to booleans,
+   * numbers to string, etc. as dictated by the schema).
+   */
   def validate(
-    typeName: String,
-    js: JsValue,
-    defaultNamespace: Option[String],
-    prefix: Option[String] = None
-  ): ValidatedNec[String, JsValue] = {
+                typeName: String,
+                js: JsValue,
+                defaultNamespace: Option[String],
+                prefix: Option[String] = None
+              ): ValidatedNec[String, JsValue] = {
     findType(typeName, defaultNamespace = defaultNamespace).toList match {
       case Nil => {
         // may be a collection type like '[string]'
         validateTypeFromName(
-          prefix.getOrElse(typeName),
+          prefix.getOrElse("value"),
           typeName,
           js,
           defaultNamespace
@@ -336,6 +336,10 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
   private[this] def validateScalar(prefix: String, scalarType: ScalarType, js: JsValue): ValidatedNec[String, JsValue] = {
     import ScalarType._
     scalarType match {
+      case FloatType | JsonType | ObjectType | UnitType => {
+        // TODO: Add validation for these types
+        js.validNec
+      }
       case StringType => validateString(prefix, js)
       case IntegerType => validateInteger(prefix, js)
       case LongType => validateLong(prefix, js)
@@ -344,7 +348,7 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
       case DecimalType => validateDecimal(prefix, js)
       case UuidType => validateUuid(prefix, js)
       case DateIso8601Type => validateDateIso8601(prefix, js)
-      case DateIso8601Type => validateDateTimeIso8601(prefix, js)
+      case DateTimeIso8601Type => validateDateTimeIso8601(prefix, js)
     }
   }
 
