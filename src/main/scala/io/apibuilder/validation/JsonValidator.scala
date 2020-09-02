@@ -138,8 +138,8 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
   ): ValidatedNec[String, JsValue] = {
     findType(typeName, defaultNamespace = defaultNamespace).toList match {
       case Nil => {
-        // may be a primitive type like 'string'
-        validateApiBuilderType(
+        // may be a collection type like '[string]'
+        validateTypeFromName(
           prefix.getOrElse(typeName),
           typeName,
           js,
@@ -164,7 +164,7 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
     prefix: Option[String] = None
   ): ValidatedNec[String, JsValue] = {
     typ match {
-      case _: ScalarType => js.validNec
+      case st: ScalarType => validateScalar(prefix.getOrElse(st.name), st, js)
 
       case e: ApiBuilderType.Enum => {
         validateEnum(prefix.getOrElse("Body"), e, js)
@@ -315,25 +315,36 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
   /**
     * Validates the JS Value based on the expected API Builder type.
     */
-  private[this] def validateApiBuilderType(
+  private[this] def validateTypeFromName(
     prefix: String,
     typ: String,
     js: JsValue,
     defaultNamespace: Option[String]
   ): ValidatedNec[String, JsValue] = {
-    typ.trim.toLowerCase match {
-      case "string" => validateString(prefix, js)
-      case "integer" => validateInteger(prefix, js)
-      case "long" => validateLong(prefix, js)
-      case "boolean" => validateBoolean(prefix, js)
-      case "double" => validateDouble(prefix, js)
-      case "decimal" => validateDecimal(prefix, js)
-      case "uuid" => validateUuid(prefix, js)
-      case "date-iso8601" => validateDateIso8601(prefix, js)
-      case "date-time-iso8601" => validateDateTimeIso8601(prefix, js)
+    typ match {
       case ArrayPattern(internalType) => validateArray(prefix + s" of type '[$internalType]':", internalType, js, defaultNamespace)
       case ObjectPattern(internalType) => validateObject(prefix + s" of type 'map[$internalType]':", internalType, js, defaultNamespace)
-      case _ => js.validNec
+      case _ => {
+        ScalarType.fromName(typ) match {
+          case None => js.validNec
+          case Some(st) => validateScalar(prefix, st, js)
+        }
+      }
+    }
+  }
+
+  private[this] def validateScalar(prefix: String, scalarType: ScalarType, js: JsValue): ValidatedNec[String, JsValue] = {
+    import ScalarType._
+    scalarType match {
+      case StringType => validateString(prefix, js)
+      case IntegerType => validateInteger(prefix, js)
+      case LongType => validateLong(prefix, js)
+      case BooleanType => validateBoolean(prefix, js)
+      case DoubleType => validateDouble(prefix, js)
+      case DecimalType => validateDecimal(prefix, js)
+      case UuidType => validateUuid(prefix, js)
+      case DateIso8601Type => validateDateIso8601(prefix, js)
+      case DateIso8601Type => validateDateTimeIso8601(prefix, js)
     }
   }
 
