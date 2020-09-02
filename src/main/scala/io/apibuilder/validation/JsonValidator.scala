@@ -87,10 +87,15 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
   def findType(name: String, defaultNamespace: Option[String]): Seq[AnyType] = {
     defaultNamespace match {
       case None => {
-        services.map { service =>
-          TypeName.parse(defaultNamespace = service.namespace, name = name)
-        }.distinct.flatMap { typeName =>
-          findType(defaultNamespace = typeName.namespace, name = typeName.name)
+        ScalarType.fromName(name) match {
+          case Some(st) => Seq(st)
+          case None => {
+            services.map { service =>
+              TypeName.parse(defaultNamespace = service.namespace, name = name)
+            }.distinct.flatMap { typeName =>
+              findType(defaultNamespace = typeName.namespace, name = typeName.name)
+            }
+          }
         }
       }
       case Some(ns) => {
@@ -109,8 +114,13 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
     cache.computeIfAbsent(
       typeName,
       _ => {
-        services.filter(_.namespace.equalsIgnoreCase(typeName.namespace)).flatMap { service =>
-          findType(service, typeName.name)
+        ScalarType.fromName(typeName.name) match {
+          case Some(st) => Seq(st)
+          case None => {
+            services.filter(_.namespace.equalsIgnoreCase(typeName.namespace)).flatMap { service =>
+              findType(service, typeName.name)
+            }
+          }
         }
       }
     )
@@ -164,7 +174,7 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
     prefix: Option[String] = None
   ): ValidatedNec[String, JsValue] = {
     typ match {
-      case st: ScalarType => validateScalar(prefix.getOrElse(st.name), st, js)
+      case st: ScalarType => validateScalar(prefix.getOrElse("value"), st, js)
 
       case e: ApiBuilderType.Enum => {
         validateEnum(prefix.getOrElse("Body"), e, js)
