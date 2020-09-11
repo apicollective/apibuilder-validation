@@ -17,7 +17,7 @@ trait ApiBuilderServiceRewriter {
 trait DefaultRewriter extends MultiServiceRewriter with ApiBuilderServiceRewriter {
 
   override final def rewrite(apiBuilderService: ApiBuilderService): ApiBuilderService = {
-    rewrite(MultiService(List(apiBuilderService))).services.head
+    rewrite(MultiService(List(apiBuilderService))).services().head
   }
 
 }
