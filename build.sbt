@@ -2,9 +2,9 @@ name := "apibuilder-validation"
 
 organization := "io.apibuilder"
 
-scalaVersion in ThisBuild := "2.13.2"
+scalaVersion in ThisBuild := "2.13.3"
 
-crossScalaVersions := Seq("2.12.10", "2.13.2")
+crossScalaVersions := Seq("2.13.3")
 
 lazy val resolversSettings = Seq(
   resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases",
@@ -29,8 +29,8 @@ lazy val root = project
       "org.apache.commons" % "commons-compress" % "1.20",
       "org.typelevel" %% "cats-core" % "2.1.1",
       "org.scalatest" %% "scalatest" % "3.2.0" % Test,
-      compilerPlugin("com.github.ghik" %% "silencer-plugin" % "1.6.0" cross CrossVersion.full),
-      "com.github.ghik" %% "silencer-lib" % "1.6.0" % Provided cross CrossVersion.full,
+      compilerPlugin("com.github.ghik" %% "silencer-plugin" % "1.7.0" cross CrossVersion.full),
+      "com.github.ghik" %% "silencer-lib" % "1.7.0" % Provided cross CrossVersion.full,
     ),
     credentials += Credentials(
       "Artifactory Realm",
@@ -50,4 +50,4 @@ publishTo := {
     Some("Artifactory Realm" at s"$host/libs-release-local")
   }
 }
-version := "0.4.24"
+version := "0.4.25"
