@@ -9,6 +9,7 @@ crossScalaVersions := Seq("2.12.10", "2.13.2")
 lazy val resolversSettings = Seq(
   resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases",
   resolvers += "Artifactory" at "https://flow.jfrog.io/flow/libs-release/",
+  resolvers += "Flow Artifactory" at "https://flow.jfrog.io/flow/libs-release-local/",
   credentials += Credentials(
     "Artifactory Realm",
     "flow.jfrog.io",
@@ -22,7 +23,7 @@ lazy val root = project
   .settings(resolversSettings)
   .settings(
   libraryDependencies ++= Seq(
-      "io.apibuilder" %% "apibuilder-commons" % "0.0.3", 
+      "io.apibuilder" %% "apibuilder-commons" % "0.0.5",
       "com.typesafe.play" %% "play-json" % "2.9.0",
       "com.typesafe.play" %% "play-json-joda" % "2.9.0",
       "org.apache.commons" % "commons-compress" % "1.20",
