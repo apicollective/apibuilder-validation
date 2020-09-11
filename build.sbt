@@ -22,7 +22,7 @@ lazy val root = project
   .settings(resolversSettings)
   .settings(
   libraryDependencies ++= Seq(
-      "io.apibuilder" %% "apibuilder-commons" % "0.0.1", 
+      "io.apibuilder" %% "apibuilder-commons" % "0.0.3", 
       "com.typesafe.play" %% "play-json" % "2.9.0",
       "com.typesafe.play" %% "play-json-joda" % "2.9.0",
       "org.apache.commons" % "commons-compress" % "1.20",
