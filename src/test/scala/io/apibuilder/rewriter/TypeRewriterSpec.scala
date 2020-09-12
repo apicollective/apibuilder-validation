@@ -1,14 +1,15 @@
 package io.apibuilder.rewriter
 
 import apibuilder.ApiBuilderHelper
-import io.apibuilder.helpers.{ApiBuilderServiceHelpers, ApiBuilderServiceValidatorHelpers, MultiServiceHelpers}
+import io.apibuilder.builders.{ApiBuilderServiceBuilders, MultiServiceHelpers}
+import io.apibuilder.helpers.ApiBuilderServiceValidatorHelpers
 import io.apibuilder.spec.v0.models.{Enum, Method, Model, Operation, Resource, Union}
 import io.apibuilder.validation.{AnyType, ApiBuilderType, MultiService, ScalarType}
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
 class TypeRewriterSpec extends AnyWordSpec with Matchers
-  with ApiBuilderServiceHelpers
+  with ApiBuilderServiceBuilders
   with MultiServiceHelpers
   with ApiBuilderServiceValidatorHelpers
 {

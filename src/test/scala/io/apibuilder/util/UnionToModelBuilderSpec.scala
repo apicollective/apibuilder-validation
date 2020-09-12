@@ -1,7 +1,7 @@
 package io.apibuilder.util
 
 import cats.data.Validated.{Invalid, Valid}
-import io.apibuilder.helpers.{ApiBuilderServiceHelpers, MultiServiceHelpers}
+import io.apibuilder.builders.{ApiBuilderServiceBuilders, MultiServiceHelpers}
 import io.apibuilder.spec.v0.models._
 import io.apibuilder.validation.{ApiBuilderService, ApiBuilderType}
 import org.scalatest.Assertion
@@ -9,7 +9,7 @@ import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
 class UnionToModelBuilderSpec extends AnyWordSpec with Matchers
-  with ApiBuilderServiceHelpers
+  with ApiBuilderServiceBuilders
   with MultiServiceHelpers
 {
   private[this] def setup(

@@ -1,13 +1,13 @@
 package io.apibuilder.validation
 
-import io.apibuilder.helpers.ApiBuilderServiceHelpers
+import io.apibuilder.builders.ApiBuilderServiceBuilders
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
 import play.api.libs.json.Json
 
 class MultipleTypesWithSameNameSpec extends AnyFunSpec with Matchers
   with helpers.Helpers
-  with ApiBuilderServiceHelpers
+  with ApiBuilderServiceBuilders
 {
 
   it("validates type found in multiple services") {

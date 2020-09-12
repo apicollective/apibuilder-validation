@@ -22,7 +22,7 @@ object Fixture {
   private[this] val CommentCharacter = "#"
 
   def load(file: File): Fixture = {
-    scala.io.Source.fromFile(file).getLines.mkString("\n").
+    scala.io.Source.fromFile(file).getLines().mkString("\n").
       split("\n").map(_.trim).filter { l => !l.startsWith(CommentCharacter) }.mkString("\n").
       trim.split("\n\n").toList match {
       case definition :: expected :: Nil => {

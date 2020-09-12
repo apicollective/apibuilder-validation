@@ -1,12 +1,12 @@
 package io.apibuilder.rewriter
 
-import io.apibuilder.helpers.{ApiBuilderServiceHelpers, MultiServiceHelpers}
+import io.apibuilder.builders.{ApiBuilderServiceBuilders, MultiServiceHelpers}
 import io.apibuilder.spec.v0.models.{Model, Union}
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
 class UnionsToModelsRewriterSpec extends AnyWordSpec with Matchers
-  with ApiBuilderServiceHelpers
+  with ApiBuilderServiceBuilders
   with MultiServiceHelpers {
 
   private[this] def rewrite(models: Seq[Model], unions: Seq[Union]) = {

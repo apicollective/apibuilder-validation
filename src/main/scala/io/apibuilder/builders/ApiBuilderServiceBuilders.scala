@@ -1,4 +1,4 @@
-package io.apibuilder.helpers
+package io.apibuilder.builders
 
 import java.util.UUID
 
@@ -6,7 +6,7 @@ import io.apibuilder.spec.v0.models.{Annotation, Apidoc, Application, Attribute,
 import io.apibuilder.validation.{ApiBuilderType, MultiService}
 import play.api.libs.json.{JsObject, Json}
 
-trait ApiBuilderServiceHelpers {
+trait ApiBuilderServiceBuilders {
 
   protected def random(): String = {
     // Start with a letter to ensure name is compatible with api builder validation

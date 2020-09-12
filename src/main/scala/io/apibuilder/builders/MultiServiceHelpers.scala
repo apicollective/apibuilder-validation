@@ -1,4 +1,4 @@
-package io.apibuilder.helpers
+package io.apibuilder.builders
 
 import io.apibuilder.spec.v0.models.Service
 import io.apibuilder.validation.{ApiBuilderService, ApiBuilderType, MultiService, TypeName}

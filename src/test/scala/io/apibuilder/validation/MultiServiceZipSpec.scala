@@ -2,7 +2,7 @@ package io.apibuilder.validation
 
 import java.io.File
 
-import io.apibuilder.helpers.ApiBuilderServiceHelpers
+import io.apibuilder.builders.ApiBuilderServiceBuilders
 import io.apibuilder.spec.v0.models.json._
 import io.apibuilder.spec.v0.models.{Method, Service}
 import io.apibuilder.validation.zip.ZipFileBuilder
@@ -11,7 +11,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
 
 class MultiServiceZipSpec extends AnyFunSpec with Matchers
-  with ApiBuilderServiceHelpers
+  with ApiBuilderServiceBuilders
   with helpers.FileHelpers
   with helpers.PerformanceHelpers
   with helpers.Helpers

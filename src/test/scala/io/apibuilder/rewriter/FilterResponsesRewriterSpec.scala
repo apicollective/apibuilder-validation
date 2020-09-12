@@ -1,12 +1,12 @@
 package io.apibuilder.rewriter
 
-import io.apibuilder.helpers.{ApiBuilderServiceHelpers, MultiServiceHelpers}
+import io.apibuilder.builders.{ApiBuilderServiceBuilders, MultiServiceHelpers}
 import io.apibuilder.spec.v0.models.{Operation, Resource, Response, ResponseCodeInt}
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
 class FilterResponsesRewriterSpec extends AnyWordSpec with Matchers
-  with ApiBuilderServiceHelpers
+  with ApiBuilderServiceBuilders
   with MultiServiceHelpers {
 
   private[this] def resource(
