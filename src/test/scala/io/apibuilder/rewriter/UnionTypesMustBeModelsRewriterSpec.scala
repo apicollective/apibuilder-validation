@@ -1,6 +1,6 @@
 package io.apibuilder.rewriter
 
-import io.apibuilder.builders.{ApiBuilderServiceBuilders, MultiServiceHelpers}
+import io.apibuilder.builders.{ApiBuilderServiceBuilders, MultiServiceBuilders}
 import io.apibuilder.helpers.ApiBuilderServiceValidatorHelpers
 import io.apibuilder.spec.v0.models.Service
 import io.apibuilder.validation.ApiBuilderService
@@ -9,7 +9,7 @@ import org.scalatest.wordspec.AnyWordSpec
 
 class UnionTypesMustBeModelsRewriterSpec extends AnyWordSpec with Matchers
   with ApiBuilderServiceBuilders
-  with MultiServiceHelpers
+  with MultiServiceBuilders
   with ApiBuilderServiceValidatorHelpers
 {
 

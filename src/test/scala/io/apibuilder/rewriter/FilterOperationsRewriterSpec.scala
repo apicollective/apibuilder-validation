@@ -1,13 +1,13 @@
 package io.apibuilder.rewriter
 
-import io.apibuilder.builders.{ApiBuilderServiceBuilders, MultiServiceHelpers}
+import io.apibuilder.builders.{ApiBuilderServiceBuilders, MultiServiceBuilders}
 import io.apibuilder.spec.v0.models.{Operation, Resource}
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
 class FilterOperationsRewriterSpec extends AnyWordSpec with Matchers
   with ApiBuilderServiceBuilders
-  with MultiServiceHelpers
+  with MultiServiceBuilders
 {
   private[this] def op(attributeName: Option[String]): Operation = {
     makeOperation(

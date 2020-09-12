@@ -1,13 +1,13 @@
 package io.apibuilder.rewriter
 
-import io.apibuilder.builders.{ApiBuilderServiceBuilders, MultiServiceHelpers}
+import io.apibuilder.builders.{ApiBuilderServiceBuilders, MultiServiceBuilders}
 import io.apibuilder.spec.v0.models.{Enum, Model, Union}
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
 class MinimalTypesRewriterSpec extends AnyWordSpec with Matchers
   with ApiBuilderServiceBuilders
-  with MultiServiceHelpers {
+  with MultiServiceBuilders {
 
   private[this] def rewrite(
     enums: Seq[Enum] = Nil,
