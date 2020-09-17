@@ -29,6 +29,7 @@ case class TypeRewriter(rewriteType: AnyType => AnyType) extends DefaultRewriter
 
   private[this] def rewrite(helper: ApiBuilderHelper, service: ApiBuilderService, resource: Resource): Resource = {
     resource.copy(
+      `type` = doRewriteType(helper, service, resource.`type`),
       operations = resource.operations.map { op =>
         rewrite(helper, service, op)
       }

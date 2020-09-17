@@ -37,7 +37,11 @@ class TypeRewriterSpec extends AnyWordSpec with Matchers
   }
 
   private[this] def firstOperation(ms: MultiService): Operation = {
-    ms.services().head.service.resources.head.operations.head
+    firstResource(ms).operations.head
+  }
+
+  private[this] def firstResource(ms: MultiService): Resource = {
+    ms.services().head.service.resources.head
   }
 
   "rename" must {
@@ -70,6 +74,28 @@ class TypeRewriterSpec extends AnyWordSpec with Matchers
       mustFindUnion(ms, "foo").union.types.map(_.`type`) must equal(
         Seq("user", "baz")
       )
+    }
+
+    "resource" must {
+      def setup(resourceType: String): Resource = {
+        val ms = rewrite(
+          models = Seq(makeModel(resourceType)),
+          resources = Seq(
+            makeResource(
+              resourceType,
+              operations = Seq(makeOperation()),
+            )
+          )
+        ) { t => rewriteTypeByName(t, resourceType, "foo") }
+
+        findModel(ms, resourceType) must be(None)
+        mustFindModel(ms, "foo")
+        firstResource(ms)
+      }
+
+      "type" in {
+        setup("example_resource").`type` must equal("foo")
+      }
     }
 
     "operations" must {
