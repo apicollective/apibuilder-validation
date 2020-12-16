@@ -131,6 +131,12 @@
         { "name": "locale", "type": "string", "required": false },
         { "name": "region", "type": "string", "required": false }
       ]
+    },
+    "expiration": {
+      "fields": [
+        { "name": "month", "type": "integer" },
+        { "name": "year", "type": "integer" }
+      ]
     }
 
   },

@@ -39,7 +39,7 @@ class MultiServiceImplSpec extends AnyFunSpec with Matchers with Helpers {
       Seq("id", "email", "status", "limit", "offset", "sort")
     )
     multi.findOperation("GET", "/org/experiences/items").get.operation.parameters.map(_.name) should be(
-      Seq("organization", "number", "status", "experience", "country", "ip", "currency", "language", "limit", "offset", "sort")
+      Seq("organization", "number", "status", "experience", "country", "ip", "currency", "language", "context", "limit", "offset", "sort")
     )
   }
 

@@ -91,4 +91,15 @@ class MinimalTypesRewriterSpec extends AnyWordSpec with Matchers
 
   }
 
+  "resources" must {
+
+    "preserve resource type" in {
+      val user = makeModel("user")
+      rewrite(
+        models = Seq(user),
+        types = Seq("user")
+      ) must equal(Seq("user"))
+    }
+  }
+
 }
