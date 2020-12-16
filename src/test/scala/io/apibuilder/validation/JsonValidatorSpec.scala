@@ -458,4 +458,18 @@ class JsonValidatorSpec extends AnyFunSpec with Matchers with Helpers {
     )
   }
 
+  it("expiration year") {
+    val expiration = apibuilderMultiService.findType("io.apibuilder.explicit.validation.v0.models.expiration").getOrElse {
+      sys.error("Did not find 'expiration' model")
+    }
+    apibuilderMultiService.upcast(
+      expiration, Json.obj(
+        "month" -> 1,
+        "year" -> "a",
+      )
+    ) should equal(
+      Left(List("expiration.year must be a valid integer"))
+    )
+  }
+
 }
