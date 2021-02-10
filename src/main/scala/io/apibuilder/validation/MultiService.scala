@@ -127,6 +127,8 @@ trait MultiService extends ResponseHelpers {
 
   final val allEnums: Seq[ApiBuilderType.Enum] = services().flatMap(_.enums)
 
+  final val allInterfaces: Seq[ApiBuilderType.Interface] = services().flatMap(_.interfaces)
+
   final val allModels: Seq[ApiBuilderType.Model] = services().flatMap(_.models)
 
   final val allUnions: Seq[ApiBuilderType.Union] = services().flatMap(_.unions)
