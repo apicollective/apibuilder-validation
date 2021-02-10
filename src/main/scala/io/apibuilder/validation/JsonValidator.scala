@@ -126,14 +126,14 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
     )
   }
 
-  private[this] def findType(service: ApiBuilderService, typeName: String): Option[AnyType] = {
-    service.enums.find(_.name.equalsIgnoreCase(typeName)) orElse {
-      service.interfaces.find(_.name.equalsIgnoreCase(typeName)) orElse {
-        service.models.find(_.name.equalsIgnoreCase(typeName)) orElse {
-          service.unions.find(_.name.equalsIgnoreCase(typeName))
-        }
-      }
-    }
+  private[this] def findType(service: ApiBuilderService, typeName: String): Seq[AnyType] = {
+    service.enums.find(_.name.equalsIgnoreCase(typeName)).fold(
+      service.models.find(_.name.equalsIgnoreCase(typeName)).fold(
+        service.unions.find(_.name.equalsIgnoreCase(typeName)).fold(
+          service.interfaces.find(_.name.equalsIgnoreCase(typeName)).toSeq : Seq[AnyType]
+        )(Seq(_) ++ service.interfaces.find(_.name.equalsIgnoreCase(typeName)).toSeq)
+      )(Seq(_))
+    )(Seq(_))
   }
 
   /**
