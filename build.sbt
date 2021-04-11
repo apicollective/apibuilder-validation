@@ -7,7 +7,6 @@ scalaVersion in ThisBuild := "2.13.5"
 crossScalaVersions := Seq("2.13.5")
 
 lazy val resolversSettings = Seq(
-  resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases",
   resolvers += "Artifactory" at "https://flow.jfrog.io/flow/libs-release/",
   resolvers += "Flow Artifactory" at "https://flow.jfrog.io/flow/libs-release-local/",
   credentials += Credentials(
