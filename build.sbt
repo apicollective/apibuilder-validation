@@ -27,7 +27,7 @@ lazy val root = project
       "com.typesafe.play" %% "play-json-joda" % "2.9.0",
       "org.apache.commons" % "commons-compress" % "1.20",
       "org.typelevel" %% "cats-core" % "2.1.1",
-      "org.scalatest" %% "scalatest" % "3.2.7" % Test,
+      "org.scalatest" %% "scalatest" % "3.2.8" % Test,
       compilerPlugin("com.github.ghik" %% "silencer-plugin" % "1.7.3" cross CrossVersion.full),
       "com.github.ghik" %% "silencer-lib" % "1.7.3" % Provided cross CrossVersion.full,
     ),
