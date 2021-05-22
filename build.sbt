@@ -2,9 +2,9 @@ name := "apibuilder-validation"
 
 organization := "io.apibuilder"
 
-scalaVersion in ThisBuild := "2.13.5"
+scalaVersion in ThisBuild := "2.13.6"
 
-crossScalaVersions := Seq("2.13.5")
+crossScalaVersions := Seq("2.13.6")
 
 lazy val resolversSettings = Seq(
   resolvers += "Artifactory" at "https://flow.jfrog.io/flow/libs-release/",
