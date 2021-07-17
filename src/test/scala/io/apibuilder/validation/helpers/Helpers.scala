@@ -1,7 +1,6 @@
 package io.apibuilder.validation.helpers
 
 import java.io.File
-
 import io.apibuilder.spec.v0.models.Service
 import io.apibuilder.spec.v0.models.json._
 import io.apibuilder.validation.zip.FileUtil
@@ -34,7 +33,7 @@ trait Helpers {
     mustFindType(multiService, qualified).asInstanceOf[ApiBuilderType.Model]
   }
 
-  lazy val apibuilderMultiService: MultiService = {
+  lazy val apiBuilderMultiService: MultiService = {
     loadMultiService(
       List(
         "apibuilder-explicit-validation-core-service.json",
@@ -52,18 +51,11 @@ trait Helpers {
     )
   }
 
-  def rightOrErrors[K,V](f: Either[K, V]): V = {
+  def rightOrErrors[_,V](f: Either[_, V]): V = {
     f match {
       case Left(bad) => sys.error(s"Expected valid value but got: $bad")
       case Right(v) => v
     }
   }
 
-  implicit def toEitherValuable[L, R](either: Either[L, R]): EitherValuable[L, R] = EitherValuable(either)
-
-}
-
-case class EitherValuable[L, R](either: Either[L, R]) {
-  def leftValue: L = either.left.getOrElse(throw new NoSuchElementException)
-  def rightValue: R = either.getOrElse(throw new NoSuchElementException)
 }

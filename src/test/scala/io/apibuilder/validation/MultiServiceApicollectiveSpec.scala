@@ -8,7 +8,7 @@ import play.api.libs.json.Json
 class MultiServiceApicollectiveSpec extends AnyFunSpec with Matchers with Helpers {
 
   it("validates imported enums") {
-    apibuilderMultiService.upcastOperationBody(
+    apiBuilderMultiService.upcastOperationBody(
       "POST",
       "/people",
       Json.obj(
