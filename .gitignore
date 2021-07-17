@@ -2,6 +2,7 @@
 target/
 logs/
 .ivy2
+.bsp
 *.swp
 *.swo
 .DS_Store
