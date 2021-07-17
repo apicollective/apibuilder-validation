@@ -7,7 +7,7 @@ class ServiceOperationResolverSpec extends AnyFunSpec with Matchers
   with helpers.PerformanceHelpers
   with helpers.Helpers
 {
-  private[this] lazy val zipService = MultiService.fromUrl("https://cdn.flow.io/util/lib-apibuilder/specs.zip").rightValue
+  private[this] lazy val zipService = MultiService.fromUrl("https://cdn.flow.io/util/lib-apibuilder/specs.zip").toOption.get
 
   it("performance: doResolveService") {
     def run(testCase: String, multi: MultiService) = {

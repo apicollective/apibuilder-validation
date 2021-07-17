@@ -108,7 +108,7 @@ class MultiServiceImplSpec extends AnyFunSpec with Matchers with Helpers {
       "POST",
       "/:organization/cards",
       Json.toJson(form)
-    ).rightValue
+    ).toOption.get
 
     (js \ "name").as[JsString].value should equal("John Doe")
     (js \ "expiration_month").as[JsNumber].value should equal(12)
@@ -126,7 +126,7 @@ class MultiServiceImplSpec extends AnyFunSpec with Matchers with Helpers {
       "POST",
       "/:organization/webhooks",
       Json.toJson(form)
-    ).rightValue
+    ).toOption.get
 
     (js \ "url").as[JsString].value should equal("123")
     (js \ "events").as[JsArray] should equal(JsArray(Seq(JsString("456"))))
