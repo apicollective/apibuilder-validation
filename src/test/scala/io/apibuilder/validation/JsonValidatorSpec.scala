@@ -316,10 +316,12 @@ class JsonValidatorSpec extends AnyFunSpec with Matchers with Helpers {
       case _: JsError => //
     }
 
-    validate("harmonized_item_form", form).left should be(
-      Seq(
-        "harmonized_item_form.categories of type '[string]': element in position[1] must be a string and not an object",
-        "harmonized_item_form.categories of type '[string]': element in position[2] must be a string and not null"
+    validate("harmonized_item_form", form) should be(
+      Left(
+        Seq(
+          "harmonized_item_form.categories of type '[string]': element in position[1] must be a string and not an object",
+          "harmonized_item_form.categories of type '[string]': element in position[2] must be a string and not null"
+        )
       )
     )
   }
