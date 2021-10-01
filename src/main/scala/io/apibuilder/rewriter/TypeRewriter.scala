@@ -92,7 +92,7 @@ case class TypeRewriter(rewriteType: AnyType => AnyType) extends DefaultRewriter
         name = doRewriteType(helper, typ.service, typ.model.name),
         fields = typ.fields.map { f =>
           f.field.copy(
-            `type` = doRewriteType(helper, f.model.service, f.field.`type`)
+            `type` = doRewriteType(helper, f.service, f.field.`type`)
           )
         }
       )

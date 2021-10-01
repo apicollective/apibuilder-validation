@@ -56,7 +56,7 @@ sealed trait ApiBuilderType extends AnyType {
   def qualified: String = s"$namespace.$typeDiscriminator.$name"
 }
 
-case class ApiBuilderField(model: ApiBuilderType.Model, field: Field)
+case class ApiBuilderField(service: ApiBuilderService, field: Field)
 case class ApiBuilderUnionType(union: ApiBuilderType.Union, `type`: UnionType)
 
 object ApiBuilderType {
@@ -64,11 +64,18 @@ object ApiBuilderType {
     override val name: String = enum.name
     override val typeDiscriminator: TypeDiscriminator = TypeDiscriminator.Enums
   }
+  case class Interface(override val service: ApiBuilderService, interface: models.Interface) extends ApiBuilderType {
+    override val name: String = interface.name
+    override val typeDiscriminator: TypeDiscriminator = TypeDiscriminator.Models
+    val fields: Seq[ApiBuilderField] = interface.fields.map { f =>
+      ApiBuilderField(service, f)
+    }
+  }
   case class Model(override val service: ApiBuilderService, model: models.Model) extends ApiBuilderType {
     override val name: String = model.name
     override val typeDiscriminator: TypeDiscriminator = TypeDiscriminator.Models
     val fields: Seq[ApiBuilderField] = model.fields.map { f =>
-      ApiBuilderField(this, f)
+      ApiBuilderField(service, f)
     }
   }
   case class Union(override val service: ApiBuilderService, union: models.Union) extends ApiBuilderType {

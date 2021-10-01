@@ -184,6 +184,10 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
         toObject(prefix.getOrElse("Body"), js).andThen(validateModel(m, _, prefix))
       }
 
+      case i: ApiBuilderType.Interface => {
+        toObject(prefix.getOrElse("Body"), js).andThen(validateInterface(i, _, prefix))
+      }
+
       case u: ApiBuilderType.Union => {
         toObject(prefix.getOrElse("Body"), js).andThen(validateUnion(u, _, prefix))
       }
@@ -236,19 +240,35 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
     js: JsObject,
     prefix: Option[String]
   ): ValidatedNec[String, JsValue] = {
+    validateFields(typ.name, typ.fields, js, prefix)
+  }
 
-    val missingFields = typ.fields.map(_.field).filter(_.required).filter { f =>
+  private[this] def validateInterface(
+    typ: ApiBuilderType.Interface,
+    js: JsObject,
+    prefix: Option[String]
+  ): ValidatedNec[String, JsValue] = {
+    validateFields(typ.name, typ.fields, js, prefix)
+  }
+
+  private[this] def validateFields(
+    parentTypeName: String,
+    fields: Seq[ApiBuilderField],
+    js: JsObject,
+    prefix: Option[String]
+  ): ValidatedNec[String, JsValue] = {
+    val missingFields = fields.map(_.field).filter(_.required).filter { f =>
       (js \ f.name).toOption.isEmpty
     }.map(_.name).toList
 
     val missingFieldsV = missingFields match {
       case Nil => ().validNec[String]
-      case one :: Nil => s"Missing required field for ${typ.model.name}: $one".invalidNec[Unit]
-      case multiple => (s"Missing required fields for ${typ.model.name}: " + multiple.mkString(", ")).invalidNec[Unit]
+      case one :: Nil => s"Missing required field for $parentTypeName: $one".invalidNec[Unit]
+      case multiple => (s"Missing required fields for $parentTypeName: " + multiple.mkString(", ")).invalidNec[Unit]
     }
 
     val invalidTypesV: ValidatedNec[String, JsObject] = js.fields.foldLeft(Json.obj().validNec[String]) { case (agg, (name, value)) =>
-      typ.model.fields.find(_.name == name) match {
+      fields.find(_.field.name == name) match {
         case None => {
           agg
         }
@@ -256,12 +276,12 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
         case Some(f) => {
           agg.andThen { agg =>
             validate(
-              typeName = f.`type`,
+              typeName = f.field.`type`,
               js = value,
               prefix = Some(
-                prefix.getOrElse(typ.model.name) + s".${f.name}"
+                prefix.getOrElse(parentTypeName) + s".${f.field.name}"
               ),
-              defaultNamespace = Some(typ.service.namespace)
+              defaultNamespace = Some(f.service.namespace)
             ).map { v =>
               agg ++ Json.obj(name -> v)
             }
@@ -582,7 +602,7 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
         Try {
           ISODateTimeFormat.dateTimeParser.parseDateTime(v.value)
         } match {
-          case Success(_) => JsString(v.value.toString).validNec
+          case Success(_) => JsString(v.value).validNec
           case Failure(_) => s"$prefix must be a valid ISO 8601 datetime. Example: '2017-07-24T09:41:08+02:00'".invalidNec
         }
       }

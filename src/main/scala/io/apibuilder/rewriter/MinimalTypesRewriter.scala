@@ -42,6 +42,7 @@ case class MinimalTypesRewriter(types: Iterable[ApiBuilderType]) extends Default
       case one :: rest => {
         val newTypes = one match {
           case _: ApiBuilderType.Enum => Nil
+          case t: ApiBuilderType.Interface => t.fields.flatMap(helper.resolveType)
           case t: ApiBuilderType.Model => t.fields.flatMap(helper.resolveType)
           case t: ApiBuilderType.Union => t.types.flatMap(helper.resolveType)
         }
