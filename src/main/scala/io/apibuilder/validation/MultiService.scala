@@ -133,7 +133,7 @@ trait MultiService extends ResponseHelpers {
 
   final val allUnions: Seq[ApiBuilderType.Union] = services().flatMap(_.unions)
 
-  final val allTypes: Seq[ApiBuilderType] = allEnums ++ allModels ++ allUnions
+  final val allTypes: Seq[ApiBuilderType] = allEnums ++ allInterfaces ++ allModels ++ allUnions
 }
 
 object MultiService {
