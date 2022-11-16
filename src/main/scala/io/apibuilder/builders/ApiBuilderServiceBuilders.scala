@@ -14,7 +14,7 @@ trait ApiBuilderServiceBuilders {
   }
 
   def makeService(
-    apidoc: Apidoc = makeApidoc(),
+    apidoc: Option[Apidoc] = Some(makeApidoc()),
     name: String = random(),
     organization: Organization = makeOrganization(),
     application: Application = makeApplication(),
