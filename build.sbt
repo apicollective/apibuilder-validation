@@ -2,9 +2,9 @@ name := "apibuilder-validation"
 
 organization := "io.apibuilder"
 
-ThisBuild / scalaVersion := "2.13.6"
+ThisBuild / scalaVersion := "2.13.10"
 
-crossScalaVersions := Seq("2.13.6")
+crossScalaVersions := Seq("2.13.10")
 
 lazy val allScalacOptions = Seq(
   "-deprecation",
