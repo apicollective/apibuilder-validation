@@ -45,7 +45,7 @@ case class UnionToModelBuilder(multiService: MultiService) {
   }
 
   private[this] def buildModel(union: ApiBuilderType.Union, discriminator: String, fields: Seq[Field]): UnionModel = {
-    val enum = buildDiscriminatorEnum(union, discriminator)
+    val `enum` = buildDiscriminatorEnum(union, discriminator)
     val allFields = Seq(buildDiscriminatorField(union, enum, discriminator)) ++ fields
     UnionModel(
       service = union.service,

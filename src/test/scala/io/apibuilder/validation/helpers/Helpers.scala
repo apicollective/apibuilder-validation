@@ -51,7 +51,7 @@ trait Helpers {
     )
   }
 
-  def rightOrErrors[_,V](f: Either[_, V]): V = {
+  def rightOrErrors[V](f: Either[_, V]): V = {
     f match {
       case Left(bad) => sys.error(s"Expected valid value but got: $bad")
       case Right(v) => v

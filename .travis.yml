@@ -1,9 +1,10 @@
 language: scala
 scala:
-  - 2.13.6
+  - 2.13.10
 jdk:
   - openjdk13
-script: 
+script:
+  - mkdir ~/.apibuilder && echo "[default]" > ~/.apibuilder/config
   - sbt ++$TRAVIS_SCALA_VERSION clean compile test
   # Tricks to avoid unnecessary cache updates
   - find $HOME/.sbt -name "*.lock" | xargs rm -f
