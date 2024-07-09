@@ -19,7 +19,7 @@ lazy val root = project
   .settings(
     testOptions += Tests.Argument("-oF"),
     libraryDependencies ++= Seq(
-      "io.apibuilder" %% "apibuilder-commons" % "0.1.0",
+      "com.github.apicollective" % "apibuilder-commons" % "0.1.0",
       "com.typesafe.play" %% "play-json" % "2.10.6",
       "com.typesafe.play" %% "play-json-joda" % "2.10.6",
       "org.apache.commons" % "commons-compress" % "1.26.2",
