@@ -223,12 +223,12 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
   ): ValidatedNec[String, JsValue] = {
     validateString(prefix, js).andThen { jsString =>
         val incomingValue = jsString.value.trim
-        val valid = typ.enum.values.flatMap { e =>
+        val valid = typ.`enum`.values.flatMap { e =>
           Seq(e.name) ++ e.value.toSeq
         }
         valid.find { _.toLowerCase.trim == incomingValue.toLowerCase } match {
           case None =>
-            (s"$prefix invalid value '${incomingValue}'. Valid values for the enum '${typ.enum.name}' are: " + valid.distinct.mkString("'", "', '", "'")).invalidNec
+            (s"$prefix invalid value '${incomingValue}'. Valid values for the enum '${typ.`enum`.name}' are: " + valid.distinct.mkString("'", "', '", "'")).invalidNec
           case Some(validValue) =>
             JsString(validValue).validNec
         }
