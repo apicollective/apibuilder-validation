@@ -108,9 +108,9 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
     findType(TypeName.parse(defaultNamespace = defaultNamespace, name = name))
   }
 
-  private[this] val cache = new ConcurrentHashMap[TypeName, Seq[AnyType]]()
+  private val cache = new ConcurrentHashMap[TypeName, Seq[AnyType]]()
 
-  private[this] def findType(typeName: TypeName): Seq[AnyType] = {
+  private def findType(typeName: TypeName): Seq[AnyType] = {
     cache.computeIfAbsent(
       typeName,
       _ => {
@@ -126,7 +126,7 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
     )
   }
 
-  private[this] def findType(service: ApiBuilderService, typeName: String): Option[AnyType] = {
+  private def findType(service: ApiBuilderService, typeName: String): Option[AnyType] = {
     service.enums.find(_.name.equalsIgnoreCase(typeName)) orElse {
       service.models.find(_.name.equalsIgnoreCase(typeName)) orElse {
         service.unions.find(_.name.equalsIgnoreCase(typeName))
@@ -194,7 +194,7 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
     }
   }
 
-  private[this] def toObject(prefix: String, js: JsValue): ValidatedNec[String, JsObject] = {
+  private def toObject(prefix: String, js: JsValue): ValidatedNec[String, JsObject] = {
     js match {
       case _: JsArray => {
         s"$prefix must be an object and not an array".invalidNec
@@ -216,7 +216,7 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
     }
   }
 
-  private[this] def validateEnum(
+  private def validateEnum(
     prefix: String,
     typ: ApiBuilderType.Enum,
     js: JsValue
@@ -235,7 +235,7 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
     }
   }
 
-  private[this] def validateModel(
+  private def validateModel(
     typ: ApiBuilderType.Model,
     js: JsObject,
     prefix: Option[String]
@@ -243,7 +243,7 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
     validateFields(typ.name, typ.fields, js, prefix)
   }
 
-  private[this] def validateInterface(
+  private def validateInterface(
     typ: ApiBuilderType.Interface,
     js: JsObject,
     prefix: Option[String]
@@ -251,7 +251,7 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
     validateFields(typ.name, typ.fields, js, prefix)
   }
 
-  private[this] def validateFields(
+  private def validateFields(
     parentTypeName: String,
     fields: Seq[ApiBuilderField],
     js: JsObject,
@@ -295,7 +295,7 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
     }
   }
 
-  private[this] def validateUnion(
+  private def validateUnion(
     typ: ApiBuilderType.Union,
     js: JsObject,
     prefix: Option[String]
@@ -339,13 +339,13 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
     }
   }
 
-  private[this] val ArrayPattern = """^\[(.+)\]$""".r
-  private[this] val ObjectPattern = """^map\[(.+)\]$""".r
+  private val ArrayPattern = """^\[(.+)\]$""".r
+  private val ObjectPattern = """^map\[(.+)\]$""".r
 
   /**
     * Validates the JS Value based on the expected API Builder type.
     */
-  private[this] def validateTypeFromName(
+  private def validateTypeFromName(
     prefix: String,
     typ: String,
     js: JsValue,
@@ -363,7 +363,7 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
     }
   }
 
-  private[this] def validateScalar(prefix: String, scalarType: ScalarType, js: JsValue): ValidatedNec[String, JsValue] = {
+  private def validateScalar(prefix: String, scalarType: ScalarType, js: JsValue): ValidatedNec[String, JsValue] = {
     import ScalarType._
     scalarType match {
       case FloatType | JsonType | ObjectType | UnitType => {

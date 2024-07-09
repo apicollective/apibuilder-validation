@@ -9,7 +9,7 @@ class FilterResponsesRewriterSpec extends AnyWordSpec with Matchers
   with ApiBuilderServiceBuilders
   with MultiServiceBuilders {
 
-  private[this] def resource(
+  private def resource(
     resourceType: String = random(),
     responseCodes: Seq[Int],
   ): Resource = {
@@ -25,7 +25,7 @@ class FilterResponsesRewriterSpec extends AnyWordSpec with Matchers
     )
   }
 
-  private[this] def rewrite(resources: Seq[Resource])(filterResponses: Operation => Seq[Response]) = {
+  private def rewrite(resources: Seq[Resource])(filterResponses: Operation => Seq[Response]) = {
     FilterResponsesRewriter(filterResponses).rewrite(
       makeMultiService(
         makeService(resources = resources)
@@ -33,18 +33,18 @@ class FilterResponsesRewriterSpec extends AnyWordSpec with Matchers
     ).services().map(_.service).flatMap(_.resources)
   }
 
-  private[this] def responseCodes(operation: Operation): Seq[Int] = {
+  private def responseCodes(operation: Operation): Seq[Int] = {
     operation.responses.map(_.code).flatMap {
       case c: ResponseCodeInt => Some(c.value)
       case _ => None
     }
   }
 
-  private[this] def responseCodes(resource: Resource): Seq[Int] = {
+  private def responseCodes(resource: Resource): Seq[Int] = {
     resource.operations.flatMap(responseCodes)
   }
 
-  private[this] def responseCodes(resources: Seq[Resource]): Seq[Int] = {
+  private def responseCodes(resources: Seq[Resource]): Seq[Int] = {
     resources.flatMap(responseCodes)
   }
 

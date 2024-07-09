@@ -19,7 +19,7 @@ case class Fixture(params: Seq[(String, String)], expected: JsObject) {
 
 object Fixture {
 
-  private[this] val CommentCharacter = "#"
+  private val CommentCharacter = "#"
 
   def load(file: File): Fixture = {
     scala.io.Source.fromFile(file).getLines().mkString("\n").
@@ -40,7 +40,7 @@ object Fixture {
     }
   }
 
-  private[this] def parseParameters(file: File, value: String): Seq[(String, String)] = {
+  private def parseParameters(file: File, value: String): Seq[(String, String)] = {
     value.split("\n").toSeq.map(_.trim).filter(_.nonEmpty).map { v =>
       v.split("=").toList match {
         case k :: Nil => (k, "")

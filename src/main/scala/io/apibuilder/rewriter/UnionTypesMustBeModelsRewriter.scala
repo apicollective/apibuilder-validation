@@ -26,7 +26,7 @@ object UnionTypesMustBeModelsRewriter extends DefaultRewriter {
     removeUnions(ms, toRemoveNames)
   }
 
-  private[this] def removeUnions(multiService: MultiService, toRemoveNames: Set[String]): MultiService = {
+  private def removeUnions(multiService: MultiService, toRemoveNames: Set[String]): MultiService = {
     MultiService(
       multiService.services().map { s =>
         s.copy(
@@ -39,7 +39,7 @@ object UnionTypesMustBeModelsRewriter extends DefaultRewriter {
 
   }
 
-  private[this] def areAllTypesModels(helper: ApiBuilderHelper, union: ApiBuilderType.Union): Boolean = {
+  private def areAllTypesModels(helper: ApiBuilderHelper, union: ApiBuilderType.Union): Boolean = {
     union.union.types.forall { t =>
       helper.resolveType(union.service, t.`type`) match {
         case Some(_: ApiBuilderType.Model) => true

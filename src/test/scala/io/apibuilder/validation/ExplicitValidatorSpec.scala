@@ -7,7 +7,7 @@ import org.scalatest.funspec.AnyFunSpec
 
 class ExplicitValidatorSpec extends AnyFunSpec with Matchers with Helpers {
 
-  private[this] lazy val validator = JsonValidator(
+  private lazy val validator = JsonValidator(
     loadService("apibuilder-explicit-validation-service.json")
   )
 

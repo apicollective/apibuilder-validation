@@ -10,7 +10,7 @@ import io.apibuilder.validation.zip.FileUtil
   * into the MultiService class
  */
 case class FileOrder(file: Option[File]) {
-  private[this] val nameToOrder: Map[String, Int] = file match {
+  private val nameToOrder: Map[String, Int] = file match {
     case None => Map.empty
     case Some(f) =>
       FileUtil

@@ -9,14 +9,14 @@ class FilterOperationsRewriterSpec extends AnyWordSpec with Matchers
   with ApiBuilderServiceBuilders
   with MultiServiceBuilders
 {
-  private[this] def op(attributeName: Option[String]): Operation = {
+  private def op(attributeName: Option[String]): Operation = {
     makeOperation(
       attributes = attributeName.toSeq.map { n => makeAttribute(n) },
     )
   }
 
   // Filters resources based on presence of an attribute
-  private[this] def rewrite(resources: Seq[Resource]) = {
+  private def rewrite(resources: Seq[Resource]) = {
     FilterOperationsRewriter { op =>
       Some(op).filter(_.attributes.nonEmpty)
     }.rewrite(

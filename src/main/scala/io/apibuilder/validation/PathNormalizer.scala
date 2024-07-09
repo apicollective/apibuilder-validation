@@ -39,7 +39,7 @@ case class PathNormalizer(operations: Seq[Operation]) {
     *   - static routes are simple lookups by path (Map[String, Route])
     *   - dynamic routes is a map from the HTTP Method to a list of routes to try (Seq[Route])
     */
-  private[this] val (staticRouteMap: StaticRouteMap, dynamicRouteMap: DynamicRouteMap) = {
+  private val (staticRouteMap: StaticRouteMap, dynamicRouteMap: DynamicRouteMap) = {
     val opsWithRoute = operations.map { op => OperationWithRoute(op) }
 
     // Map from method name to list of operations

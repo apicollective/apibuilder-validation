@@ -7,7 +7,7 @@ import org.scalatest.funspec.AnyFunSpec
 
 class ApiBuilderServiceSpec extends AnyFunSpec with Matchers with Helpers {
 
-  private[this] lazy val service = loadService("flow-api-service.json")
+  private lazy val service = loadService("flow-api-service.json")
 
   it("fromUrl") {
     ApiBuilderService.fromUrl("file://non-existent-tmp").left.getOrElse {

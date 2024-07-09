@@ -61,7 +61,7 @@ trait ResponseHelpers {
     * Returns a list of the declared response codes. If ALL response codes are valid,
     * will return ["*"]
     */
-  private[this] def declaredResponseCodes(operation: Operation): Seq[String] = {
+  private def declaredResponseCodes(operation: Operation): Seq[String] = {
     val responseCodes = operation.responses.map(_.code)
     if (responseCodes.exists {
       case ResponseCodeOption.Default => true

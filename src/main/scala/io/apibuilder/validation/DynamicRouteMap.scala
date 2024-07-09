@@ -3,11 +3,11 @@ package io.apibuilder.validation
 import io.apibuilder.spec.v0.models.Method
 
 case class StaticRouteMap(routes: Seq[OperationWithRoute]) {
-  private[this] def key(method: Method, path: String): String = {
+  private def key(method: Method, path: String): String = {
     s"$method$path"
   }
 
-  private[this] val lookup: Map[String, OperationWithRoute] = Map(
+  private val lookup: Map[String, OperationWithRoute] = Map(
     routes.map { op =>
       key(op.route.method, op.route.path) -> op
     }: _*
@@ -20,13 +20,13 @@ case class StaticRouteMap(routes: Seq[OperationWithRoute]) {
 
 case class DynamicRouteMap(routes: Seq[OperationWithRoute]) {
 
-  private[this] val lookup: Map[String, Seq[OperationWithRoute]] = routes.groupBy { r =>
+  private val lookup: Map[String, Seq[OperationWithRoute]] = routes.groupBy { r =>
     key(r.route.method, r.route.path)
   }
 
-  private[this] def numberSlashes(path: String): Int = path.count(_ == '/')
+  private def numberSlashes(path: String): Int = path.count(_ == '/')
 
-  private[this] def key(method: Method, path: String): String = {
+  private def key(method: Method, path: String): String = {
     s"$method:${numberSlashes(path)}"
   }
 

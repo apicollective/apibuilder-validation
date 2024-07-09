@@ -12,7 +12,7 @@ class UnionToModelBuilderSpec extends AnyWordSpec with Matchers
   with ApiBuilderServiceBuilders
   with MultiServiceBuilders
 {
-  private[this] def setup(
+  private def setup(
     discriminator: Option[String] = Some("discriminator"),
     enums: Seq[Enum],
     models: Seq[Model],
@@ -35,7 +35,7 @@ class UnionToModelBuilderSpec extends AnyWordSpec with Matchers
     UnionToModelBuilder(makeMultiService(service)).toModel(ApiBuilderType.Union(ApiBuilderService(service), union))
   }
 
-  private[this] def setupValid(
+  private def setupValid(
     enums: Seq[Enum] = Nil,
     models: Seq[Model],
     unions: Seq[Union] = Nil,
@@ -52,7 +52,7 @@ class UnionToModelBuilderSpec extends AnyWordSpec with Matchers
     }
   }
 
-  private[this] def setupInvalid(
+  private def setupInvalid(
     discriminator: Option[String] = Some("discriminator"),
     enums: Seq[Enum] = Nil,
     models: Seq[Model] = Nil,

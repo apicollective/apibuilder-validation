@@ -10,11 +10,11 @@ import org.scalatest.funspec.AnyFunSpec
 
 class JsonValidatorSpec extends AnyFunSpec with Matchers with Helpers {
 
-  private[this] lazy val validator: JsonValidator = JsonValidator(
+  private lazy val validator: JsonValidator = JsonValidator(
     loadService("flow-api-service.json")
   )
 
-  private[this] def validate(typ: String, js: JsValue) = {
+  private def validate(typ: String, js: JsValue) = {
     validator.validate(
       typ, js, defaultNamespace = None
     )

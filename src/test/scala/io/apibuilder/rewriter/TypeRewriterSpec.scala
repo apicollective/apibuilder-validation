@@ -14,7 +14,7 @@ class TypeRewriterSpec extends AnyWordSpec with Matchers
   with ApiBuilderServiceValidatorHelpers
 {
 
-  private[this] def rewriteTypeByName(anyType: AnyType, originalName: String, newName: String): AnyType = {
+  private def rewriteTypeByName(anyType: AnyType, originalName: String, newName: String): AnyType = {
     anyType match {
       case typ: ApiBuilderType if typ.name == originalName => {
         ApiBuilderHelper.changeName(typ, newName)
@@ -24,7 +24,7 @@ class TypeRewriterSpec extends AnyWordSpec with Matchers
     }
   }
 
-  private[this] def rewrite(enums: Seq[Enum] = Nil, models: Seq[Model], unions: Seq[Union] = Nil, resources: Seq[Resource] = Nil)(
+  private def rewrite(enums: Seq[Enum] = Nil, models: Seq[Model], unions: Seq[Union] = Nil, resources: Seq[Resource] = Nil)(
     rewriteType: AnyType => AnyType
   ) = {
     val ms = TypeRewriter(rewriteType).rewrite(
@@ -36,11 +36,11 @@ class TypeRewriterSpec extends AnyWordSpec with Matchers
     ms
   }
 
-  private[this] def firstOperation(ms: MultiService): Operation = {
+  private def firstOperation(ms: MultiService): Operation = {
     firstResource(ms).operations.head
   }
 
-  private[this] def firstResource(ms: MultiService): Resource = {
+  private def firstResource(ms: MultiService): Resource = {
     ms.services().head.service.resources.head
   }
 

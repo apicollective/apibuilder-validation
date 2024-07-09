@@ -26,14 +26,14 @@ case class FilterResponsesRewriter(
     )
   }
 
-  private[this] def filter(resource: Resource): Option[Resource] = {
+  private def filter(resource: Resource): Option[Resource] = {
     resource.operations.flatMap(filter).toList match {
       case Nil => None
       case ops => Some(resource.copy(operations = ops))
     }
   }
 
-  private[this] def filter(operation: Operation): Option[Operation] = {
+  private def filter(operation: Operation): Option[Operation] = {
     filterResponses(operation).toList match {
       case Nil => None
       case responses => Some(

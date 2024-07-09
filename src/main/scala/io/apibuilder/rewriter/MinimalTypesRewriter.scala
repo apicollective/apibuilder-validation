@@ -36,7 +36,7 @@ case class MinimalTypesRewriter(types: Iterable[ApiBuilderType]) extends Default
    * or the types of a union
    */
   @tailrec
-  private[this] def expand(helper: ApiBuilderHelper, incoming: Seq[ApiBuilderType], resolved: Set[ApiBuilderType]): Set[ApiBuilderType] = {
+  private def expand(helper: ApiBuilderHelper, incoming: Seq[ApiBuilderType], resolved: Set[ApiBuilderType]): Set[ApiBuilderType] = {
     incoming.toList match {
       case Nil => resolved
       case one :: rest => {

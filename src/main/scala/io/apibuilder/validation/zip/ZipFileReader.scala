@@ -19,7 +19,7 @@ object ZipFileReader {
     */
   def isJsonFile(name: String): Boolean = endsWithSuffix(name, "json")
 
-  private[this] def endsWithSuffix(name: String, suffix: String) = {
+  private def endsWithSuffix(name: String, suffix: String) = {
     name.trim.split("\\?").head.trim.toLowerCase().endsWith(s".$suffix")
   }
 
@@ -36,7 +36,7 @@ object ZipFileReader {
 
 case class ZipFileReader(inputStream: InputStream) {
 
-  private[this] val destDir: File = Files.createTempDirectory("zipfilereader").toFile
+  private val destDir: File = Files.createTempDirectory("zipfilereader").toFile
 
   /**
     * Returns a list of the entries of the zip file (all files ending with .json)
@@ -65,7 +65,7 @@ case class ZipFileReader(inputStream: InputStream) {
     all.toSeq
   }
 
-  private[this] def newFile(zipEntry: ZipEntry): File = {
+  private def newFile(zipEntry: ZipEntry): File = {
     val file = new File(destDir, zipEntry.getName)
     assert(
       file.getCanonicalPath.startsWith(destDir.getCanonicalPath + File.separator),

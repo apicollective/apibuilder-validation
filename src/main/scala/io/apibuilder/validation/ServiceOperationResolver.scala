@@ -18,9 +18,9 @@ private[validation] case class ServiceOperationCache(
 )(
   acceptPath: String => Boolean
 ) {
-  private[this] case class Entry(route: Route, operation: ApiBuilderOperation)
+  private case class Entry(route: Route, operation: ApiBuilderOperation)
 
-  private[this] val entries: List[Entry] = {
+  private val entries: List[Entry] = {
     services.flatMap { s =>
       s.service.resources.flatMap(_.operations)
         .filter { op => acceptPath(op.path) }
@@ -33,11 +33,11 @@ private[validation] case class ServiceOperationCache(
     }
   }
 
-  private[this] val entriesByNumberSlashes: Map[Int, List[Entry]] = entries.groupBy { e =>
+  private val entriesByNumberSlashes: Map[Int, List[Entry]] = entries.groupBy { e =>
     numberSlashes(e.route.path)
   }
 
-  private[this] def numberSlashes(path: String): Int = path.count(_ == '/')
+  private def numberSlashes(path: String): Int = path.count(_ == '/')
 
   def findOperation(method: Method, path: String): Option[ApiBuilderOperation] = {
     entriesByNumberSlashes.getOrElse(numberSlashes(path), List.empty)
@@ -48,8 +48,8 @@ private[validation] case class ServiceOperationCache(
 
 case class ServiceOperationResolver(services: List[ApiBuilderService]) {
 
-  private[this] val static = ServiceOperationCache(services)(Route.isStatic)
-  private[this] val dynamic = ServiceOperationCache(services)(Route.isDynamic)
+  private val static = ServiceOperationCache(services)(Route.isStatic)
+  private val dynamic = ServiceOperationCache(services)(Route.isDynamic)
 
   // If we find a static path in any service, return that one.
   // Otherwise return the first matching service. This handles ambiguity:

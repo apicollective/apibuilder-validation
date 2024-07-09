@@ -32,7 +32,7 @@ object Route {
     */
   case class Dynamic(method: Method, path: String) extends Route {
 
-    private[this] val pattern = (
+    private val pattern = (
       "^" +
         path.split("/").map { p =>
           if (p.startsWith(":")) {

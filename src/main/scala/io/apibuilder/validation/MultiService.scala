@@ -107,7 +107,7 @@ trait MultiService extends ResponseHelpers {
     * Returns a nice error message explaining that this method is unavailable
     * with hints as to what may be (e.g. alternate methods)
     */
-  private[this] def operationErrorMessage(method: Method, path: String): Seq[String] = {
+  private def operationErrorMessage(method: Method, path: String): Seq[String] = {
     method match {
       case Method.UNDEFINED(name) => {
         Seq(StandardErrors.invalidMethodError(name))
@@ -140,7 +140,7 @@ object MultiService {
 
   // If this file is found in the zip file, we read files in
   // the order in which they are listed.
-  private[this] val OrderByFileName: String = "order.txt"
+  private val OrderByFileName: String = "order.txt"
 
   def apply(services: List[ApiBuilderService]): MultiService = {
     MultiServiceImpl(services)

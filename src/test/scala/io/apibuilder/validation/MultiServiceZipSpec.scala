@@ -17,7 +17,7 @@ class MultiServiceZipSpec extends AnyFunSpec with Matchers
   with helpers.Helpers
 {
 
-  private[this] lazy val zipService = MultiService.fromUrl("https://cdn.flow.io/util/lib-apibuilder/specs.zip").toOption.get
+  private lazy val zipService = MultiService.fromUrl("https://cdn.flow.io/util/lib-apibuilder/specs.zip").toOption.get
 
   case class ServiceAndFile(service: Service, file: File)
 
@@ -31,9 +31,9 @@ class MultiServiceZipSpec extends AnyFunSpec with Matchers
     )
   }
 
-  private[this] lazy val service1 = createServiceAndWriteToFile()
-  private[this] lazy val service2 = createServiceAndWriteToFile()
-  private[this] lazy val zipFile: File = {
+  private lazy val service1 = createServiceAndWriteToFile()
+  private lazy val service2 = createServiceAndWriteToFile()
+  private lazy val zipFile: File = {
     ZipFileBuilder()
       .withFile(service1.service.name + ".json", service1.file)
       .withFile(service2.service.name + ".json", service2.file)

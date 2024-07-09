@@ -29,7 +29,7 @@ object ScalarType {
 
   val all: scala.List[ScalarType] = scala.List(BooleanType, DoubleType, IntegerType, StringType, DecimalType, FloatType, LongType, JsonType, ObjectType, DateIso8601Type, DateTimeIso8601Type, UnitType, UuidType)
 
-  private[this] val byName: Map[String, ScalarType] = all.map(x => x.name.toLowerCase -> x).toMap
+  private val byName: Map[String, ScalarType] = all.map(x => x.name.toLowerCase -> x).toMap
 
   def fromName(typeName: String): Option[ScalarType] = byName.get(typeName.toLowerCase)
 }

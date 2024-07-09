@@ -3036,7 +3036,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Expired, InvalidNumber, InvalidExpiration, NoAccount, Avs, Cvv, Fraud, Duplicate, Unknown)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): AuthorizationDeclineCode = fromString(value).getOrElse(UNDEFINED(value))
@@ -3093,7 +3093,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Pending, PendingCallBank, Authorized, Declined, Voided)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): AuthorizationStatus = fromString(value).getOrElse(UNDEFINED(value))
@@ -3141,7 +3141,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Match, Partial, Unsupported, NoMatch)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): AvsCode = fromString(value).getOrElse(UNDEFINED(value))
@@ -3181,7 +3181,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Weekdays, Everyday)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): Calendar = fromString(value).getOrElse(UNDEFINED(value))
@@ -3214,7 +3214,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Crossdock)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): Capability = fromString(value).getOrElse(UNDEFINED(value))
@@ -3257,7 +3257,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Expired, Unknown)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): CaptureDeclineCode = fromString(value).getOrElse(UNDEFINED(value))
@@ -3298,7 +3298,7 @@ package io.flow.v0.models {
      */
     val all = Seq(AmericanExpress, ChinaUnionPay, Dankort, DinersClub, Discover, Jcb, Maestro, Mastercard, Visa)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): CardType = fromString(value).getOrElse(UNDEFINED(value))
@@ -3333,7 +3333,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Insert, Update, Delete)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): ChangeType = fromString(value).getOrElse(UNDEFINED(value))
@@ -3381,7 +3381,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Match, Suspicious, Unsupported, NoMatch)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): CvvCode = fromString(value).getOrElse(UNDEFINED(value))
@@ -3427,7 +3427,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Paid, Unpaid, Choice)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): DeliveredDuty = fromString(value).getOrElse(UNDEFINED(value))
@@ -3469,7 +3469,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Sandbox, Production)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): Environment = fromString(value).getOrElse(UNDEFINED(value))
@@ -3543,7 +3543,7 @@ package io.flow.v0.models {
      */
     val all = Seq(CatalogUpserted, CatalogDeleted, SubcatalogUpserted, SubcatalogDeleted, CatalogItemUpserted, CatalogItemDeleted, SubcatalogItemUpserted, SubcatalogItemDeleted, FlowCurrencySettingDeleted, FlowCurrencySettingUpserted, RateDeleted, RateUpserted, SpotRateDeleted, SpotRateUpserted, OrganizationCurrencySettingDeleted, OrganizationCurrencySettingUpserted, ContractedRateUpserted, ExperienceDeleted, ExperienceUpserted, ItemMarginDeleted, ItemMarginUpserted, OrderDeleted, OrderUpserted, OrderBookingDeleted, OrderBookingUpserted, Hs6CodeUpserted, Hs6CodeDeleted, Hs10CodeUpserted, Hs10CodeDeleted, LabelUpserted, LocalizedItemUpserted, LocalizedItemDeleted, LocalizedItemSnapshot, OrganizationUpserted, OrganizationDeleted, AuthorizationUpserted, AuthorizationDeleted, CaptureUpserted, CardUpserted, CardDeleted, RefundUpserted, TrackingLabelEventUpserted)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): EventType = fromString(value).getOrElse(UNDEFINED(value))
@@ -3577,7 +3577,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Open, Closed)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): ExceptionType = fromString(value).getOrElse(UNDEFINED(value))
@@ -3617,7 +3617,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Created, Processing, Completed, Failed)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): ExportStatus = fromString(value).getOrElse(UNDEFINED(value))
@@ -3651,7 +3651,7 @@ package io.flow.v0.models {
      */
     val all = Seq(UsBankHolidays, JewishHolidays)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): HolidayCalendar = fromString(value).getOrElse(UNDEFINED(value))
@@ -3694,7 +3694,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Goods, Duty, Insurance, Freight, Vat)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): LevyComponent = fromString(value).getOrElse(UNDEFINED(value))
@@ -3729,7 +3729,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Minimum, Average, Maximum)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): LevyStrategy = fromString(value).getOrElse(UNDEFINED(value))
@@ -3778,7 +3778,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Price, Subtotal, Vat, Duty, Discount, Shipping, Total)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): LocalizedPriceKey = fromString(value).getOrElse(UNDEFINED(value))
@@ -3822,7 +3822,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Fixed, Percent)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): MarginType = fromString(value).getOrElse(UNDEFINED(value))
@@ -3856,7 +3856,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Imperial, Metric)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): MeasurementSystem = fromString(value).getOrElse(UNDEFINED(value))
@@ -3892,7 +3892,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Post)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): Method = fromString(value).getOrElse(UNDEFINED(value))
@@ -3996,7 +3996,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Adjustment, TaxDeminimus, DutyDeminimus, DutiesItemPrice, DutiesFreight, DutiesInsurance, VatItemPrice, VatFreight, VatInsurance, VatDutiesItemPrice, VatDutiesFreight, VatDutiesInsurance, ItemPrice, Rounding, Insurance, Shipping, OrderDiscount)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): OrderPriceDetailComponentKey = fromString(value).getOrElse(UNDEFINED(value))
@@ -4057,7 +4057,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Adjustment, Subtotal, Vat, Duty, Shipping, Insurance, Discount)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): OrderPriceDetailKey = fromString(value).getOrElse(UNDEFINED(value))
@@ -4092,7 +4092,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Included, Displayed, Ignored)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): PricingLevySetting = fromString(value).getOrElse(UNDEFINED(value))
@@ -4135,7 +4135,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Exclusion, Inclusion)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): QueryType = fromString(value).getOrElse(UNDEFINED(value))
@@ -4172,7 +4172,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Admin, Member)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): Role = fromString(value).getOrElse(UNDEFINED(value))
@@ -4219,7 +4219,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Up, Down, Nearest)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): RoundingMethod = fromString(value).getOrElse(UNDEFINED(value))
@@ -4266,7 +4266,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Pattern, Multiple)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): RoundingType = fromString(value).getOrElse(UNDEFINED(value))
@@ -4303,7 +4303,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Open, Closed)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): ScheduleExceptionStatus = fromString(value).getOrElse(UNDEFINED(value))
@@ -4352,7 +4352,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Direct, Information, Preadvice)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): ShipmentIntegrationType = fromString(value).getOrElse(UNDEFINED(value))
@@ -4386,7 +4386,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Ascending, Descending)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): SortDirection = fromString(value).getOrElse(UNDEFINED(value))
@@ -4430,7 +4430,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Range, From, To)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): Strategy = fromString(value).getOrElse(UNDEFINED(value))
@@ -4478,7 +4478,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Excluded, Included, Restricted)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): SubcatalogItemStatus = fromString(value).getOrElse(UNDEFINED(value))
@@ -4521,7 +4521,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Fastest, LowestCost)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): TierStrategy = fromString(value).getOrElse(UNDEFINED(value))
@@ -4561,7 +4561,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Pending, InfoReceived, InTransit, OutForDelivery, AttemptFail, Delivered, Exception, Expired)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): TrackingStatus = fromString(value).getOrElse(UNDEFINED(value))
@@ -4643,7 +4643,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Millimeter, Centimeter, Inch, Foot, CubicInch, CubicMeter, Gram, Kilogram, Meter, Ounce, Pound)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): UnitOfMeasurement = fromString(value).getOrElse(UNDEFINED(value))
@@ -4683,7 +4683,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Day, Hour, Minute)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): UnitOfTime = fromString(value).getOrElse(UNDEFINED(value))
@@ -4721,7 +4721,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Auto, Queue, Discard)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): UpdatePolicy = fromString(value).getOrElse(UNDEFINED(value))
@@ -4765,7 +4765,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Change, Set)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): UpdateType = fromString(value).getOrElse(UNDEFINED(value))
@@ -4801,7 +4801,7 @@ package io.flow.v0.models {
      */
     val all = Seq(HazardousMaterial)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): ValueAddedService = fromString(value).getOrElse(UNDEFINED(value))
@@ -4835,7 +4835,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Public, Private)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): Visibility = fromString(value).getOrElse(UNDEFINED(value))
@@ -4870,7 +4870,7 @@ package io.flow.v0.models {
      */
     val all = Seq(Pending, Success, Failure)
 
-    private[this]
+    private
     val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
     def apply(value: String): WebhookStatus = fromString(value).getOrElse(UNDEFINED(value))

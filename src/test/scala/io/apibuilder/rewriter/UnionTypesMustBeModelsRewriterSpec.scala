@@ -13,7 +13,7 @@ class UnionTypesMustBeModelsRewriterSpec extends AnyWordSpec with Matchers
   with ApiBuilderServiceValidatorHelpers
 {
 
-  private[this] def rewrite(service: Service): ApiBuilderService = {
+  private def rewrite(service: Service): ApiBuilderService = {
     val ms = makeMultiService(ApiBuilderService(service))
     apiBuilderValidator.mustValidateDefaultProfile(ms)
     UnionTypesMustBeModelsRewriter.rewrite(ms).services().head

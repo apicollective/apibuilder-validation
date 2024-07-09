@@ -7,10 +7,10 @@ import org.scalatest.funspec.AnyFunSpec
 
 class ApiBuilderTypeSpec extends AnyFunSpec with Matchers with Helpers {
 
-  private[this] lazy val service = loadService("flow-api-service.json")
-  private[this] lazy val `enum` = ApiBuilderType.Enum(service, Enum("gender", "genders", values = Nil))
-  private[this] lazy val model = ApiBuilderType.Model(service, Model("user", "users", fields = Nil))
-  private[this] lazy val union = ApiBuilderType.Union(service, Union("test", "tests", types = Nil))
+  private lazy val service = loadService("flow-api-service.json")
+  private lazy val `enum` = ApiBuilderType.Enum(service, Enum("gender", "genders", values = Nil))
+  private lazy val model = ApiBuilderType.Model(service, Model("user", "users", fields = Nil))
+  private lazy val union = ApiBuilderType.Union(service, Union("test", "tests", types = Nil))
 
   it("namespace") {
     enum.namespace should equal(service.namespace)

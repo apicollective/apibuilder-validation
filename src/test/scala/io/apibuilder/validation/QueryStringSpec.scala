@@ -7,12 +7,12 @@ import play.api.libs.json.{JsArray, JsObject, JsValue, Json}
 
 class QueryStringSpec extends AnyFunSpec with Matchers {
 
-  private[this] val QueryStringDir: File = {
+  private val QueryStringDir: File = {
     val d = new File("src/test/resources/querystring")
     assert(d.exists(), s"Dir[$d] does not exist")
     d
   }
-  private[this] val QueryStringToJsonOnlyDir: File = {
+  private val QueryStringToJsonOnlyDir: File = {
     val d = new File("src/test/resources/querystring-to-json-only")
     assert(d.exists(), s"Dir[$d] does not exist")
     d
@@ -21,7 +21,7 @@ class QueryStringSpec extends AnyFunSpec with Matchers {
   /**
     * Recursively diff the two objects to highlight specific field errors
     */
-  private[this] def diff(a: JsValue, b: JsValue, differences: Seq[String] = Nil, desc: Option[String] = None): Seq[String] = {
+  private def diff(a: JsValue, b: JsValue, differences: Seq[String] = Nil, desc: Option[String] = None): Seq[String] = {
     (a, b) match {
       case (a: JsObject, b: JsObject) => {
         if (a.keys == b.keys) {

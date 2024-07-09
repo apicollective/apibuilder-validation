@@ -8,7 +8,7 @@ import org.scalatest.funspec.AnyFunSpec
 
 class MultiServiceImplSpec extends AnyFunSpec with Matchers with Helpers {
 
-  private[this] lazy val multi = MultiServiceImpl(
+  private lazy val multi = MultiServiceImpl(
     List("flow-api-service.json", "apibuilder-api-service.json").map(loadService)
   )
 

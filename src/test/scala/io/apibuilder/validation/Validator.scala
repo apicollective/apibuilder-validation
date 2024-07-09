@@ -69,7 +69,7 @@ case class Validator() {
     )
   }
 
-  private[this] def parseResult(requestBody: String, body: String): ValidatedNec[String, Unit] = {
+  private def parseResult(requestBody: String, body: String): ValidatedNec[String, Unit] = {
     val js = Json.parse(body)
     if ((js \ "valid").asOpt[JsBoolean].exists(_.value)) {
       // println(s"ApiBuilder Validation Succeeded for body:\n$requestBody\n\n")
@@ -80,11 +80,11 @@ case class Validator() {
     }
   }
 
-  private[this] def await[T](f: Future[T]): T = {
+  private def await[T](f: Future[T]): T = {
     Await.result(f, FiniteDuration(10, SECONDS))
   }
 
-  private[this] def toJson(multiService: MultiService): JsValue = {
+  private def toJson(multiService: MultiService): JsValue = {
     multiService.services() match {
       case Nil => Json.obj()
       case one :: Nil => Json.toJson(one.service)

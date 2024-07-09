@@ -16,8 +16,8 @@ import play.api.libs.json._
 case class ApiBuilderService(
   service: Service
 ) {
-  private[this] lazy val validator = JsonValidator(this)
-  private[this] val normalizer = PathNormalizer(service)
+  private lazy val validator = JsonValidator(this)
+  private val normalizer = PathNormalizer(service)
 
   val name: String = service.name
   val namespace: String = service.namespace
@@ -67,7 +67,7 @@ object ApiBuilderService {
     toService(copyToString(inputStream))
   }
 
-  private[this] def copyToString(inputStream: InputStream): String = {
+  private def copyToString(inputStream: InputStream): String = {
     val result = new ByteArrayOutputStream()
     val buffer = new Array[Byte](1024)
     var length = inputStream.read(buffer)

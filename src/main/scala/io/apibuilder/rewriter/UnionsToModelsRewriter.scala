@@ -19,18 +19,18 @@ object UnionsToModelsRewriter extends DefaultRewriter {
     )
   }
 
-  private[this] def rewrite(unionToModelBuilder: UnionToModelBuilder, service: ApiBuilderService): ApiBuilderService = {
+  private def rewrite(unionToModelBuilder: UnionToModelBuilder, service: ApiBuilderService): ApiBuilderService = {
     val newTypes = service.unions.flatMap { u => rewrite(unionToModelBuilder, u) }
     service.copy(
       service = service.service.copy(
         unions = newTypes.collect { case e: ApiBuilderType.Union => e.union },
-        enums = service.service.enums ++ newTypes.collect { case e: ApiBuilderType.Enum => e.enum },
+        enums = service.service.enums ++ newTypes.collect { case e: ApiBuilderType.Enum => e.`enum` },
         models = service.service.models ++ newTypes.collect { case m: ApiBuilderType.Model => m.model },
       )
     )
   }
 
-  private[this] def rewrite(unionToModelBuilder: UnionToModelBuilder, union: ApiBuilderType.Union): Seq[ApiBuilderType] = {
+  private def rewrite(unionToModelBuilder: UnionToModelBuilder, union: ApiBuilderType.Union): Seq[ApiBuilderType] = {
     unionToModelBuilder.toModel(union) match {
       case Valid(r) => r.apiBuilderTypes
       case Invalid(errors) => {

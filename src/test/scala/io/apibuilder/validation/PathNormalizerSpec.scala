@@ -7,9 +7,9 @@ import org.scalatest.funspec.AnyFunSpec
 
 class PathNormalizerSpec extends AnyFunSpec with Matchers with Helpers {
 
-  private[this] lazy val apibuilderApiService = loadService("apibuilder-api-service.json")
+  private lazy val apibuilderApiService = loadService("apibuilder-api-service.json")
 
-  private[this] val normalizer = PathNormalizer(apibuilderApiService)
+  private val normalizer = PathNormalizer(apibuilderApiService)
 
   it("parse static routes") {
     normalizer.resolve(Method.Get, "/non/existent/route/should/not/match") should be(
