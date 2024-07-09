@@ -451,11 +451,11 @@ package io.apibuilder.spec.v0.models {
     import play.api.libs.functional.syntax._
     import io.apibuilder.spec.v0.models.json._
 
-    private[v0] implicit val jsonReadsUUID = __.read[String].map { str =>
+    private[v0] implicit val jsonReadsUUID: play.api.libs.json.Reads[_root_.java.util.UUID] = __.read[String].map { str =>
       _root_.java.util.UUID.fromString(str)
     }
 
-    private[v0] implicit val jsonWritesUUID = new Writes[_root_.java.util.UUID] {
+    private[v0] implicit val jsonWritesUUID: play.api.libs.json.Writes[_root_.java.util.UUID] = new play.api.libs.json.Writes[_root_.java.util.UUID] {
       def writes(x: _root_.java.util.UUID) = JsString(x.toString)
     }
 

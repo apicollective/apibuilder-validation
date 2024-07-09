@@ -61,7 +61,7 @@ case class ApiBuilderUnionType(union: ApiBuilderType.Union, `type`: UnionType)
 
 object ApiBuilderType {
   case class Enum(override val service: ApiBuilderService, `enum`: models.Enum) extends ApiBuilderType {
-    override val name: String = enum.name
+    override val name: String = `enum`.name
     override val typeDiscriminator: TypeDiscriminator = TypeDiscriminator.Enums
   }
   case class Interface(override val service: ApiBuilderService, interface: models.Interface) extends ApiBuilderType {
