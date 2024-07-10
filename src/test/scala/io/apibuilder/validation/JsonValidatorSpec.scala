@@ -277,35 +277,34 @@ class JsonValidatorSpec extends AnyWordSpec with Matchers with Helpers with Test
     ))(service) mustBe Seq("invitation_form.name must be an object and not a string")
   }
 
-  "converts array of length 1 into a single value" in {
-    // This supports a use case from python libraries that send single values w/ array syntax (e.g. number[]=1)
-    val form = Json.obj(
-      "order_number" -> Seq[String]("123"),
-      "token" -> "blah",
-      "discriminator" -> "merchant_of_record_authorization_form"
+  "converts array" must {
+    val service = makeService(
+      models = Seq(makeModel("order", fields = Seq(
+        makeField("number", `type` = "string")
+      )))
     )
 
-    expectValidNec {
-      validate("merchant_of_record_authorization_form", form)
-    } must equal(
-      Json.obj(
-        "order_number" -> "123",
-        "token" -> "blah",
-        "discriminator" -> "merchant_of_record_authorization_form"
+    "length 1 into a single value" in {
+      // This supports a use case from python libraries that send single values w/ array syntax (e.g. number[]=1)
+
+      expectValidNec {
+        validate("order", Json.obj(
+          "number" -> Seq[String]("123")
+        ))(service)
+      } must equal(
+        Json.obj(
+          "number" -> "123"
+        )
       )
-    )
-  }
+    }
 
-  "reports errors when expecting a single value and presented with an array of length > 1" in {
-    val form = Json.obj(
-      "order_number" -> Seq[String]("123", "456"),
-      "token" -> "blah",
-      "discriminator" -> "merchant_of_record_authorization_form"
-    )
-
-    expectInvalidNec {
-      validate("merchant_of_record_authorization_form", form)
-    } mustBe Seq("merchant_of_record_authorization_form.order_number must be a string and not an array")
+    "reports errors when expecting a single value and presented with an array of length > 1" in {
+      expectInvalidNec {
+        validate("order", Json.obj(
+          "number" -> Seq[String]("123", "456")
+        ))(service)
+      } mustBe Seq("order.number must be a string and not an array")
+    }
   }
 
   "accept null as optional" in {
