@@ -59,13 +59,14 @@ class MultiServiceZipSpec extends AnyWordSpec with Matchers
     }
   }
 
-  /*
   "Able to download service from the internet" in {
+    expectValidNec {
+      MultiService.fromUrl("file:///tmp/specs/api.spec.billing.json")
+    }
     expectValidNec {
       MultiService.fromUrl("https://cdn.flow.io/util/lib-apibuilder/specs.zip")
     }
   }
-  */
 
   "upcast" in {
     val multiService = expectValidNec {
