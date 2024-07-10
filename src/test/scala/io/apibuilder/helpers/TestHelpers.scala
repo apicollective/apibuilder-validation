@@ -2,8 +2,11 @@ package io.apibuilder.helpers
 
 import cats.data.Validated.{Invalid, Valid}
 import cats.data.{Validated, ValidatedNec}
+import java.util.UUID
 
 trait TestHelpers {
+
+  def randomString(): String = UUID.randomUUID().toString
 
   def expectInvalid[T](value: Validated[T, ?]): T = {
     value match {
