@@ -30,7 +30,7 @@ class FilterResponsesRewriterSpec extends AnyWordSpec with Matchers
       makeMultiService(
         makeService(resources = resources)
       )
-    ).services().map(_.service).flatMap(_.resources)
+    ).services.map(_.service).flatMap(_.resources)
   }
 
   private def responseCodes(operation: Operation): Seq[Int] = {

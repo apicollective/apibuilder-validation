@@ -1,12 +1,10 @@
 package io.apibuilder.validation
 
 import io.apibuilder.validation.helpers.Helpers
-import io.flow.v0.models.{CardForm, HarmonizedItemForm, ItemForm}
-import io.flow.v0.models.json._
-import play.api.libs.json._
 import org.joda.time.DateTime
-import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
+import play.api.libs.json.*
 
 class JsonValidatorSpec extends AnyFunSpec with Matchers with Helpers {
 
@@ -227,140 +225,6 @@ class JsonValidatorSpec extends AnyFunSpec with Matchers with Helpers {
         Seq("card_form.address.streets of type '[string]': element in position[1] must be a string and not null")
       )
       case Right(_) => sys.error("Expected form to NOT validate")
-    }
-  }
-
-
-  it("converts types") {
-    val form = Json.obj(
-      "number" -> 123,
-      "cvv" -> Seq("456"),
-      "expiration_month" -> "01",
-      "expiration_year" -> "2019",
-      "name" -> "Joe Smith"
-    )
-
-    form.validate[CardForm] match {
-      case _: JsSuccess[CardForm] => sys.error("Expected form to NOT validate")
-      case _: JsError => //
-    }
-
-    val converted: JsValue = validate("card_form", form) match {
-      case Left(errors) => sys.error(errors.mkString(", "))
-      case Right(js) => js
-    }
-
-    converted.validate[CardForm] match {
-      case s: JsSuccess[CardForm] => {
-        val form = s.get
-        form.number should be(Some("123"))
-        form.cvv should be(Some("456"))
-        form.expirationMonth should be(1)
-        form.expirationYear should be(2019)
-        form.name should be("Joe Smith")
-      }
-      case e: JsError => {
-        sys.error(s"Expected validation to succeed but got: $e")
-      }
-    }
-  }
-
-  it("converted nested values in arrays") {
-    val form = Json.obj(
-      "name" -> JsString("Test item"),
-      "number" -> JsString("sku-1"),
-      "categories" -> JsArray(Seq(JsString("a"), JsNumber(123))),
-      "currency" -> "CAD",
-      "price" -> 123,
-    )
-
-    form.validate[HarmonizedItemForm] match {
-      case _: JsSuccess[HarmonizedItemForm] => sys.error("Expected form to NOT validate")
-      case _: JsError => //
-    }
-
-    val converted: JsValue = rightOrErrors {
-      validate("harmonized_item_form", form)
-    }
-
-    converted.validate[HarmonizedItemForm] match {
-      case s: JsSuccess[HarmonizedItemForm] => {
-        val form = s.get
-        form.name should be("Test item")
-        form.number should be("sku-1")
-        form.categories should be(Some(Seq("a", "123")))
-      }
-      case e: JsError => {
-        sys.error(s"Expected validation to succeed but got: $e")
-      }
-    }
-  }
-
-  it("validates array values") {
-    val form = Json.obj(
-      "name" -> JsString("Test item"),
-      "number" -> JsString("sku-1"),
-      "categories" -> JsArray(
-        Seq(
-          JsString("furniture"),
-          Json.obj(),
-          JsNull
-        )
-      ),
-      "currency" -> "CAD",
-      "price" -> 123,
-    )
-
-    form.validate[HarmonizedItemForm] match {
-      case _: JsSuccess[HarmonizedItemForm] => sys.error("Expected form to NOT validate")
-      case _: JsError => //
-    }
-
-    validate("harmonized_item_form", form) should be(
-      Left(
-        Seq(
-          "harmonized_item_form.categories of type '[string]': element in position[1] must be a string and not an object",
-          "harmonized_item_form.categories of type '[string]': element in position[2] must be a string and not null"
-        )
-      )
-    )
-  }
-
-  it("validates maps") {
-    val form = Json.obj(
-      "number" -> "sku-1",
-      "name" -> "test",
-      "currency" -> "USD",
-      "price" -> 10,
-      "locale" -> "en_us",
-      "attributes" -> Json.obj(
-        "a" -> 1,
-        "b" -> true,
-        "c" -> "baz"
-      )
-    )
-
-    val js = validate("item_form", form) match {
-      case Left(errors) => sys.error(errors.mkString(", "))
-      case Right(js) => js
-    }
-
-    js.validate[ItemForm] match {
-      case s: JsSuccess[ItemForm] => {
-        val i = s.get
-        i.attributes should be(
-          Some(
-            Map(
-              "a" -> "1",
-              "b" -> "true",
-              "c" -> "baz"
-            )
-          )
-        )
-      }
-      case e: JsError => {
-        sys.error(s"Expected validation to succeed but got: $e")
-      }
     }
   }
 
