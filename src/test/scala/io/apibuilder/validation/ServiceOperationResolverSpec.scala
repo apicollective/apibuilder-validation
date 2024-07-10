@@ -3,12 +3,11 @@ package io.apibuilder.validation
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import io.apibuilder.builders.ApiBuilderServiceBuilders
-import io.apibuilder.spec.v0.models.json._
+import io.apibuilder.spec.v0.models.json.*
 import io.apibuilder.helpers.*
+import io.apibuilder.spec.v0.models.Method
 import io.apibuilder.validation.zip.ZipFileBuilder
 import play.api.libs.json.Json
-
-import java.io.File
 
 class ServiceOperationResolverSpec extends AnyWordSpec with Matchers
   with PerformanceHelpers
@@ -31,9 +30,18 @@ class ServiceOperationResolverSpec extends AnyWordSpec with Matchers
       result
     }
 
-    val services = 0.to(100).map { _ =>
-      makeService()
+    val models = 0.to(100).map { i => s"model_$i" }
+    val services = 0.to(99).map { _ =>
+      makeService(
+        models = models.map { name => makeModel(name) },
+        resources = models.map { name =>
+          makeResource(name, operations = Method.all.map { m =>
+            makeOperation(m)
+          })
+        }
+      )
     }
+
     val zipFile = services.foldLeft(ZipFileBuilder()) { case (builder, svc) =>
       builder.withFile(writeToTempFile(Json.toJson(svc).toString, suffix = "json"))
     }.build()
@@ -41,6 +49,7 @@ class ServiceOperationResolverSpec extends AnyWordSpec with Matchers
     val zipService = expectValidNec {
       MultiService.fromUrl(s"file://${zipFile.getAbsolutePath}")
     }
+    zipService.services.length mustBe 100
     run("zipService", zipService)
   }
 }
