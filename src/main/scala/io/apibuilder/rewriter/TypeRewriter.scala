@@ -13,7 +13,7 @@ case class TypeRewriter(rewriteType: AnyType => AnyType) extends DefaultRewriter
 
   override def rewrite(multiService: MultiService): MultiService = {
     val helper = ApiBuilderHelperImpl(multiService)
-    MultiService(multiService.services().map { s => rewrite(helper, s) })
+    MultiService(multiService.services.map { s => rewrite(helper, s) })
   }
 
   private def rewrite(helper: ApiBuilderHelper, service: ApiBuilderService): ApiBuilderService = {

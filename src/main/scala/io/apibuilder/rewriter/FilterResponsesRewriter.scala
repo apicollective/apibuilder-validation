@@ -14,7 +14,7 @@ case class FilterResponsesRewriter(
 
   override def rewrite(multiService: MultiService): MultiService = {
     MultiService(
-      multiService.services().map(rewrite)
+      multiService.services.map(rewrite)
     )
   }
 

@@ -28,7 +28,7 @@ object UnionTypesMustBeModelsRewriter extends DefaultRewriter {
 
   private def removeUnions(multiService: MultiService, toRemoveNames: Set[String]): MultiService = {
     MultiService(
-      multiService.services().map { s =>
+      multiService.services.map { s =>
         s.copy(
           service = s.service.copy(
             unions = s.unions.filterNot { u => toRemoveNames.contains(u.qualified) }.map(_.union),

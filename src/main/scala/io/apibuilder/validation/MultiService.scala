@@ -12,7 +12,7 @@ import play.api.libs.json._
   */
 trait MultiService extends ResponseHelpers {
 
-  def services(): List[ApiBuilderService]
+  def services: List[ApiBuilderService]
 
   def findOperation(method: Method, path: String): Option[ApiBuilderOperation]
 

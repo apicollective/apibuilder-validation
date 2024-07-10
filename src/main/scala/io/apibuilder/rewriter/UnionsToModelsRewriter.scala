@@ -15,7 +15,7 @@ object UnionsToModelsRewriter extends DefaultRewriter {
   override def rewrite(multiService: MultiService): MultiService = {
     val unionToModelBuilder = UnionToModelBuilder(multiService)
     MultiService(
-      multiService.services().map { s => rewrite(unionToModelBuilder, s) }
+      multiService.services.map { s => rewrite(unionToModelBuilder, s) }
     )
   }
 

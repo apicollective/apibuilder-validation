@@ -18,7 +18,7 @@ case class MinimalTypesRewriter(types: Iterable[ApiBuilderType]) extends Default
     val all = expand(helper, types.toSeq, Set.empty).groupBy(_.namespace)
 
     MultiService(
-      multiService.services().map { s =>
+      multiService.services.map { s =>
         val svcTypes = all.getOrElse(s.namespace, Nil).toSeq
         s.copy(
           service = s.service.copy(

@@ -1,7 +1,7 @@
 package apibuilder
 
-import io.apibuilder.spec.v0.models._
-import io.apibuilder.validation.{AnyType, ApiBuilderField, ApiBuilderService, ApiBuilderType, ApiBuilderUnionType, MultiService, ScalarType, TypeName}
+import io.apibuilder.spec.v0.models.*
+import io.apibuilder.validation.*
 
 import scala.annotation.tailrec
 import scala.util.matching.Regex
@@ -49,7 +49,7 @@ trait ApiBuilderHelper {
   def resolveType(service: Service, parameter: Parameter): Option[AnyType] = resolveType(service, parameter.`type`)
 
   def resolveType(typeName: TypeName): Option[AnyType] = {
-    multiService.services().find(_.namespace == typeName.namespace).flatMap { s =>
+    multiService.services.find(_.namespace == typeName.namespace).flatMap { s =>
       resolveType(s, typeName.name)
     }
   }

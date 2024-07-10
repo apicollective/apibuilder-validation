@@ -85,7 +85,7 @@ case class Validator() {
   }
 
   private def toJson(multiService: MultiService): JsValue = {
-    multiService.services() match {
+    multiService.services match {
       case Nil => Json.obj()
       case one :: Nil => Json.toJson(one.service)
       case _ => sys.error("Cannot serialize multiple services")
