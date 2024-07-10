@@ -315,21 +315,27 @@ class JsonValidatorSpec extends AnyWordSpec with Matchers with Helpers with Test
         ))
       )
     )
+
     expectValidNec {
       validate("user", Json.obj(
         "description" -> JsNull
       ))(service)
     }
   }
-/*
+
   "understands arrays are required" in {
-    apiBuilderMultiService.upcastOperationBody(
-      "POST", "/queries", Json.obj()
-    ) must equal(
-      Left(Seq("Missing required field for query_form: filters"))
+    val service = makeService(
+      models = Seq(
+        makeModel("user", fields = Seq(
+          makeField("emails", `type` = "[string]")
+        ))
+      )
     )
+
+    expectInvalidNec("user", Json.obj())(service) mustBe Seq("Missing required field for user: emails")
   }
 
+  /*
   "expiration year" in {
     val expiration = apiBuilderMultiService.findType("io.apibuilder.explicit.validation.v0.models.expiration").getOrElse {
       sys.error("Did not find 'expiration' model")
