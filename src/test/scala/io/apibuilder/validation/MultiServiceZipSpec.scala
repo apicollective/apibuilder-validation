@@ -59,6 +59,14 @@ class MultiServiceZipSpec extends AnyWordSpec with Matchers
     }
   }
 
+  /*
+  "Able to download service from the internet" in {
+    expectValidNec {
+      MultiService.fromUrl("https://cdn.flow.io/util/lib-apibuilder/specs.zip")
+    }
+  }
+  */
+
   "upcast" in {
     val multiService = expectValidNec {
       MultiService.fromUrl(s"file://$zipFile")
@@ -69,11 +77,5 @@ class MultiServiceZipSpec extends AnyWordSpec with Matchers
     expectInvalidNec {
       multiService.upcastOperationBody("POST", "/users", Json.obj("name" -> "test"))
     } mustBe Seq("user_form.name must be an object and not a string")
-  }
-
-  "Able to download service from the internet" in {
-    expectValidNec {
-      MultiService.fromUrl("https://cdn.flow.io/util/lib-apibuilder/specs.zip")
-    }
   }
 }

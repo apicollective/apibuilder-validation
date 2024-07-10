@@ -13,9 +13,10 @@ object ApiBuilderHelper {
   val Map: Regex = """^map\[(.+)\]$""".r
 
   def is2xx(r: Response): Boolean = {
-    r.code.toIntOption match {
-      case Some(v) => v >= 200 && v < 300
-      case None => false
+    r.code match {
+      case ResponseCodeInt(v) => v >= 200 && v < 300
+      case ResponseCodeOption.Default => true
+      case ResponseCodeOption.UNDEFINED(_) | ResponseCodeUndefinedType(_) => false
     }
   }
 
