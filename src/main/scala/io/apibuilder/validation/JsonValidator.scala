@@ -367,10 +367,11 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
   private def validateScalar(prefix: String, scalarType: ScalarType, js: JsValue): ValidatedNec[String, JsValue] = {
     import ScalarType._
     scalarType match {
-      case FloatType | JsonType | ObjectType | UnitType => {
+      case FloatType | JsonType | UnitType => {
         // TODO: Add validation for these types
         js.validNec
       }
+      case ObjectType => validateObject(prefix, js)
       case StringType => validateString(prefix, js)
       case IntegerType => validateInteger(prefix, js)
       case LongType => validateLong(prefix, js)
@@ -396,6 +397,17 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
       case v: JsNumber => JsString(v.value.toString).validNec
       case _: JsObject => s"$prefix must be a string and not an object".invalidNec
       case v: JsString => v.validNec
+    }
+  }
+
+  def validateObject(prefix: String, js: JsValue): ValidatedNec[String, JsObject] = {
+    js match {
+      case _: JsArray => s"$prefix must be an object and not an array".invalidNec
+      case _: JsBoolean => s"$prefix must be an object and not a boolean".invalidNec
+      case JsNull => s"$prefix must be an object and not null".invalidNec
+      case _: JsNumber => s"$prefix must be an object and not a number".invalidNec
+      case o: JsObject => o.validNec
+      case _: JsString => s"$prefix must be an object and not a string".invalidNec
     }
   }
 
