@@ -3,6 +3,7 @@ package io.apibuilder.validation
 import cats.data.ValidatedNec
 import io.apibuilder.builders.ApiBuilderServiceBuilders
 import io.apibuilder.helpers.TestHelpers
+import io.apibuilder.spec.v0.models.Service
 import io.apibuilder.validation.helpers.Helpers
 import org.joda.time.DateTime
 import org.scalatest.wordspec.AnyWordSpec
@@ -11,52 +12,50 @@ import play.api.libs.json.*
 
 class JsonValidatorSpec extends AnyWordSpec with Matchers with Helpers with TestHelpers with ApiBuilderServiceBuilders {
 
-  private lazy val validator: JsonValidator = JsonValidator(
-    ApiBuilderService(
-      makeService(
-        enums = Seq(
-          makeEnum("avs_code", values = Seq(
-            makeEnumValue("match"),
-            makeEnumValue("partial"),
-          ))
-        ),
-        models = Seq(
-          makeModel("webhook"),
-          makeModel("webhook_form", fields = Seq(
-            makeField("url", required = true, `type` = "string"),
-            makeField("events", required = true, `type` = "[string]")
-          )),
-          makeModel("booleans", fields = Seq(
-            makeField("value", `type` = "boolean")
-          )),
-          makeModel("avs", fields = Seq(
-            makeField("code", `type` = "avs_code")
-          )),
-          makeModel("invitation_form", fields = Seq(
-            makeField("name", `type` = "object")
-          ))
-        ),
-      )
-    )
+  private lazy val defaultService: Service = makeService(
+    enums = Seq(
+      makeEnum("avs_code", values = Seq(
+        makeEnumValue("match"),
+        makeEnumValue("partial"),
+      ))
+    ),
+    models = Seq(
+      makeModel("webhook"),
+      makeModel("webhook_form", fields = Seq(
+        makeField("url", required = true, `type` = "string"),
+        makeField("events", required = true, `type` = "[string]")
+      )),
+      makeModel("booleans", fields = Seq(
+        makeField("value", `type` = "boolean")
+      )),
+      makeModel("avs", fields = Seq(
+        makeField("code", `type` = "avs_code")
+      )),
+      makeModel("invitation_form", fields = Seq(
+        makeField("name", `type` = "object")
+      ))
+    ),
   )
 
-  private def validate(typ: String, js: JsValue): ValidatedNec[String, JsValue] = {
-    validator.validate(
+  private def validate(typ: String, js: JsValue)(implicit service: Service = defaultService): ValidatedNec[String, JsValue] = {
+    JsonValidator(ApiBuilderService(service)).validate(
       typ, js, defaultNamespace = None
     )
   }
-  private def validateValid(typ: String, js: JsValue): JsValue = {
+  private def validateValid(typ: String, js: JsValue)(implicit service: Service = defaultService): JsValue = {
     expectValidNec {
-      validate(typ, js)
+      validate(typ, js)(service)
     }
   }
-  private def validateError(typ: String, js: JsValue): Seq[String] = {
+  private def validateError(typ: String, js: JsValue)(implicit service: Service = defaultService): Seq[String] = {
     expectInvalidNec {
-      validate(typ, js)
+      validate(typ, js)(service)
     }
   }
 
   "findType is case insensitive" in {
+    val validator = JsonValidator(ApiBuilderService(defaultService))
+
     val m1 = validator.findType("webhook", defaultNamespace = None).head
     m1.name must equal("webhook")
 
