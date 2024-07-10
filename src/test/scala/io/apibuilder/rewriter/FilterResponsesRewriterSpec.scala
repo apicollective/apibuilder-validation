@@ -1,7 +1,7 @@
 package io.apibuilder.rewriter
 
 import io.apibuilder.builders.{ApiBuilderServiceBuilders, MultiServiceBuilders}
-import io.apibuilder.spec.v0.models.{Operation, Resource, Response, ResponseCodeInt}
+import io.apibuilder.spec.v0.models.{Operation, Resource, Response}
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
@@ -18,7 +18,7 @@ class FilterResponsesRewriterSpec extends AnyWordSpec with Matchers
       operations = Seq(
         makeOperation(
           responses = responseCodes.map { s =>
-            makeResponse(code = ResponseCodeInt(s))
+            makeResponse(code = s.toString)
           },
         )
       )
@@ -34,10 +34,7 @@ class FilterResponsesRewriterSpec extends AnyWordSpec with Matchers
   }
 
   private def responseCodes(operation: Operation): Seq[Int] = {
-    operation.responses.map(_.code).flatMap {
-      case c: ResponseCodeInt => Some(c.value)
-      case _ => None
-    }
+    operation.responses.flatMap(_.code.toIntOption)
   }
 
   private def responseCodes(resource: Resource): Seq[Int] = {
@@ -52,7 +49,7 @@ class FilterResponsesRewriterSpec extends AnyWordSpec with Matchers
     def opByResponseCode(code: Int): Operation = {
       makeOperation(
         responses = Seq(
-          makeResponse(code = ResponseCodeInt(code))
+          makeResponse(code = code.toString)
         ),
       )
     }
@@ -67,7 +64,7 @@ class FilterResponsesRewriterSpec extends AnyWordSpec with Matchers
             )
           )
         )
-      )(_.responses.filter(_.code == ResponseCodeInt(200))).flatMap(_.operations) match {
+      )(_.responses.filter(_.code == "200")).flatMap(_.operations) match {
         case one :: Nil => {
           // verifying that only the operation with response code 200 was accepted
           responseCodes(one) must equal(Seq(200))
@@ -84,7 +81,7 @@ class FilterResponsesRewriterSpec extends AnyWordSpec with Matchers
           resource("a", responseCodes = Seq(200, 201)),
           resource("b", responseCodes = Seq(200)),
         )
-      )(_.responses.filter(_.code == ResponseCodeInt(201))) match {
+      )(_.responses.filter(_.code == "201")) match {
         case one :: Nil => {
           one.`type` must equal("a")
           responseCodes(one) must equal(Seq(201))
@@ -103,7 +100,7 @@ class FilterResponsesRewriterSpec extends AnyWordSpec with Matchers
             Seq(
               resource(responseCodes = Seq(200, 400))
             )
-          )(_.responses.filter(_.code == ResponseCodeInt(code)))
+          )(_.responses.filter(_.code == code.toString))
         )
       }
       acceptCode(200) must be(Seq(200))

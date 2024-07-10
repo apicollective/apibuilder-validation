@@ -2,7 +2,7 @@ package io.apibuilder.builders
 
 import java.util.UUID
 
-import io.apibuilder.spec.v0.models.{Annotation, Apidoc, Application, Attribute, Body, Contact, Deprecation, Enum, EnumValue, Field, Header, Import, Info, License, Method, Model, Operation, Organization, Parameter, ParameterLocation, Resource, Response, ResponseCode, ResponseCodeInt, Service, Union, UnionType}
+import io.apibuilder.spec.v0.models.{Annotation, Apidoc, Application, Attribute, Body, Contact, Deprecation, Enum, EnumValue, Field, Header, Import, Info, License, Method, Model, Operation, Organization, Parameter, ParameterLocation, Resource, Response, Service, Union, UnionType}
 import io.apibuilder.validation.{ApiBuilderType, MultiService}
 import play.api.libs.json.{JsObject, Json}
 
@@ -261,13 +261,13 @@ trait ApiBuilderServiceBuilders {
 
   def make200Response(`type`: String): Response = {
     makeResponse(
-      code = ResponseCodeInt(200),
+      code = "200",
       `type` = `type`,
     )
   }
 
   def makeResponse(
-    code: ResponseCode = ResponseCodeInt(200),
+    code: String = "200",
     `type`: String = random(),
     headers: Option[Seq[Header]] = None,
     description: Option[String] = None,

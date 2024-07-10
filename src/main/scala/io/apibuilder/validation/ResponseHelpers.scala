@@ -14,23 +14,9 @@ trait ResponseHelpers {
     */
   def response(operation: Operation, responseCode: Int): Option[Response] = {
     operation.responses.find { r =>
-      r.code match {
-        case ResponseCodeInt(s) => s == responseCode
-        case _ => false
-      }
-    } match {
-      case Some(r) => {
-        Some(r)
-      }
-
-      case None => {
-        operation.responses.find { r =>
-          r.code match {
-            case ResponseCodeOption.Default => true
-            case _ => false
-          }
-        }
-      }
+      r.code.toIntOption.contains(responseCode)
+    } orElse {
+      operation.responses.find(_.code.toLowerCase == "default")
     }
   }
 
@@ -62,21 +48,13 @@ trait ResponseHelpers {
     * will return ["*"]
     */
   private def declaredResponseCodes(operation: Operation): Seq[String] = {
-    val responseCodes = operation.responses.map(_.code)
-    if (responseCodes.exists {
-      case ResponseCodeOption.Default => true
-      case _ => false
-    }) {
+    val responseCodes = operation.responses.map(_.code.toLowerCase)
+    if (responseCodes.contains("default")) {
       // All response codes are valid
       Seq("*")
 
     } else {
-      responseCodes.flatMap {
-        case ResponseCodeOption.Default => None
-        case ResponseCodeOption.UNDEFINED(_) => None
-        case ResponseCodeInt(value) => Some(value.toString)
-        case ResponseCodeUndefinedType(_) => None
-      }
+      responseCodes
     }
   }
 }
