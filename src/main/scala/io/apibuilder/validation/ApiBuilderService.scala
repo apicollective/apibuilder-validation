@@ -48,13 +48,13 @@ object ApiBuilderService {
     * Loads the API Builder service specification from the specified URI,
     * returning either a list of errors or the service itself.
     */
-  def fromUrl(url: String): Either[Seq[String], ApiBuilderService] = {
+  def fromUrl(url: String): ValidatedNec[String, ApiBuilderService] = {
     UrlDownloader.withInputStream(url) { is =>
       fromInputStream(is)
     }
   }
 
-  def fromFile(file: File): Either[Seq[String], ApiBuilderService] = {
+  def fromFile(file: File): ValidatedNec[String, ApiBuilderService] = {
     val is = new BufferedInputStream(new FileInputStream(file))
     try {
       fromInputStream(is)
@@ -63,7 +63,7 @@ object ApiBuilderService {
     }
   }
 
-  def fromInputStream(inputStream: InputStream): Either[Seq[String], ApiBuilderService] = {
+  def fromInputStream(inputStream: InputStream): ValidatedNec[String, ApiBuilderService] = {
     toService(copyToString(inputStream))
   }
 
@@ -78,7 +78,7 @@ object ApiBuilderService {
     result.toString(StandardCharsets.UTF_8.name())
   }
 
-  def toService(contents: String): Either[Seq[String], ApiBuilderService] = {
+  def toService(contents: String): ValidatedNec[String, ApiBuilderService] = {
     Json.parse(contents).validate[Service] match {
       case s: JsSuccess[Service] => Right(ApiBuilderService(s.get))
       case e: JsError => Left(Seq(s"Error parsing service: $e"))

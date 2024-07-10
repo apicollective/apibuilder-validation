@@ -23,7 +23,7 @@ object ZipFileReader {
     name.trim.split("\\?").head.trim.toLowerCase().endsWith(s".$suffix")
   }
 
-  def fromUrl(url: String): Either[Seq[String], ZipFileReader] = {
+  def fromUrl(url: String): ValidatedNec[String, ZipFileReader] = {
     UrlDownloader.withInputStream(url) { is =>
       Right(ZipFileReader(is))
     }

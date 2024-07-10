@@ -47,9 +47,9 @@ object ValidatedUrlDownloader {
 object UrlDownloader {
   import io.apibuilder.validation.util.Implicits._
 
-  def withInputStream[T](url: String)(f: InputStream => Either[Seq[String], T]): Either[Seq[String], T] =
+  def withInputStream[T](url: String)(f: InputStream => ValidatedNec[String, T]): ValidatedNec[String, T] =
     ValidatedUrlDownloader.validateUrl(url).toEither.leftToSeq.flatMap(ValidatedUrlDownloader.withInputStream(_, f, e => Left(Seq(e))))
 
-  def withInputStream[T](url: URL)(f: InputStream => Either[Seq[String], T]): Either[Seq[String], T] =
+  def withInputStream[T](url: URL)(f: InputStream => ValidatedNec[String, T]): ValidatedNec[String, T] =
     ValidatedUrlDownloader.withInputStream(url, f, e => Left(Seq(e)))
 }

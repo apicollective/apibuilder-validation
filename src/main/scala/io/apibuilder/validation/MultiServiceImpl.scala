@@ -26,7 +26,7 @@ case class MultiServiceImpl(
     ).headOption
   }
 
-  override def upcast(typ: AnyType, js: JsValue): Either[Seq[String], JsValue] = {
+  override def upcast(typ: AnyType, js: JsValue): ValidatedNec[String, JsValue] = {
     validator.validateType(typ, js)
   }
 

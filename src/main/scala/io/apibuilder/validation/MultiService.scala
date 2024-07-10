@@ -24,7 +24,7 @@ trait MultiService extends ResponseHelpers {
   /**
     * Upcast the json value based on the specified type name, if it is defined. a No-op if not
     */
-  def upcast(typ: AnyType, js: JsValue): Either[Seq[String], JsValue]
+  def upcast(typ: AnyType, js: JsValue): ValidatedNec[String, JsValue]
 
   final def findOperation(method: String, path: String): Option[ApiBuilderOperation] = {
     findOperation(Method(method), path)
@@ -61,7 +61,7 @@ trait MultiService extends ResponseHelpers {
     * Validates the js value across all services, upcasting types to
     * match the request method/path as needed.
     */
-  final def upcast(apiBuilderOperation: ApiBuilderOperation, js: JsValue): Either[Seq[String], JsValue] = {
+  final def upcast(apiBuilderOperation: ApiBuilderOperation, js: JsValue): ValidatedNec[String, JsValue] = {
     findBodyType(apiBuilderOperation) match {
       case None => Right(js)
       case Some(bodyType) => upcast(bodyType, js)
@@ -77,25 +77,25 @@ trait MultiService extends ResponseHelpers {
     }
   }
 
-  final def upcastOperationBody(method: String, path: String, js: JsValue): Either[Seq[String], JsValue] = {
+  final def upcastOperationBody(method: String, path: String, js: JsValue): ValidatedNec[String, JsValue] = {
     upcastOperationBody(Method(method), path, js)
   }
 
-  final def upcastOperationBody(method: Method, path: String, js: JsValue): Either[Seq[String], JsValue] = {
+  final def upcastOperationBody(method: Method, path: String, js: JsValue): ValidatedNec[String, JsValue] = {
     validateOperation(method, path) match {
       case Left(errors) => Left(errors)
       case Right(op) => upcast(op, js)
     }
   }
 
-  final def upcastType(defaultNamespace: String, typeName: String, js: JsValue): Either[Seq[String], JsValue] = {
+  final def upcastType(defaultNamespace: String, typeName: String, js: JsValue): ValidatedNec[String, JsValue] = {
     findType(defaultNamespace = defaultNamespace, typeName = typeName) match {
       case None => Right(js)
       case Some(t) => upcast(t, js)
     }
   }
 
-  final def validateOperation(method: Method, path: String): Either[Seq[String], ApiBuilderOperation] = {
+  final def validateOperation(method: Method, path: String): ValidatedNec[String, ApiBuilderOperation] = {
     findOperation(method, path) match {
       case Some(op) => Right(op)
       case None => Left(operationErrorMessage(method, path))
@@ -146,7 +146,7 @@ object MultiService {
     MultiServiceImpl(services)
   }
 
-  def fromUrl(url: String): Either[Seq[String], MultiService] = {
+  def fromUrl(url: String): ValidatedNec[String, MultiService] = {
     fromUrls(urls = Seq(url))
   }
 
@@ -154,7 +154,7 @@ object MultiService {
   * Loads the list of API Builder service specification from the specified URIs,
   * returning either a list of errors or an instance of MultiService
   */
-  def fromUrls(urls: Seq[String]): Either[Seq[String], MultiService] = {
+  def fromUrls(urls: Seq[String]): ValidatedNec[String, MultiService] = {
     val eithers = urls.flatMap { url =>
       if (ZipFileReader.isZipFile(url)) {
         ZipFileReader.fromUrl(url) match {

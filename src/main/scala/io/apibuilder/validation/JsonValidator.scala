@@ -1,5 +1,6 @@
 package io.apibuilder.validation
 
+import cats.implicits._
 import java.util.concurrent.ConcurrentHashMap
 
 import cats.implicits._
@@ -37,43 +38,43 @@ case class JsonValidator(validator: ValidatedJsonValidator) {
   def findType(defaultNamespace: String, name: String): Seq[AnyType] =
     validator.findType(defaultNamespace, name)
 
-  def validate(typeName: String, js: JsValue, defaultNamespace: Option[String], prefix: Option[String] = None): Either[Seq[String], JsValue] =
+  def validate(typeName: String, js: JsValue, defaultNamespace: Option[String], prefix: Option[String] = None): ValidatedNec[String, JsValue] =
     validator.validate(typeName, js, defaultNamespace, prefix).toEither.leftToSeq
 
-  def validateType(typ: AnyType, js: JsValue, prefix: Option[String] = None): Either[Seq[String], JsValue] =
+  def validateType(typ: AnyType, js: JsValue, prefix: Option[String] = None): ValidatedNec[String, JsValue] =
     validator.validateType(typ, js, prefix).toEither.leftToSeq
 
-  def validateString(prefix: String, js: JsValue): Either[Seq[String], JsString] =
+  def validateString(prefix: String, js: JsValue): ValidatedNec[String, JsString] =
     validator.validateString(prefix, js).toEither.leftToSeq
 
-  def validateArray(prefix: String, internalType: String, js: JsValue, defaultNamespace: Option[String]): Either[Seq[String], JsArray] =
+  def validateArray(prefix: String, internalType: String, js: JsValue, defaultNamespace: Option[String]): ValidatedNec[String, JsArray] =
     validator.validateArray(prefix, internalType, js, defaultNamespace).toEither.leftToSeq
 
-  def validateObject(prefix: String, internalType: String, js: JsValue, defaultNamespace: Option[String]): Either[Seq[String], JsObject] =
+  def validateObject(prefix: String, internalType: String, js: JsValue, defaultNamespace: Option[String]): ValidatedNec[String, JsObject] =
     validator.validateObject(prefix, internalType, js, defaultNamespace).toEither.leftToSeq
 
-  def validateInteger(prefix: String, js: JsValue): Either[Seq[String], JsNumber] =
+  def validateInteger(prefix: String, js: JsValue): ValidatedNec[String, JsNumber] =
     validator.validateInteger(prefix, js).toEither.leftToSeq
 
-  def validateDouble(prefix: String, js: JsValue): Either[Seq[String], JsNumber] =
+  def validateDouble(prefix: String, js: JsValue): ValidatedNec[String, JsNumber] =
     validator.validateDouble(prefix, js).toEither.leftToSeq
 
-  def validateDecimal(prefix: String, js: JsValue): Either[Seq[String], JsNumber] =
+  def validateDecimal(prefix: String, js: JsValue): ValidatedNec[String, JsNumber] =
     validator.validateDecimal(prefix, js).toEither.leftToSeq
 
-  def validateLong(prefix: String, js: JsValue): Either[Seq[String], JsNumber] =
+  def validateLong(prefix: String, js: JsValue): ValidatedNec[String, JsNumber] =
     validator.validateLong(prefix, js).toEither.leftToSeq
 
-  def validateUuid(prefix: String, js: JsValue): Either[Seq[String], JsString] =
+  def validateUuid(prefix: String, js: JsValue): ValidatedNec[String, JsString] =
     validator.validateUuid(prefix, js).toEither.leftToSeq
 
-  def validateDateIso8601(prefix: String, js: JsValue): Either[Seq[String], JsString] =
+  def validateDateIso8601(prefix: String, js: JsValue): ValidatedNec[String, JsString] =
     validator.validateDateIso8601(prefix, js).toEither.leftToSeq
 
-  def validateDateTimeIso8601(prefix: String, js: JsValue): Either[Seq[String], JsString] =
+  def validateDateTimeIso8601(prefix: String, js: JsValue): ValidatedNec[String, JsString] =
     validator.validateDateTimeIso8601(prefix, js).toEither.leftToSeq
 
-  def validateBoolean(prefix: String, js: JsValue): Either[Seq[String], JsBoolean] =
+  def validateBoolean(prefix: String, js: JsValue): ValidatedNec[String, JsBoolean] =
     validator.validateBoolean(prefix, js).toEither.leftToSeq
 }
 

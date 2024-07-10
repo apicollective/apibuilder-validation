@@ -56,7 +56,7 @@ case class PathNormalizer(operations: Seq[Operation]) {
     )
   }
 
-  final def resolve(method: Method, path: String): Either[Seq[String], Operation] = {
+  final def resolve(method: Method, path: String): ValidatedNec[String, Operation] = {
     method match {
       case Method.UNDEFINED(m) => {
         Left(Seq(StandardErrors.invalidMethodError(m)))
