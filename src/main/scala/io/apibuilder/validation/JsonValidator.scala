@@ -367,10 +367,12 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
   private def validateScalar(prefix: String, scalarType: ScalarType, js: JsValue): ValidatedNec[String, JsValue] = {
     import ScalarType._
     scalarType match {
-      case FloatType | JsonType | UnitType => {
-        // TODO: Add validation for these types
+      case UnitType => {
+        // TODO: is there anything to validate?
         js.validNec
       }
+      case FloatType => validateFloat(prefix, js)
+      case JsonType => js.validNec
       case ObjectType => validateObject(prefix, js)
       case StringType => validateString(prefix, js)
       case IntegerType => validateInteger(prefix, js)
@@ -501,27 +503,35 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
     }
   }
 
+  def validateFloat(prefix: String, js: JsValue): ValidatedNec[String, JsNumber] = {
+    validateNumber("float")(prefix, js)
+  }
+
   def validateDecimal(prefix: String, js: JsValue): ValidatedNec[String, JsNumber] = {
+    validateNumber("decimal")(prefix, js)
+  }
+
+  private def validateNumber(typeName: String)(prefix: String, js: JsValue): ValidatedNec[String, JsNumber] = {
     js match {
       case v: JsArray => {
         v.value.size match {
           case 1 => validateDecimal(prefix, v.value.head)
-          case _ => s"$prefix must be a decimal and not an array".invalidNec
+          case _ => s"$prefix must be a $typeName and not an array".invalidNec
         }
       }
-      case _: JsBoolean => s"$prefix must be a decimal and not a boolean".invalidNec
-      case JsNull => s"$prefix must be a decimal and not null".invalidNec
+      case _: JsBoolean => s"$prefix must be a $typeName and not a boolean".invalidNec
+      case JsNull => s"$prefix must be a $typeName and not null".invalidNec
       case v: JsNumber => v.asOpt[BigDecimal] match {
-        case None => s"$prefix must be a valid decimal".invalidNec
+        case None => s"$prefix must be a valid $typeName".invalidNec
         case Some(_) => v.validNec
       }
-      case _: JsObject => s"$prefix must be a decimal and not an object".invalidNec
+      case _: JsObject => s"$prefix must be a $typeName and not an object".invalidNec
       case v: JsString => {
         Try {
           BigDecimal.apply(v.value)
         } match {
           case Success(num) => JsNumber(num).validNec
-          case Failure(_) => s"$prefix must be a valid decimal".invalidNec
+          case Failure(_) => s"$prefix must be a valid $typeName".invalidNec
         }
       }
     }

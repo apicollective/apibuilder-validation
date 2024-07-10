@@ -155,6 +155,12 @@ class JsonValidatorSpec extends AnyWordSpec with Matchers with Helpers with Test
     validateError("decimal", JsString(" ")) mustBe Seq("value must be a valid decimal")
   }
 
+  "validates a float" in {
+    validate("float", Json.parse("123.45")).toOption.get.as[Float] must equal(123.45)
+    validate("float", Json.parse("123")).toOption.get.as[Float] must equal(123)
+    validateError("float", JsString(" ")) mustBe Seq("value must be a valid float")
+  }
+
   "validates a UUID" in {
     val uuid = java.util.UUID.randomUUID
     validate("uuid", JsString(uuid.toString)).toOption.get.as[java.util.UUID] must equal(uuid)
@@ -257,7 +263,7 @@ class JsonValidatorSpec extends AnyWordSpec with Matchers with Helpers with Test
     ))(service) mustBe Seq("item_form.attributes of type 'map[string]': element[a] must be a string and not an object")
   }
 
-  "Properly reports errors on js objects" in {
+  "Properly reports errors on object" in {
     val service = makeService(
       models = Seq(
         makeModel("invitation_form", fields = Seq(
