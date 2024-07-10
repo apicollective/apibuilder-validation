@@ -20,6 +20,9 @@ class JsonValidatorSpec extends AnyWordSpec with Matchers with Helpers with Test
             makeField("url", required = true, `type` = "string"),
             makeField("events", required = true, `type` = "[string]")
           )),
+          makeModel("booleans", fields = Seq(
+            makeField("value", `type` = "boolean")
+          ))
         ),
       )
     )
@@ -29,6 +32,11 @@ class JsonValidatorSpec extends AnyWordSpec with Matchers with Helpers with Test
     validator.validate(
       typ, js, defaultNamespace = None
     )
+  }
+  private def validateValid(typ: String, js: JsValue): JsValue = {
+    expectValidNec {
+      validate(typ, js)
+    }
   }
   private def validateError(typ: String, js: JsValue): Seq[String] = {
     expectInvalidNec {
@@ -45,20 +53,20 @@ class JsonValidatorSpec extends AnyWordSpec with Matchers with Helpers with Test
   }
 
   "1 required field" in {
-    validate(
+    validateError(
       "webhook_form",
       Json.obj("url" -> "https://test.flow.io")
     ) must equal(
-      Left(Seq("Missing required field for webhook_form: events"))
+      Seq("Missing required field for webhook_form: events")
     )
   }
 
   "multiple required fields" in {
-    validate(
+    validateError(
       "webhook_form",
       Json.obj()
     ) must equal(
-      Left(Seq("Missing required fields for webhook_form: url, events"))
+      Seq("Missing required fields for webhook_form: url, events")
     )
   }
 
@@ -67,11 +75,9 @@ class JsonValidatorSpec extends AnyWordSpec with Matchers with Helpers with Test
       "url" -> Seq("https://a.flow.io", "https://b.flow.io"),
       "events" -> Seq("*")
     )
-    validate("webhook_form", form) must equal(
-      Left(
-        Seq(
-          "webhook_form.url must be a string and not an array"
-        )
+    validateError("webhook_form", form) must equal(
+      Seq(
+        "webhook_form.url must be a string and not an array"
       )
     )
   }
@@ -81,12 +87,10 @@ class JsonValidatorSpec extends AnyWordSpec with Matchers with Helpers with Test
       "url" -> "https://a.flow.io",
       "events" -> "*"
     )
-    validate("webhook_form", form) must equal(
-      Right(
-        Json.obj(
-          "url" -> "https://a.flow.io",
-          "events" -> Seq("*")
-        )
+    validateValid("webhook_form", form) must equal(
+      Json.obj(
+        "url" -> "https://a.flow.io",
+        "events" -> Seq("*")
       )
     )
   }
@@ -96,12 +100,10 @@ class JsonValidatorSpec extends AnyWordSpec with Matchers with Helpers with Test
       "url" -> 123,
       "events" -> Seq("*")
     )
-    validate("webhook_form", form) must equal(
-      Right(
-        Json.obj(
-          "url" -> "123",
-          "events" -> Seq("*")
-        )
+    validateValid("webhook_form", form) must equal(
+      Json.obj(
+        "url" -> "123",
+        "events" -> Seq("*")
       )
     )
   }
@@ -111,12 +113,10 @@ class JsonValidatorSpec extends AnyWordSpec with Matchers with Helpers with Test
       "url" -> 123.45,
       "events" -> Seq("*")
     )
-    validate("webhook_form", form) must equal(
-      Right(
-        Json.obj(
-          "url" -> "123.45",
-          "events" -> Seq("*")
-        )
+    validateValid("webhook_form", form) must equal(
+      Json.obj(
+        "url" -> "123.45",
+        "events" -> Seq("*")
       )
     )
   }
@@ -124,27 +124,28 @@ class JsonValidatorSpec extends AnyWordSpec with Matchers with Helpers with Test
   "validates an integer" in {
     validate("integer", Json.parse("123")).toOption.get.as[Double] must equal(123)
     validateError("integer", Json.parse("123.45")) mustBe Seq("value must be a valid integer")
-    validate("integer", JsString("NaN")) must equal(Left(List("value must be a valid integer")))
-    validate("integer", JsString(" ")) must equal(Left(List("value must be a valid integer")))
+    validateError("integer", JsString("NaN")) mustBe Seq("value must be a valid integer")
+    validateError("integer", JsString(" ")) mustBe Seq("value must be a valid integer")
   }
 
   "validates a double" in {
-    validate("double", Json.parse("123.45")).toOption.get.as[Double] must equal(123.45)
-    validate("double", Json.parse("123")).toOption.get.as[Double] must equal(123)
-    validate("double", JsString("NaN")) must equal(Left(List("value must be a valid double")))
-    validate("double", JsString(" ")) must equal(Left(List("value must be a valid double")))
+    validateValid("double", Json.parse("123.45")).as[Double] must equal(123.45)
+
+    validateValid("double", Json.parse("123")).as[Double] must equal(123)
+    validateError("double", JsString("NaN")) mustBe Seq("value must be a valid double")
+    validateError("double", JsString(" ")) mustBe Seq("value must be a valid double")
   }
 
   "validates a decimal" in {
     validate("decimal", Json.parse("123.45")).toOption.get.as[BigDecimal] must equal(123.45)
     validate("decimal", Json.parse("123")).toOption.get.as[BigDecimal] must equal(123)
-    validate("decimal", JsString(" ")) must equal(Left(List("value must be a valid decimal")))
+    validateError("decimal", JsString(" ")) mustBe Seq("value must be a valid decimal")
   }
 
   "validates a UUID" in {
     val uuid = java.util.UUID.randomUUID
     validate("uuid", JsString(uuid.toString)).toOption.get.as[java.util.UUID] must equal(uuid)
-    validate("uuid", JsString(" ")) must equal(Left(List("value must be a valid UUID")))
+    validateError("uuid", JsString(" ")) mustBe Seq("value must be a valid UUID")
   }
 
   "validates an ISO 8601 date (yyyy-MM-dd)" in {
@@ -152,9 +153,9 @@ class JsonValidatorSpec extends AnyWordSpec with Matchers with Helpers with Test
     validate("date-iso8601", JsString("2017-1-01")).toOption.get.as[String] must equal("2017-1-01")
     validate("date-iso8601", JsString("2017-01-1")).toOption.get.as[String] must equal("2017-01-1")
     validate("date-iso8601", JsString("2017-1-1")).toOption.get.as[String] must equal("2017-1-1")
-    validate("date-iso8601", JsString("invalid")) must equal(Left(List("value must be a valid ISO 8601 date. Example: '2017-07-24'")))
+    validateError("date-iso8601", JsString("invalid")) mustBe Seq("value must be a valid ISO 8601 date. Example: '2017-07-24'")
     // Tests that the format must be yyyy-MM-dd
-    validate("date-iso8601", JsString(new DateTime(2017, 2, 24, 0, 0, 0).toString)) must equal(Left(List("value must be a valid ISO 8601 date. Example: '2017-07-24'")))
+    validateError("date-iso8601", JsString(new DateTime(2017, 2, 24, 0, 0, 0).toString)) mustBe Seq("value must be a valid ISO 8601 date. Example: '2017-07-24'")
   }
 
   "validates an ISO 8601 datetime" in {
@@ -165,23 +166,16 @@ class JsonValidatorSpec extends AnyWordSpec with Matchers with Helpers with Test
     validate("date-time-iso8601", JsString("2017-01-1")).toOption.get.as[String] must equal("2017-01-1")
     validate("date-time-iso8601", JsString("2017-1-1")).toOption.get.as[String] must equal("2017-1-1")
     validate("date-time-iso8601", JsString(dt)).toOption.get.as[String] must equal(dt)
-    validate("date-time-iso8601", JsString("invalid")) must equal(Left(List("value must be a valid ISO 8601 datetime. Example: '2017-07-24T09:41:08+02:00'")))
+    validateError("date-time-iso8601", JsString("invalid")) mustBe Seq("value must be a valid ISO 8601 datetime. Example: '2017-07-24T09:41:08+02:00'")
   }
 
   "converts booleans where possible" in {
     (
       Booleans.TrueValues.map(JsString(_)) ++ Seq(JsNumber(1))
     ).foreach { v =>
-      val form = Json.obj(
-        "code" -> "match",
-        "name" -> v
-      )
-      validate("avs", form) must equal(
-        Right(
-          Json.obj(
-            "code" -> "match",
-            "name" -> true
-          )
+      validateValid("booleans", Json.obj("value" -> v)) must equal(
+        Json.obj(
+          "value" -> true
         )
       )
     }
@@ -189,16 +183,9 @@ class JsonValidatorSpec extends AnyWordSpec with Matchers with Helpers with Test
     (
       Booleans.FalseValues.map(JsString(_)) ++ Seq(JsNumber(0))
     ).foreach { v =>
-      val form = Json.obj(
-        "code" -> "match",
-        "name" -> v
-      )
-      validate("avs", form) must equal(
-        Right(
-          Json.obj(
-            "code" -> "match",
-            "name" -> false
-          )
+      validateValid("booleans", Json.obj("value" -> v)) must equal(
+        Json.obj(
+          "value" -> false
         )
       )
     }
@@ -208,22 +195,14 @@ class JsonValidatorSpec extends AnyWordSpec with Matchers with Helpers with Test
     val form = Json.obj(
       "code" -> "bad"
     )
-    validate("avs", form) must equal(
-      Left(
-        Seq("avs.code invalid value 'bad'. Valid values for the enum 'avs_code' are: 'match', 'partial', 'unsupported', 'no_match'")
-      )
-    )
+    validateError("avs", form) mustBe Seq("avs.code invalid value 'bad'. Valid values for the enum 'avs_code' are: 'match', 'partial', 'unsupported', 'no_match'")
   }
 
   "validates enum values that are passed in as empty strings" in {
     val form = Json.obj(
       "code" -> ""
     )
-    validate("avs", form) must equal(
-      Left(
-        Seq("avs.code invalid value ''. Valid values for the enum 'avs_code' are: 'match', 'partial', 'unsupported', 'no_match'")
-      )
-    )
+    validateError("avs", form) mustBe Seq("avs.code invalid value ''. Valid values for the enum 'avs_code' are: 'match', 'partial', 'unsupported', 'no_match'")
   }
 
   "validates nested models" in {
@@ -255,11 +234,7 @@ class JsonValidatorSpec extends AnyWordSpec with Matchers with Helpers with Test
       )
     )
 
-    validate("item_form", form) must be(
-      Left(
-        Seq("item_form.attributes of type 'map[string]': element[a] must be a string and not an object")
-      )
-    )
+    validateError("item_form", form) mustBe Seq("item_form.attributes of type 'map[string]': element[a] must be a string and not an object")
   }
 
   "Properly reports errors on js objects" in {
@@ -270,9 +245,7 @@ class JsonValidatorSpec extends AnyWordSpec with Matchers with Helpers with Test
       "role" -> "member"
     )
 
-    expectInvalidNec {
-      validate("invitation_form", form)
-    } mustBe Seq("invitation_form.name must be an object and not a string")
+    validateError("invitation_form", form) mustBe Seq("invitation_form.name must be an object and not a string")
   }
 
   "converts array of length 1 into a single value" in {
