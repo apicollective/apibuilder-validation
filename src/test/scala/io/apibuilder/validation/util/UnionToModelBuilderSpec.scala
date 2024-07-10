@@ -1,8 +1,9 @@
-package io.apibuilder.util
+package io.apibuilder.validation.util
 
 import cats.data.Validated.{Invalid, Valid}
 import io.apibuilder.builders.{ApiBuilderServiceBuilders, MultiServiceBuilders}
-import io.apibuilder.spec.v0.models._
+import io.apibuilder.spec.v0.models.*
+import io.apibuilder.util.{UnionModel, UnionToModelBuilder}
 import io.apibuilder.validation.{ApiBuilderService, ApiBuilderType}
 import org.scalatest.Assertion
 import org.scalatest.matchers.must.Matchers
@@ -107,9 +108,7 @@ class UnionToModelBuilderSpec extends AnyWordSpec with Matchers
         model("string"),
         model("foo"),
         model("long"),
-      )) mustEqual(
-        Seq("Union type 'test.unions.example_union' Field 'id' has incompatible types: foo, long, string - all union types must have a common type")
-      )
+      )) mustEqual Seq("Union type 'test.unions.example_union' Field 'id' has incompatible types: foo, long, string - all union types must have a common type")
     }
 
     "upcast to string if necessary and all types are scalars" in {
