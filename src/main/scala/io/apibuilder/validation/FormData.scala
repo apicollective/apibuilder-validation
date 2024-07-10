@@ -79,7 +79,6 @@ object FormData {
       case o: JsBoolean => encodeIt(o.value.toString, keys)
       case o: JsNumber => encodeIt(o.value.toString, keys)
       case JsNull => encodeIt("", keys)
-      case other => encodeIt(other.toString, keys)
     }
   }
 
