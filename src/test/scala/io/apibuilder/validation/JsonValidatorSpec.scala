@@ -217,6 +217,17 @@ class JsonValidatorSpec extends AnyWordSpec with Matchers with Helpers with Test
   }
 
   "validates nested models" in {
+    val service = makeService(
+      models = Seq(
+        makeModel("card_form", fields = Seq(
+          makeField("address", `type` = "address_form")
+        )),
+        makeModel("address_form", fields = Seq(
+          makeField("streets", `type` = "[string]")
+        )),
+      )
+    )
+
     val form = Json.obj(
       "address" -> Json.obj(
         "streets" -> JsArray(Seq(JsString("1 main st"), JsNull))
@@ -224,7 +235,7 @@ class JsonValidatorSpec extends AnyWordSpec with Matchers with Helpers with Test
     )
 
     expectInvalidNec {
-      validate("card_form", form)
+      validate("card_form", form)(service)
     } mustBe Seq("card_form.address.streets of type '[string]': element in position[1] must be a string and not null")
   }
 
