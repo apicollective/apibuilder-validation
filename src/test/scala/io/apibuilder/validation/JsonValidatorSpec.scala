@@ -156,8 +156,8 @@ class JsonValidatorSpec extends AnyWordSpec with Matchers with Helpers with Test
   }
 
   "validates a float" in {
-    validate("float", Json.parse("123.45")).toOption.get.as[Float] must equal(123.45)
-    validate("float", Json.parse("123")).toOption.get.as[Float] must equal(123)
+    validate("float", Json.parse("123.45")).toOption.get.as[Float] must equal(123.45.toFloat)
+    validate("float", Json.parse("123")).toOption.get.as[Float] must equal(123.toFloat)
     validateError("float", JsString(" ")) mustBe Seq("value must be a valid float")
   }
 
