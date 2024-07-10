@@ -5,6 +5,7 @@
  */
 package io.apibuilder.spec.v0.models {
 
+  sealed trait ResponseCode extends _root_.scala.Product with _root_.scala.Serializable
   /**
    * Used to indicate an API concern for a field that is specific to the field's
    * usage but not necessarily its data type. For example, you might use annotations
@@ -241,12 +242,8 @@ package io.apibuilder.spec.v0.models {
     attributes: Seq[io.apibuilder.spec.v0.models.Attribute] = Nil
   )
 
-  /**
-   * @param code Can be a http status code (eg 200) or the string 'Default'
-   */
-
   final case class Response(
-    code: String,
+    code: io.apibuilder.spec.v0.models.ResponseCode,
     `type`: String,
     headers: _root_.scala.Option[Seq[io.apibuilder.spec.v0.models.Header]] = None,
     description: _root_.scala.Option[String] = None,
@@ -327,6 +324,28 @@ package io.apibuilder.spec.v0.models {
     default: _root_.scala.Option[Boolean] = None,
     discriminatorValue: _root_.scala.Option[String] = None
   )
+
+  /**
+   * Provides future compatibility in clients - in the future, when a type is added
+   * to the union ResponseCode, it will need to be handled in the client code. This
+   * implementation will deserialize these future types as an instance of this class.
+   *
+   * @param description Information about the type that we received that is undefined in this version of
+   *        the client.
+   */
+
+  final case class ResponseCodeUndefinedType(
+    description: String
+  ) extends ResponseCode
+
+  /**
+   * Wrapper class to support the union types containing the datatype[integer]
+   */
+
+  final case class ResponseCodeInt(
+    value: Int
+  ) extends ResponseCode
+
   sealed trait Method extends _root_.scala.Product with _root_.scala.Serializable
 
   object Method {
@@ -399,6 +418,38 @@ package io.apibuilder.spec.v0.models {
     def apply(value: String): ParameterLocation = fromString(value).getOrElse(UNDEFINED(value))
 
     def fromString(value: String): _root_.scala.Option[ParameterLocation] = byName.get(value.toLowerCase)
+
+  }
+
+  sealed trait ResponseCodeOption extends ResponseCode
+
+  object ResponseCodeOption {
+
+    case object Default extends ResponseCodeOption { override def toString = "Default" }
+    /**
+     * UNDEFINED captures values that are sent either in error or
+     * that were added by the server after this library was
+     * generated. We want to make it easy and obvious for users of
+     * this library to handle this case gracefully.
+     *
+     * We use all CAPS for the variable name to avoid collisions
+     * with the camel cased values above.
+     */
+    final case class UNDEFINED(override val toString: String) extends ResponseCodeOption
+
+    /**
+     * all returns a list of all the valid, known values. We use
+     * lower case to avoid collisions with the camel cased values
+     * above.
+     */
+    val all: scala.List[ResponseCodeOption] = scala.List(Default)
+
+    private
+    val byName: Map[String, ResponseCodeOption] = all.map(x => x.toString.toLowerCase -> x).toMap
+
+    def apply(value: String): ResponseCodeOption = fromString(value).getOrElse(UNDEFINED(value))
+
+    def fromString(value: String): _root_.scala.Option[ResponseCodeOption] = byName.get(value.toLowerCase)
 
   }
 
@@ -496,6 +547,38 @@ package io.apibuilder.spec.v0.models {
     implicit def jsonWritesApibuilderSpecParameterLocation: play.api.libs.json.Writes[ParameterLocation] = {
       (obj: io.apibuilder.spec.v0.models.ParameterLocation) => {
         io.apibuilder.spec.v0.models.json.jsonWritesApibuilderSpecParameterLocation(obj)
+      }
+    }
+
+    implicit val jsonReadsApibuilderSpecResponseCodeOption: play.api.libs.json.Reads[io.apibuilder.spec.v0.models.ResponseCodeOption] = new play.api.libs.json.Reads[io.apibuilder.spec.v0.models.ResponseCodeOption] {
+      def reads(js: play.api.libs.json.JsValue): play.api.libs.json.JsResult[io.apibuilder.spec.v0.models.ResponseCodeOption] = {
+        js match {
+          case v: play.api.libs.json.JsString => play.api.libs.json.JsSuccess(io.apibuilder.spec.v0.models.ResponseCodeOption(v.value))
+          case _ => {
+            (js \ "value").validate[String] match {
+              case play.api.libs.json.JsSuccess(v, _) => play.api.libs.json.JsSuccess(io.apibuilder.spec.v0.models.ResponseCodeOption(v))
+              case err: play.api.libs.json.JsError =>
+                (js \ "response_code_option").validate[String] match {
+                  case play.api.libs.json.JsSuccess(v, _) => play.api.libs.json.JsSuccess(io.apibuilder.spec.v0.models.ResponseCodeOption(v))
+                  case err: play.api.libs.json.JsError => err
+                }
+            }
+          }
+        }
+      }
+    }
+
+    def jsonWritesApibuilderSpecResponseCodeOption(obj: io.apibuilder.spec.v0.models.ResponseCodeOption) = {
+      play.api.libs.json.JsString(obj.toString)
+    }
+
+    def jsObjectResponseCodeOption(obj: io.apibuilder.spec.v0.models.ResponseCodeOption) = {
+      play.api.libs.json.Json.obj("value" -> play.api.libs.json.JsString(obj.toString))
+    }
+
+    implicit def jsonWritesApibuilderSpecResponseCodeOption: play.api.libs.json.Writes[ResponseCodeOption] = {
+      (obj: io.apibuilder.spec.v0.models.ResponseCodeOption) => {
+        io.apibuilder.spec.v0.models.json.jsonWritesApibuilderSpecResponseCodeOption(obj)
       }
     }
 
@@ -1126,7 +1209,7 @@ package io.apibuilder.spec.v0.models {
 
     implicit def jsonReadsApibuilderSpecResponse: play.api.libs.json.Reads[io.apibuilder.spec.v0.models.Response] = {
       for {
-        code <- (__ \ "code").read[String]
+        code <- (__ \ "code").read[io.apibuilder.spec.v0.models.ResponseCode]
         `type` <- (__ \ "type").read[String]
         headers <- (__ \ "headers").readNullable[Seq[io.apibuilder.spec.v0.models.Header]]
         description <- (__ \ "description").readNullable[String]
@@ -1137,7 +1220,7 @@ package io.apibuilder.spec.v0.models {
 
     def jsObjectResponse(obj: io.apibuilder.spec.v0.models.Response): play.api.libs.json.JsObject = {
       play.api.libs.json.Json.obj(
-        "code" -> play.api.libs.json.JsString(obj.code),
+        "code" -> io.apibuilder.spec.v0.models.json.jsObjectResponseCode(obj.code),
         "type" -> play.api.libs.json.JsString(obj.`type`)
       ) ++ (obj.headers match {
         case None => play.api.libs.json.Json.obj()
@@ -1299,6 +1382,47 @@ package io.apibuilder.spec.v0.models {
     implicit def jsonWritesApibuilderSpecUnionType: play.api.libs.json.Writes[UnionType] = {
       (obj: io.apibuilder.spec.v0.models.UnionType) => {
         io.apibuilder.spec.v0.models.json.jsObjectUnionType(obj)
+      }
+    }
+
+    implicit def jsonReadsApibuilderSpecResponseCodeInt: play.api.libs.json.Reads[io.apibuilder.spec.v0.models.ResponseCodeInt] = {
+      (__ \ "value").read[Int].map { x => ResponseCodeInt(value = x) }
+    }
+
+    implicit def jsonReadsApibuilderSpecResponseCode[T <: io.apibuilder.spec.v0.models.ResponseCode]: play.api.libs.json.Reads[T] = (json: play.api.libs.json.JsValue) => {
+      val default = jsonReadsApibuilderSpecResponseCodeInt.reads(json).map(_.asInstanceOf[T])
+      val all: Seq[play.api.libs.json.JsResult[T]] = Seq(
+        default,
+        jsonReadsApibuilderSpecResponseCodeOption.reads(json).map(_.asInstanceOf[T])
+      )
+      all.view.find(_.isSuccess).getOrElse(default)
+    }
+
+
+
+    implicit def jsonReadsApibuilderSpecResponseCodeSeq[T <: io.apibuilder.spec.v0.models.ResponseCode]: play.api.libs.json.Reads[Seq[T]] = {
+      case a: play.api.libs.json.JsArray => {
+        val all: Seq[play.api.libs.json.JsResult[io.apibuilder.spec.v0.models.ResponseCode]] = a.value.map(jsonReadsApibuilderSpecResponseCode.reads).toSeq
+
+        all.collect { case e: play.api.libs.json.JsError => e }.toList match {
+          case Nil => play.api.libs.json.JsSuccess(all.collect { case play.api.libs.json.JsSuccess(v, _) => v.asInstanceOf[T] })
+          case errors => play.api.libs.json.JsError(play.api.libs.json.JsError.merge(errors.flatMap(_.errors), Nil))
+        }
+      }
+      case other => play.api.libs.json.JsError(s"Expected array but found [" + other.getClass.getName + "]")
+    }
+
+    def jsObjectResponseCode(obj: io.apibuilder.spec.v0.models.ResponseCode): play.api.libs.json.JsObject = {
+      obj match {
+        case x: io.apibuilder.spec.v0.models.ResponseCodeInt => play.api.libs.json.Json.obj("integer" -> play.api.libs.json.Json.obj("value" -> play.api.libs.json.JsNumber(x.value)))
+        case x: io.apibuilder.spec.v0.models.ResponseCodeOption => play.api.libs.json.Json.obj("response_code_option" -> play.api.libs.json.JsString(x.toString))
+        case x: io.apibuilder.spec.v0.models.ResponseCodeUndefinedType => sys.error(s"The type[io.apibuilder.spec.v0.models.ResponseCodeUndefinedType] should never be serialized")
+      }
+    }
+
+    implicit def jsonWritesApibuilderSpecResponseCode[T <: io.apibuilder.spec.v0.models.ResponseCode]: play.api.libs.json.Writes[T] = {
+      (obj: io.apibuilder.spec.v0.models.ResponseCode) => {
+        io.apibuilder.spec.v0.models.json.jsObjectResponseCode(obj)
       }
     }
   }
