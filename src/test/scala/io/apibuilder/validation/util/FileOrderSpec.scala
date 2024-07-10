@@ -1,30 +1,30 @@
 package io.apibuilder.validation.util
 
-import io.apibuilder.validation.helpers
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.funspec.AnyFunSpec
+import io.apibuilder.helpers.FileHelpers
+import org.scalatest.matchers.must.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class FileOrderSpec extends AnyFunSpec with Matchers
-  with helpers.FileHelpers
+class FileOrderSpec extends AnyWordSpec with Matchers
+  with FileHelpers
 {
-  it("sortOrder with no ordering file is alphabetical") {
-    FileOrder(None).sort(Seq("b", "a")) should equal(
+  "sortOrder with no ordering file is alphabetical" in {
+    FileOrder(None).sort(Seq("b", "a")) must equal(
       List("a", "b")
     )
   }
 
-  it("sortOrder respects ordering file") {
+  "sortOrder respects ordering file" in {
     FileOrder(
       Some(writeToTempFile(contents = "b\na"))
-    ).sort(Seq("b", "a")) should equal(
+    ).sort(Seq("b", "a")) must equal(
       List("b", "a")
     )
   }
 
-  it("sortOrder respects ordering file for entries in it, alphabetical for rest") {
+  "sortOrder respects ordering file for entries in it, alphabetical for rest" in {
     FileOrder(
       Some(writeToTempFile(contents = "c"))
-    ).sort(Seq("c", "b", "a")) should equal(
+    ).sort(Seq("c", "b", "a")) must equal(
       List("c", "a", "b")
     )
   }

@@ -1,8 +1,7 @@
 package io.apibuilder.validation
 
 import io.apibuilder.builders.ApiBuilderServiceBuilders
-import io.apibuilder.helpers.{ApiBuilderServiceValidatorHelpers, TestHelpers}
-import io.apibuilder.validation.helpers.{FileHelpers, Helpers}
+import io.apibuilder.helpers.{ApiBuilderServiceValidatorHelpers, FileHelpers, Helpers, TestHelpers}
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.must.Matchers
 import play.api.libs.json.Json

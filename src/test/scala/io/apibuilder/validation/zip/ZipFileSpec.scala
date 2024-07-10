@@ -1,8 +1,7 @@
 package io.apibuilder.validation.zip
 
+import io.apibuilder.helpers.FileHelpers
 import java.io.File
-import io.apibuilder.validation.helpers
-import io.apibuilder.validation.helpers.FileHelpers
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 

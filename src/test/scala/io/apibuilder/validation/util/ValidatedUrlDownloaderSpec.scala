@@ -2,12 +2,12 @@ package io.apibuilder.validation.util
 
 import cats.data.NonEmptyChain
 import cats.data.Validated.{Invalid, Valid}
-import cats.implicits._
-import io.apibuilder.validation.helpers
+import cats.implicits.*
+import io.apibuilder.helpers.FileHelpers
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpec
 
-class ValidatedUrlDownloaderSpec extends AnyFunSpec with Matchers with helpers.FileHelpers {
+class ValidatedUrlDownloaderSpec extends AnyFunSpec with Matchers with FileHelpers {
   describe("java.net.URL") {
     it("handles the happy path") {
       val urlStr = writeToTempFile("").toURI.toURL

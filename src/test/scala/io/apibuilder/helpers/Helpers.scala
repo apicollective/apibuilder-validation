@@ -1,4 +1,4 @@
-package io.apibuilder.validation.helpers
+package io.apibuilder.helpers
 
 import io.apibuilder.validation.{AnyType, ApiBuilderService, ApiBuilderType, MultiService}
 

@@ -1,8 +1,8 @@
 package io.apibuilder.validation
 
 import io.apibuilder.builders.ApiBuilderServiceBuilders
+import io.apibuilder.helpers.Helpers
 import io.apibuilder.spec.v0.models.{Enum, Model, Union}
-import io.apibuilder.validation.helpers.Helpers
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 

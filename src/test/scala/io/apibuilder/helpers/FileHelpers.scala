@@ -1,7 +1,8 @@
-package io.apibuilder.validation.helpers
+package io.apibuilder.helpers
+
+import io.apibuilder.validation.zip.FileUtil
 
 import java.io.File
-import io.apibuilder.validation.zip.FileUtil
 
 trait FileHelpers {
 

@@ -1,9 +1,8 @@
 package io.apibuilder.validation
 
 import io.apibuilder.builders.ApiBuilderServiceBuilders
-import io.apibuilder.helpers.TestHelpers
+import io.apibuilder.helpers.{Helpers, TestHelpers}
 import io.apibuilder.spec.v0.models.{Method, Operation}
-import io.apibuilder.validation.helpers.Helpers
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
