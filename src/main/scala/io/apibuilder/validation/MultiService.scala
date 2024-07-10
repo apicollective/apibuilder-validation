@@ -1,9 +1,11 @@
 package io.apibuilder.validation
 
-import io.apibuilder.spec.v0.models._
+import cats.implicits._
+import cats.data.ValidatedNec
+import io.apibuilder.spec.v0.models.*
 import io.apibuilder.validation.util.{FileOrder, StandardErrors}
 import io.apibuilder.validation.zip.ZipFileReader
-import play.api.libs.json._
+import play.api.libs.json.*
 
 /**
   * Wrapper to work with multiple API Builder services.
@@ -63,7 +65,7 @@ trait MultiService extends ResponseHelpers {
     */
   final def upcast(apiBuilderOperation: ApiBuilderOperation, js: JsValue): ValidatedNec[String, JsValue] = {
     findBodyType(apiBuilderOperation) match {
-      case None => Right(js)
+      case None => js.validNec
       case Some(bodyType) => upcast(bodyType, js)
     }
   }
@@ -82,23 +84,22 @@ trait MultiService extends ResponseHelpers {
   }
 
   final def upcastOperationBody(method: Method, path: String, js: JsValue): ValidatedNec[String, JsValue] = {
-    validateOperation(method, path) match {
-      case Left(errors) => Left(errors)
-      case Right(op) => upcast(op, js)
+    validateOperation(method, path).andThen { op =>
+      upcast(op, js)
     }
   }
 
   final def upcastType(defaultNamespace: String, typeName: String, js: JsValue): ValidatedNec[String, JsValue] = {
     findType(defaultNamespace = defaultNamespace, typeName = typeName) match {
-      case None => Right(js)
+      case None => js.validNec
       case Some(t) => upcast(t, js)
     }
   }
 
   final def validateOperation(method: Method, path: String): ValidatedNec[String, ApiBuilderOperation] = {
     findOperation(method, path) match {
-      case Some(op) => Right(op)
-      case None => Left(operationErrorMessage(method, path))
+      case Some(op) => op.validNec
+      case None => operationErrorMessage(method, path).invalidNec
     }
   }
 
@@ -107,19 +108,19 @@ trait MultiService extends ResponseHelpers {
     * Returns a nice error message explaining that this method is unavailable
     * with hints as to what may be (e.g. alternate methods)
     */
-  private def operationErrorMessage(method: Method, path: String): Seq[String] = {
+  private def operationErrorMessage(method: Method, path: String): String = {
     method match {
       case Method.UNDEFINED(name) => {
-        Seq(StandardErrors.invalidMethodError(name))
+        StandardErrors.invalidMethodError(name)
       }
       case _ => {
         val availableMethods = Method.all.filterNot(_ == method).filter { m =>
           findOperation(m, path).nonEmpty
         }
         if (availableMethods.isEmpty) {
-          Seq(s"HTTP path '$path' is not defined")
+          s"HTTP path '$path' is not defined"
         } else {
-          Seq(s"HTTP method '$method' not defined for path '$path' - Available methods: ${availableMethods.map(_.toString).mkString(", ")}")
+          s"HTTP method '$method' not defined for path '$path' - Available methods: ${availableMethods.map(_.toString).mkString(", ")}"
         }
       }
     }
@@ -155,29 +156,20 @@ object MultiService {
   * returning either a list of errors or an instance of MultiService
   */
   def fromUrls(urls: Seq[String]): ValidatedNec[String, MultiService] = {
-    val eithers = urls.flatMap { url =>
+    urls.flatMap { url =>
       if (ZipFileReader.isZipFile(url)) {
-        ZipFileReader.fromUrl(url) match {
-          case Left(errors) => Seq(Left(errors))
-          case Right(reader) => {
-            val fileSorter = FileOrder(reader.entries.find(_.name.toLowerCase() == OrderByFileName).map(_.file))
-            reader.entries
-              .filter { e => ZipFileReader.isJsonFile(e.name) }
-              .sortBy { e => fileSorter.sortOrder(e.name) }
-              .map { e => ApiBuilderService.fromFile(e.file) }
-          }
+        ZipFileReader.fromUrl(url).map { reader =>
+          val fileSorter = FileOrder(reader.entries.find(_.name.toLowerCase() == OrderByFileName).map(_.file))
+          reader.entries
+            .filter { e => ZipFileReader.isJsonFile(e.name) }
+            .sortBy { e => fileSorter.sortOrder(e.name) }
+            .map { e => ApiBuilderService.fromFile(e.file) }
         }
       } else {
         Seq(ApiBuilderService.fromUrl(url))
       }
-    }
-
-    eithers.flatMap(_.left.getOrElse(Nil)).toList match {
-      case Nil => {
-        val services = eithers.collect { case Right(r) => r }
-        Right(MultiServiceImpl(services.toList))
-      }
-      case errors => Left(errors)
+    }.sequence.map { services =>
+      MultiServiceImpl(services.toList)
     }
   }
 

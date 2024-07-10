@@ -48,8 +48,10 @@ object UrlDownloader {
   import io.apibuilder.validation.util.Implicits._
 
   def withInputStream[T](url: String)(f: InputStream => ValidatedNec[String, T]): ValidatedNec[String, T] =
-    ValidatedUrlDownloader.validateUrl(url).toEither.leftToSeq.flatMap(ValidatedUrlDownloader.withInputStream(_, f, e => Left(Seq(e))))
+    ValidatedUrlDownloader.validateUrl(url).andThen { url =>
+      ValidatedUrlDownloader.withInputStream(url, f, e => e.invalidNec)
+    }
 
   def withInputStream[T](url: URL)(f: InputStream => ValidatedNec[String, T]): ValidatedNec[String, T] =
-    ValidatedUrlDownloader.withInputStream(url, f, e => Left(Seq(e)))
+    ValidatedUrlDownloader.withInputStream(url, f, e => e.invalidNec)
 }

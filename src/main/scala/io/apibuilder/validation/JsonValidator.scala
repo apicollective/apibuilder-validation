@@ -39,43 +39,43 @@ case class JsonValidator(validator: ValidatedJsonValidator) {
     validator.findType(defaultNamespace, name)
 
   def validate(typeName: String, js: JsValue, defaultNamespace: Option[String], prefix: Option[String] = None): ValidatedNec[String, JsValue] =
-    validator.validate(typeName, js, defaultNamespace, prefix).toEither.leftToSeq
+    validator.validate(typeName, js, defaultNamespace, prefix)
 
   def validateType(typ: AnyType, js: JsValue, prefix: Option[String] = None): ValidatedNec[String, JsValue] =
-    validator.validateType(typ, js, prefix).toEither.leftToSeq
+    validator.validateType(typ, js, prefix)
 
   def validateString(prefix: String, js: JsValue): ValidatedNec[String, JsString] =
-    validator.validateString(prefix, js).toEither.leftToSeq
+    validator.validateString(prefix, js)
 
   def validateArray(prefix: String, internalType: String, js: JsValue, defaultNamespace: Option[String]): ValidatedNec[String, JsArray] =
-    validator.validateArray(prefix, internalType, js, defaultNamespace).toEither.leftToSeq
+    validator.validateArray(prefix, internalType, js, defaultNamespace)
 
   def validateObject(prefix: String, internalType: String, js: JsValue, defaultNamespace: Option[String]): ValidatedNec[String, JsObject] =
-    validator.validateObject(prefix, internalType, js, defaultNamespace).toEither.leftToSeq
+    validator.validateObject(prefix, internalType, js, defaultNamespace)
 
   def validateInteger(prefix: String, js: JsValue): ValidatedNec[String, JsNumber] =
-    validator.validateInteger(prefix, js).toEither.leftToSeq
+    validator.validateInteger(prefix, js)
 
   def validateDouble(prefix: String, js: JsValue): ValidatedNec[String, JsNumber] =
-    validator.validateDouble(prefix, js).toEither.leftToSeq
+    validator.validateDouble(prefix, js)
 
   def validateDecimal(prefix: String, js: JsValue): ValidatedNec[String, JsNumber] =
-    validator.validateDecimal(prefix, js).toEither.leftToSeq
+    validator.validateDecimal(prefix, js)
 
   def validateLong(prefix: String, js: JsValue): ValidatedNec[String, JsNumber] =
-    validator.validateLong(prefix, js).toEither.leftToSeq
+    validator.validateLong(prefix, js)
 
   def validateUuid(prefix: String, js: JsValue): ValidatedNec[String, JsString] =
-    validator.validateUuid(prefix, js).toEither.leftToSeq
+    validator.validateUuid(prefix, js)
 
   def validateDateIso8601(prefix: String, js: JsValue): ValidatedNec[String, JsString] =
-    validator.validateDateIso8601(prefix, js).toEither.leftToSeq
+    validator.validateDateIso8601(prefix, js)
 
   def validateDateTimeIso8601(prefix: String, js: JsValue): ValidatedNec[String, JsString] =
-    validator.validateDateTimeIso8601(prefix, js).toEither.leftToSeq
+    validator.validateDateTimeIso8601(prefix, js)
 
   def validateBoolean(prefix: String, js: JsValue): ValidatedNec[String, JsBoolean] =
-    validator.validateBoolean(prefix, js).toEither.leftToSeq
+    validator.validateBoolean(prefix, js)
 }
 
 object ValidatedJsonValidator {

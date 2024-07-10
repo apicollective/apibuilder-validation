@@ -1,5 +1,6 @@
 package io.apibuilder.validation
 
+import cats.data.ValidatedNec
 import io.apibuilder.spec.v0.models.Method
 import play.api.libs.json.JsValue
 

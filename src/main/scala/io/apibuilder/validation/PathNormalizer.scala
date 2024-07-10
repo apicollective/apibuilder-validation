@@ -1,5 +1,7 @@
 package io.apibuilder.validation
 
+import cats.data.ValidatedNec
+import cats.implicits.*
 import io.apibuilder.spec.v0.models.{Method, Operation, Service}
 import io.apibuilder.validation.util.StandardErrors
 
@@ -59,24 +61,23 @@ case class PathNormalizer(operations: Seq[Operation]) {
   final def resolve(method: Method, path: String): ValidatedNec[String, Operation] = {
     method match {
       case Method.UNDEFINED(m) => {
-        Left(Seq(StandardErrors.invalidMethodError(m)))
+        StandardErrors.invalidMethodError(m).invalidNec
       }
       case _ => {
         staticRouteMap.find(method, path) match {
           case Some(opWithRoute) => {
-            Right(opWithRoute.op)
+            opWithRoute.op.validNec
           }
           case None => {
             dynamicRouteMap.find(method, path) match {
-              case None => Left(Seq(s"HTTP Operation '$method $path' is not defined"))
-              case Some(route) => Right(route.op)
+              case None => s"HTTP Operation '$method $path' is not defined".invalidNec
+              case Some(route) => route.op.validNec
             }
           }
         }
       }
     }
   }
-
 }
 
 private[validation] case class OperationWithRoute(

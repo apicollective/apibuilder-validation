@@ -1,13 +1,15 @@
 package io.apibuilder.validation
 
+import cats.implicits._
+import cats.data.ValidatedNec
+
 import java.io.{BufferedInputStream, ByteArrayOutputStream, File, FileInputStream, InputStream}
-
 import io.apibuilder.spec.v0.models.{Method, Operation, Service}
-import io.apibuilder.spec.v0.models.json._
-import java.nio.charset.StandardCharsets
+import io.apibuilder.spec.v0.models.json.*
 
+import java.nio.charset.StandardCharsets
 import io.apibuilder.validation.util.UrlDownloader
-import play.api.libs.json._
+import play.api.libs.json.*
 
 /**
   * Wraps a single API Builder service, providing helpers to validate
@@ -34,10 +36,7 @@ case class ApiBuilderService(
   }
 
   def findOperation(method: Method, path: String): Option[Operation] = {
-    normalizer.resolve(method, path) match {
-      case Right(op) => Some(op)
-      case Left(_) => None
-    }
+    normalizer.resolve(method, path).toOption
   }
 
 }
@@ -80,8 +79,8 @@ object ApiBuilderService {
 
   def toService(contents: String): ValidatedNec[String, ApiBuilderService] = {
     Json.parse(contents).validate[Service] match {
-      case s: JsSuccess[Service] => Right(ApiBuilderService(s.get))
-      case e: JsError => Left(Seq(s"Error parsing service: $e"))
+      case JsSuccess(s: Service, _) => ApiBuilderService(s).validNec
+      case e: JsError => s"Error parsing service: $e".invalidNec
     }
   }
 
