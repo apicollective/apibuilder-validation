@@ -1,11 +1,6 @@
 package io.apibuilder.validation.helpers
 
-import java.io.File
-import io.apibuilder.spec.v0.models.Service
-import io.apibuilder.spec.v0.models.json._
-import io.apibuilder.validation.zip.FileUtil
-import io.apibuilder.validation.{AnyType, ApiBuilderService, ApiBuilderType, MultiService, MultiServiceImpl}
-import play.api.libs.json.Json
+import io.apibuilder.validation.{AnyType, ApiBuilderType, MultiService}
 
 trait Helpers {
 
