@@ -12,16 +12,17 @@ class ApiBuilderServiceSpec extends AnyWordSpec with Matchers with Helpers with 
 
   "from non existent url" must {
     "invalid" in {
+      val url = s"file://${randomString()}"
       expectInvalidNec {
-        ApiBuilderService.fromUrl(s"file://${randomString()}")
-      } mustBe Seq("TODO")
+        ApiBuilderService.fromUrl(url)
+      }.head.contains("Error downloading URL") mustBe true
     }
 
     "valid" in {
       val service = makeService()
-      val file = writeToTempFile(Json.toJson(service))
+      val file = writeToTempFile(Json.toJson(service).toString)
       expectValid {
-        ApiBuilderService.toService(readFile(s"file://${file.getAbsolutePath}))
+        ApiBuilderService.fromUrl(s"file://${file.getAbsolutePath}")
       }
     }
   }
