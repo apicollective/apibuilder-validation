@@ -14,6 +14,12 @@ class JsonValidatorSpec extends AnyWordSpec with Matchers with Helpers with Test
   private lazy val validator: JsonValidator = JsonValidator(
     ApiBuilderService(
       makeService(
+        enums = Seq(
+          makeEnum("avs_code", values = Seq(
+            makeEnumValue("match"),
+            makeEnumValue("partial"),
+          ))
+        ),
         models = Seq(
           makeModel("webhook"),
           makeModel("webhook_form", fields = Seq(
@@ -22,6 +28,12 @@ class JsonValidatorSpec extends AnyWordSpec with Matchers with Helpers with Test
           )),
           makeModel("booleans", fields = Seq(
             makeField("value", `type` = "boolean")
+          )),
+          makeModel("avs", fields = Seq(
+            makeField("code", `type` = "avs_code")
+          )),
+          makeModel("invitation_form", fields = Seq(
+            makeField("name", `type` = "object")
           ))
         ),
       )
@@ -195,23 +207,18 @@ class JsonValidatorSpec extends AnyWordSpec with Matchers with Helpers with Test
     val form = Json.obj(
       "code" -> "bad"
     )
-    validateError("avs", form) mustBe Seq("avs.code invalid value 'bad'. Valid values for the enum 'avs_code' are: 'match', 'partial', 'unsupported', 'no_match'")
+    validateError("avs", form) mustBe Seq("avs.code invalid value 'bad'. Valid values for the enum 'avs_code' are: 'match', 'partial'")
   }
 
   "validates enum values that are passed in as empty strings" in {
     val form = Json.obj(
       "code" -> ""
     )
-    validateError("avs", form) mustBe Seq("avs.code invalid value ''. Valid values for the enum 'avs_code' are: 'match', 'partial', 'unsupported', 'no_match'")
+    validateError("avs", form) mustBe Seq("avs.code invalid value ''. Valid values for the enum 'avs_code' are: 'match', 'partial'")
   }
 
   "validates nested models" in {
     val form = Json.obj(
-      "number" -> 123,
-      "cvv" -> 456,
-      "expiration_month" -> "01",
-      "expiration_year" -> "2019",
-      "name" -> "Joe Smith",
       "address" -> Json.obj(
         "streets" -> JsArray(Seq(JsString("1 main st"), JsNull))
       )
@@ -240,9 +247,6 @@ class JsonValidatorSpec extends AnyWordSpec with Matchers with Helpers with Test
   "Properly reports errors on js objects" in {
     val form = Json.obj(
       "name" -> "",
-      "email" -> "test-user@test.flow.io",
-      "organization" -> "demo",
-      "role" -> "member"
     )
 
     validateError("invitation_form", form) mustBe Seq("invitation_form.name must be an object and not a string")
