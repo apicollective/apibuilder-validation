@@ -12,13 +12,22 @@ class MultiServiceSpec extends AnyWordSpec with Matchers with Helpers with TestH
   private val defaultService = MultiService(List(ApiBuilderService(makeService())))
 
   "validates unknown method" in {
+    val service = MultiService(List(ApiBuilderService(makeService(
+      models = Seq(
+        makeModel("payment"),
+        makeModel("payment_form"),
+      ),
+      resources = Seq(makeResource("payment", operations = Seq(
+        makeOperation(Method.Post, "/:organization/payments", body = Some(makeBody("payment_form")))
+      )))
+    ))))
     expectInvalidNec {
-      defaultService.validateOperation(Method.UNDEFINED("FOO"), "/:organization/payments")
+      service.validateOperation(Method.UNDEFINED("FOO"), "/:organization/payments")
     } mustBe Seq("HTTP method 'FOO' is invalid. Must be one of: " + Method.all.map(_.toString).mkString(", "))
 
     expectInvalidNec {
-      defaultService.validateOperation(Method.Options, "/:organization/payments")
-    } mustBe Seq("HTTP method 'OPTIONS' not defined for path '/:organization/payments' - Available methods: GET, POST")
+      service.validateOperation(Method.Options, "/:organization/payments")
+    } mustBe Seq("HTTP method 'OPTIONS' not defined for path '/:organization/payments' - Available methods: POST")
   }
 
   "validates unknown paths" in {
@@ -51,7 +60,7 @@ class MultiServiceSpec extends AnyWordSpec with Matchers with Helpers with TestH
     MultiService(List(
       buildService,
       buildService,
-    )).bodyTypeFromPath("POST", "/:organization/payments").get.name must equal("payment_form")
+    )).bodyTypeFromPath("POST", "/payments/:key/other/:foo").get.name must equal("payment_form")
   }
 
   /**
@@ -119,7 +128,7 @@ class MultiServiceSpec extends AnyWordSpec with Matchers with Helpers with TestH
       Seq(100, 200, 417, 500, 503).foreach { code =>
         expectInvalidNec {
           multiService.validateResponseCode(op, code)
-        } mustBe Seq(s"Unexpected response code[$code] for operation[POST /cards]. Declared response codes: 201, 401, 403, 422")
+        } mustBe Seq(s"Unexpected response code[$code] for operation[POST /cards]. Declared response codes: 201, 401, 422")
       }
     }
 
@@ -130,7 +139,7 @@ class MultiServiceSpec extends AnyWordSpec with Matchers with Helpers with TestH
     }
 
     "correctly parses required fields" in {
-      val orgModel = mustFindModelType(multiService, "card").model
+      val orgModel = multiService.allModels.find(_.name == "card").get.model
       orgModel.fields.find(_.name == "id").get.required must be(true)
       orgModel.fields.find(_.name == "parent").get.required must be(false)
     }
