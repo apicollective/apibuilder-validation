@@ -1,5 +1,7 @@
 package io.apibuilder.validation
 
+import cats.data.ValidatedNec
+import cats.implicits._
 import io.apibuilder.spec.v0.models._
 
 trait ResponseHelpers {
@@ -34,25 +36,20 @@ trait ResponseHelpers {
     }
   }
 
-  def validateResponseCode(apiBuilderOperation: ApiBuilderOperation, responseCode: Int): Either[String, Response] = {
-    validateResponseCode(apiBuilderOperation.operation, responseCode)
+  def validateResponseCode(op: ApiBuilderOperation, responseCode: Int): ValidatedNec[String, Response] = {
+    validateResponseCode(op.operation, responseCode)
   }
 
   /**
     * If the responseCode is valid for the operation, returns a Right(Unit) - otherwise
     * returns an error message detailing the difference in expectation.
     */
-  def validateResponseCode(operation: Operation, responseCode: Int): Either[String, Response] = {
+  def validateResponseCode(operation: Operation, responseCode: Int): ValidatedNec[String, Response] = {
     response(operation, responseCode) match {
-      case Some(r) => {
-        Right(r)
-      }
-
+      case Some(r) => r.validNec
       case None => {
-        Left(
-          s"Unexpected response code[$responseCode] for operation[${operation.method} ${operation.path}]. Declared response codes: " +
-            declaredResponseCodes(operation).mkString(", ")
-        )
+        (s"Unexpected response code[$responseCode] for operation[${operation.method} ${operation.path}]. Declared response codes: " +
+            declaredResponseCodes(operation).mkString(", ")).invalidNec
       }
     }
   }
