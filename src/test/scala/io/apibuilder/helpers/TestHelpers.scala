@@ -7,6 +7,7 @@ import java.util.UUID
 trait TestHelpers {
 
   def randomString(): String = UUID.randomUUID().toString
+  def randomEmail(): String = s"${randomString()}@test.apibuilder.io"
 
   def expectInvalid[T](value: Validated[T, ?]): T = {
     value match {
