@@ -26,7 +26,8 @@ class ServiceOperationResolverSpec extends AnyWordSpec with Matchers
           resolver.findOperation(op.method, op.path.replaceAll(":organization", i.toString))
         }
       }
-      println(s"$testCase [${operations.length} operations]: $result ms")
+      val perLookup = result / operations.length * 10
+      println(s"$testCase [${operations.length} operations, 10 lookups each]: $result ms [perLookup: $perLookup]")
       result
     }
 
