@@ -6,8 +6,8 @@ import io.apibuilder.helpers.TestHelpers
 import io.apibuilder.spec.v0.models.Service
 import io.apibuilder.validation.helpers.Helpers
 import org.joda.time.DateTime
-import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.must.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json.*
 
 class JsonValidatorSpec extends AnyWordSpec with Matchers with Helpers with TestHelpers with ApiBuilderServiceBuilders {
@@ -335,19 +335,19 @@ class JsonValidatorSpec extends AnyWordSpec with Matchers with Helpers with Test
     validateError("user", Json.obj())(service) mustBe Seq("Missing required field for user: emails")
   }
 
-  /*
-  "expiration year" in {
-    val expiration = apiBuilderMultiService.findType("io.apibuilder.explicit.validation.v0.models.expiration").getOrElse {
-      sys.error("Did not find 'expiration' model")
-    }
-    apiBuilderMultiService.upcast(
-      expiration, Json.obj(
-        "month" -> 1,
-        "year" -> "a",
+  "integer" in {
+    val service = makeService(
+      models = Seq(
+        makeModel("user", fields = Seq(
+          makeField("birth_year", `type` = "integer")
+        ))
       )
-    ) must equal(
-      Left(List("expiration.year must be a valid integer"))
     )
+
+    validateError("user", Json.obj(
+      "birth_year" -> "a"
+    ))(service) mustBe Seq("user.birth_year must be a valid integer")
   }
-*/
+
+
 }
