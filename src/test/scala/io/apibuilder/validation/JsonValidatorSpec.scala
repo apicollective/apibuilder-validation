@@ -308,17 +308,17 @@ class JsonValidatorSpec extends AnyWordSpec with Matchers with Helpers with Test
   }
 
   "accept null as optional" in {
-    val form = Json.obj(
-      "description" -> JsNull,
-      "number" -> "1",
-      "locale" -> "en_US",
-      "name" -> "test",
-      "currency" -> "USD",
-      "price" -> 10
+    val service = makeService(
+      models = Seq(
+        makeModel("user", fields = Seq(
+          makeField("description", required = false)
+        ))
+      )
     )
-
     expectValidNec {
-      validate("item_form", form)
+      validate("user", Json.obj(
+        "description" -> JsNull
+      ))(service)
     }
   }
 /*
