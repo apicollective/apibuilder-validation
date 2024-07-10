@@ -156,21 +156,25 @@ object MultiService {
   * returning either a list of errors or an instance of MultiService
   */
   def fromUrls(urls: Seq[String]): ValidatedNec[String, MultiService] = {
-    urls.flatMap { url =>
+    urls.map { url =>
       if (ZipFileReader.isZipFile(url)) {
-        ZipFileReader.fromUrl(url).map { reader =>
-          val fileSorter = FileOrder(reader.entries.find(_.name.toLowerCase() == OrderByFileName).map(_.file))
-          reader.entries
-            .filter { e => ZipFileReader.isJsonFile(e.name) }
-            .sortBy { e => fileSorter.sortOrder(e.name) }
-            .map { e => ApiBuilderService.fromFile(e.file) }
-        }
+        servicesFromZip(url)
       } else {
-        Seq(ApiBuilderService.fromUrl(url))
+        ApiBuilderService.fromUrl(url).map(Seq(_))
       }
     }.sequence.map { services =>
-      MultiServiceImpl(services.toList)
+      MultiServiceImpl(services.flatten.toList)
     }
   }
 
+  private def servicesFromZip(url: String): ValidatedNec[String, Seq[ApiBuilderService]] = {
+    ZipFileReader.fromUrl(url).andThen { reader =>
+      val fileSorter = FileOrder(reader.entries.find(_.name.toLowerCase() == OrderByFileName).map(_.file))
+      reader.entries
+        .filter { e => ZipFileReader.isJsonFile(e.name) }
+        .sortBy { e => fileSorter.sortOrder(e.name) }
+        .map { e => ApiBuilderService.fromFile(e.file) }
+        .sequence
+    }
+  }
 }
