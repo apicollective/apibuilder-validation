@@ -332,7 +332,7 @@ class JsonValidatorSpec extends AnyWordSpec with Matchers with Helpers with Test
       )
     )
 
-    expectInvalidNec("user", Json.obj())(service) mustBe Seq("Missing required field for user: emails")
+    validateError("user", Json.obj())(service) mustBe Seq("Missing required field for user: emails")
   }
 
   /*
