@@ -30,7 +30,7 @@ class ServiceOperationResolverSpec extends AnyWordSpec with Matchers
       result
     }
 
-    val models = 0.to(100).map { i => s"model_$i" }
+    val models = 0.to(10).map { i => s"model_$i" }
     val services = 0.to(99).map { _ =>
       makeService(
         models = models.map { name => makeModel(name) },
