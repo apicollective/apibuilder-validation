@@ -240,18 +240,19 @@ class JsonValidatorSpec extends AnyWordSpec with Matchers with Helpers with Test
   }
 
   "returns appropriate error messages from maps" in {
-    val form = Json.obj(
-      "number" -> "sku-1",
-      "name" -> "test",
-      "currency" -> "USD",
-      "price" -> 10,
-      "locale" -> "en_us",
-      "attributes" -> Json.obj(
-        "a" -> Json.obj()
+    val service = makeService(
+      models = Seq(
+        makeModel("item_form", fields = Seq(
+          makeField("attributes", `type` = "map[string]")
+        ))
       )
     )
 
-    validateError("item_form", form) mustBe Seq("item_form.attributes of type 'map[string]': element[a] must be a string and not an object")
+    validateError("item_form", Json.obj(
+      "attributes" -> Json.obj(
+        "a" -> Json.obj()
+      )
+    ))(service) mustBe Seq("item_form.attributes of type 'map[string]': element[a] must be a string and not an object")
   }
 
   "Properly reports errors on js objects" in {
