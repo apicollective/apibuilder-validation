@@ -38,7 +38,9 @@ class JsonValidatorSpec extends AnyWordSpec with Matchers with Helpers with Test
   )
 
   private def validate(typ: String, js: JsValue)(implicit service: Service = defaultService): ValidatedNec[String, JsValue] = {
-    JsonValidator(ApiBuilderService(service)).validate(
+    val svc = ApiBuilderService(service)
+    mustFindType(svc, typ)
+    JsonValidator(svc).validate(
       typ, js, defaultNamespace = None
     )
   }
@@ -256,11 +258,17 @@ class JsonValidatorSpec extends AnyWordSpec with Matchers with Helpers with Test
   }
 
   "Properly reports errors on js objects" in {
-    val form = Json.obj(
-      "name" -> "",
+    val service = makeService(
+      models = Seq(
+        makeModel("invitation_form", fields = Seq(
+          makeField("name", `type` = "object")
+        ))
+      )
     )
 
-    validateError("invitation_form", form) mustBe Seq("invitation_form.name must be an object and not a string")
+    validateError("invitation_form", Json.obj(
+      "name" -> "",
+    ))(service) mustBe Seq("invitation_form.name must be an object and not a string")
   }
 
   "converts array of length 1 into a single value" in {
