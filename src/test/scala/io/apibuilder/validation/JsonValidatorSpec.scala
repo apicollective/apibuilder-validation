@@ -152,7 +152,7 @@ class JsonValidatorSpec extends AnyFunSpec with Matchers with Helpers {
 
   it("converts booleans where possible") {
     (
-      Booleans.TrueValues.map(JsString) ++ Seq(JsNumber(1))
+      Booleans.TrueValues.map(JsString(_)) ++ Seq(JsNumber(1))
     ).foreach { v =>
       val form = Json.obj(
         "code" -> "match",
@@ -169,7 +169,7 @@ class JsonValidatorSpec extends AnyFunSpec with Matchers with Helpers {
     }
 
     (
-      Booleans.FalseValues.map(JsString) ++ Seq(JsNumber(0))
+      Booleans.FalseValues.map(JsString(_)) ++ Seq(JsNumber(0))
     ).foreach { v =>
       val form = Json.obj(
         "code" -> "match",

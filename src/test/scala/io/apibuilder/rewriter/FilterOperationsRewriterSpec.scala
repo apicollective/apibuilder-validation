@@ -16,14 +16,14 @@ class FilterOperationsRewriterSpec extends AnyWordSpec with Matchers
   }
 
   // Filters resources based on presence of an attribute
-  private def rewrite(resources: Seq[Resource]) = {
+  private def rewrite(resources: Seq[Resource]): Seq[Resource] = {
     FilterOperationsRewriter { op =>
       Some(op).filter(_.attributes.nonEmpty)
     }.rewrite(
       makeMultiService(
         makeService(resources = resources)
       )
-    ).services().map(_.service).flatMap(_.resources)
+    ).services.map(_.service).flatMap(_.resources)
   }
 
   "operations" must {

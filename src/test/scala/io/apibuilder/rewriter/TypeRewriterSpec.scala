@@ -41,7 +41,7 @@ class TypeRewriterSpec extends AnyWordSpec with Matchers
   }
 
   private def firstResource(ms: MultiService): Resource = {
-    ms.services().head.service.resources.head
+    ms.services.head.service.resources.head
   }
 
   "rename" must {

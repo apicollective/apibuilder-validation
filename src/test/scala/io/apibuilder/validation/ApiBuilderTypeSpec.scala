@@ -13,25 +13,25 @@ class ApiBuilderTypeSpec extends AnyFunSpec with Matchers with Helpers {
   private lazy val union = ApiBuilderType.Union(service, Union("test", "tests", types = Nil))
 
   it("namespace") {
-    enum.namespace should equal(service.namespace)
+    `enum`.namespace should equal(service.namespace)
     model.namespace should equal(service.namespace)
     union.namespace should equal(service.namespace)
   }
 
   it("name") {
-    enum.name should equal("gender")
+    `enum`.name should equal("gender")
     model.name should equal("user")
     union.name should equal("test")
   }
 
   it("qualified") {
-    enum.qualified should equal(service.namespace + ".enums.gender")
+    `enum`.qualified should equal(service.namespace + ".enums.gender")
     model.qualified should equal(service.namespace + ".models.user")
     union.qualified should equal(service.namespace + ".unions.test")
   }
 
   it("qualified is compatible with Type Name") {
-    TypeName.parse(defaultNamespace = "foo", name = enum.qualified) should equal(
+    TypeName.parse(defaultNamespace = "foo", name = `enum`.qualified) should equal(
       TypeName(name = "gender", namespace = service.namespace)
     )
   }

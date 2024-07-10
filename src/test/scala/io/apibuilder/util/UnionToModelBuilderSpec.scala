@@ -78,7 +78,7 @@ class UnionToModelBuilderSpec extends AnyWordSpec with Matchers
   "validates all types are models" must {
     "enum" in {
       val `enum` = makeEnum("test")
-      setupInvalid(enums = Seq(enum)) must equal(
+      setupInvalid(enums = Seq(`enum`)) must equal(
         Seq("Type 'test' is an enum. A model is required")
       )
     }

@@ -16,7 +16,7 @@ class UnionTypesMustBeModelsRewriterSpec extends AnyWordSpec with Matchers
   private def rewrite(service: Service): ApiBuilderService = {
     val ms = makeMultiService(ApiBuilderService(service))
     apiBuilderValidator.mustValidateDefaultProfile(ms)
-    UnionTypesMustBeModelsRewriter.rewrite(ms).services().head
+    UnionTypesMustBeModelsRewriter.rewrite(ms).services.head
   }
 
   "replaces unions with an enum type" in {
