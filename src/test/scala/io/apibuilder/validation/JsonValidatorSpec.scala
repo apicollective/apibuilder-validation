@@ -349,5 +349,16 @@ class JsonValidatorSpec extends AnyWordSpec with Matchers with Helpers with Test
     ))(service) mustBe Seq("user.birth_year must be a valid integer")
   }
 
-
+  "properly identifies invalid decimal" in {
+    val service = makeService(
+      models = Seq(makeModel("price", fields = Seq(
+        makeField("amount", `type` = "decimal"),
+        makeField("currency"),
+      )))
+    )
+    validateError("price", Json.obj(
+        "amount" -> "a",
+        "currency" -> "USD"
+    ))(service) mustBe Seq("price.amount must be a valid decimal")
+  }
 }
