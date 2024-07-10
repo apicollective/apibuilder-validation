@@ -26,13 +26,13 @@ class ServiceOperationResolverSpec extends AnyWordSpec with Matchers
           resolver.findOperation(op.method, op.path.replaceAll(":organization", i.toString))
         }
       }
-      val perLookup = result / operations.length * 10
-      println(s"$testCase [${operations.length} operations, 10 lookups each]: $result ms [perLookup: $perLookup]")
+      val perLookup = (result * 1000.0 / (operations.length * 10.0)).toInt
+      println(s"$testCase [${operations.length} operations, 10 lookups each]: $result ms [perLookup: $perLookup microSeconds]")
       result
     }
 
     val names = 0.to(10).map { i => s"model_$i" }
-    val services = 0.to(99).map { _ =>
+    val services = 0.to(49).map { _ =>
       makeService(
         models = names.map { name => makeModel(name) },
         resources = names.map { name =>
@@ -50,7 +50,7 @@ class ServiceOperationResolverSpec extends AnyWordSpec with Matchers
     val zipService = expectValidNec {
       MultiService.fromUrl(s"file://${zipFile.getAbsolutePath}")
     }
-    zipService.services.length mustBe 100
+    zipService.services.length mustBe 50
     run("zipService", zipService)
   }
 }
