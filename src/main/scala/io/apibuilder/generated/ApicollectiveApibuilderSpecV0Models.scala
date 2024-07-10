@@ -1393,9 +1393,9 @@ package io.apibuilder.spec.v0.models {
       Seq(
         jsonReadsApibuilderSpecResponseCodeInt.reads(json).map(_.asInstanceOf[T]),
         jsonReadsApibuilderSpecResponseCodeOption.reads(json).map(_.asInstanceOf[T])
-      ).view.find(_.isSuccess).getOrElse(
-        play.api.libs.json.JsSuccess(ResponseCodeUndefinedType(json.toString).asInstanceOf[T])]]
-      )
+      ).view.find(_.isSuccess).getOrElse {
+        play.api.libs.json.JsSuccess(ResponseCodeUndefinedType(json.toString).asInstanceOf[T])
+      }
     }
 
 
