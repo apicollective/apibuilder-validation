@@ -107,7 +107,7 @@ class MultiServiceImplSpec extends AnyWordSpec with Matchers with Helpers with T
         )),
       ),
       resources = Seq(makeResource("card", operations = Seq(
-        makeOperation(Method.Post, "/cards")
+        makeOperation(Method.Post, "/cards", body = Some(makeBody("card_form")))
       )))
     ))))
 

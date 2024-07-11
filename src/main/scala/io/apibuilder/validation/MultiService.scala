@@ -64,6 +64,7 @@ trait MultiService extends ResponseHelpers {
     * match the request method/path as needed.
     */
   final def upcast(apiBuilderOperation: ApiBuilderOperation, js: JsValue): ValidatedNec[String, JsValue] = {
+    println(s"body type: ${findBodyType(apiBuilderOperation)}")
     findBodyType(apiBuilderOperation) match {
       case None => js.validNec
       case Some(bodyType) => upcast(bodyType, js)
@@ -85,6 +86,7 @@ trait MultiService extends ResponseHelpers {
 
   final def upcastOperationBody(method: Method, path: String, js: JsValue): ValidatedNec[String, JsValue] = {
     validateOperation(method, path).andThen { op =>
+      println(s"op: $op")
       upcast(op, js)
     }
   }
