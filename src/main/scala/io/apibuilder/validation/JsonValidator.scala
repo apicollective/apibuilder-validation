@@ -301,6 +301,7 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
     js: JsObject,
     prefix: Option[String]
   ): ValidatedNec[String, JsValue] = {
+    println(s"validate union. disc: ${typ.union.discriminator}")
     typ.union.discriminator match {
       case None => {
         js.validNec

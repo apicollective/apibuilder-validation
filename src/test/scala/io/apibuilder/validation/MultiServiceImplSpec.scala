@@ -163,10 +163,10 @@ class MultiServiceImplSpec extends AnyWordSpec with Matchers with Helpers with T
         )),
       ),
       unions = Seq(
-        makeUnion("authorization", types = Seq(
+        makeUnion("authorization", discriminator = Some("discriminator"), types = Seq(
           makeUnionType("card_authorization")
         )),
-        makeUnion("authorization_form", types = Seq(
+        makeUnion("authorization_form", discriminator = Some("discriminator"), types = Seq(
           makeUnionType("card_authorization_form")
         ))
       ),
@@ -184,7 +184,7 @@ class MultiServiceImplSpec extends AnyWordSpec with Matchers with Helpers with T
           "/authorizations",
           Json.obj("discriminator" -> "foo")
         )
-      } mustBe Seq("TODO")
+      } mustBe Seq("Invalid discriminator 'foo' for union type 'authorization_form': must be one of 'card_authorization_form'")
     }
 
     "validate union type" in {
