@@ -1,45 +1,60 @@
 package io.apibuilder.validation.util
 
-import io.apibuilder.validation.helpers
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.funspec.AnyFunSpec
+import cats.implicits.*
+import io.apibuilder.helpers.{FileHelpers, TestHelpers}
+import org.scalatest.matchers.must.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class UrlDownloaderSpec extends AnyFunSpec with Matchers with helpers.FileHelpers {
-  describe("java.net.URL") {
-    it("handles the happy path") {
+class UrlDownloaderSpec extends AnyWordSpec with Matchers with FileHelpers with TestHelpers {
+  "java.net.URL" must {
+    "handles the happy path" in {
       val urlStr = writeToTempFile("").toURI.toURL
-      UrlDownloader.withInputStream(urlStr)(_ => Right("yeah")) shouldBe Right("yeah")
+      expectValid {
+        UrlDownloader.withInputStream(urlStr)(_ => ().validNec)
+      }
     }
 
-    it("handles the error case") {
+    "handles the error case" in {
       val urlStr = writeToTempFile("").toURI.toURL
-      UrlDownloader.withInputStream(urlStr)(_ => Left(Seq("boo"))) shouldBe Left(Seq("boo"))
+      expectInvalidNec {
+        UrlDownloader.withInputStream(urlStr)(_ => "".invalidNec)
+      }
     }
 
-    it("handles the empty error case") {
+    "handles the empty error case" in {
       val urlStr = writeToTempFile("").toURI.toURL
-      UrlDownloader.withInputStream(urlStr)(_ => Left(Nil)) shouldBe Left(Nil)
+      expectInvalidNec {
+        UrlDownloader.withInputStream(urlStr)(_ => "".invalidNec)
+      }
     }
   }
 
-  describe("Url String") {
-    it("handles the happy path") {
+  "Url String" must {
+    "handles the happy path" in {
       val urlStr = writeToTempFile("").toURI.toURL.toString
-      UrlDownloader.withInputStream(urlStr)(_ => Right("yeah")) shouldBe Right("yeah")
+      expectValidNec {
+        UrlDownloader.withInputStream(urlStr)(_ => ().validNec)
+      }
     }
 
-    it("handles the invalid URL case") {
-      UrlDownloader.withInputStream("boom")(_ => Right("unused")) shouldBe Left(Seq("Invalid URL: no protocol: boom"))
+    "handles the invalid URL case" in {
+      expectInvalidNec {
+        UrlDownloader.withInputStream("boom")(_ => ().validNec)
+      } mustBe Seq("Invalid URL: no protocol: boom")
     }
 
-    it("handles the error case") {
+    "handles the error case" in {
       val urlStr = writeToTempFile("").toURI.toURL.toString
-      UrlDownloader.withInputStream(urlStr)(_ => Left(Seq("boo"))) shouldBe Left(Seq("boo"))
+      expectInvalidNec {
+        UrlDownloader.withInputStream(urlStr)(_ => "".invalidNec)
+      }
     }
 
-    it("handles the empty error case") {
+    "handles the empty error case" in {
       val urlStr = writeToTempFile("").toURI.toURL.toString
-      UrlDownloader.withInputStream(urlStr)(_ => Left(Nil)) shouldBe Left(Nil)
+      expectInvalidNec {
+        UrlDownloader.withInputStream(urlStr)(_ => "".invalidNec)
+      }
     }
   }
 }

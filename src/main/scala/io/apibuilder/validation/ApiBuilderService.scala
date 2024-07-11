@@ -1,13 +1,15 @@
 package io.apibuilder.validation
 
+import cats.implicits._
+import cats.data.ValidatedNec
+
 import java.io.{BufferedInputStream, ByteArrayOutputStream, File, FileInputStream, InputStream}
-
 import io.apibuilder.spec.v0.models.{Method, Operation, Service}
-import io.apibuilder.spec.v0.models.json._
-import java.nio.charset.StandardCharsets
+import io.apibuilder.spec.v0.models.json.*
 
+import java.nio.charset.StandardCharsets
 import io.apibuilder.validation.util.UrlDownloader
-import play.api.libs.json._
+import play.api.libs.json.*
 
 /**
   * Wraps a single API Builder service, providing helpers to validate
@@ -16,8 +18,8 @@ import play.api.libs.json._
 case class ApiBuilderService(
   service: Service
 ) {
-  private[this] lazy val validator = JsonValidator(this)
-  private[this] val normalizer = PathNormalizer(service)
+  private lazy val validator = JsonValidator(this)
+  private val normalizer = PathNormalizer(service)
 
   val name: String = service.name
   val namespace: String = service.namespace
@@ -34,10 +36,7 @@ case class ApiBuilderService(
   }
 
   def findOperation(method: Method, path: String): Option[Operation] = {
-    normalizer.resolve(method, path) match {
-      case Right(op) => Some(op)
-      case Left(_) => None
-    }
+    normalizer.resolve(method, path).toOption
   }
 
 }
@@ -48,13 +47,13 @@ object ApiBuilderService {
     * Loads the API Builder service specification from the specified URI,
     * returning either a list of errors or the service itself.
     */
-  def fromUrl(url: String): Either[Seq[String], ApiBuilderService] = {
+  def fromUrl(url: String): ValidatedNec[String, ApiBuilderService] = {
     UrlDownloader.withInputStream(url) { is =>
       fromInputStream(is)
     }
   }
 
-  def fromFile(file: File): Either[Seq[String], ApiBuilderService] = {
+  def fromFile(file: File): ValidatedNec[String, ApiBuilderService] = {
     val is = new BufferedInputStream(new FileInputStream(file))
     try {
       fromInputStream(is)
@@ -63,11 +62,11 @@ object ApiBuilderService {
     }
   }
 
-  def fromInputStream(inputStream: InputStream): Either[Seq[String], ApiBuilderService] = {
+  def fromInputStream(inputStream: InputStream): ValidatedNec[String, ApiBuilderService] = {
     toService(copyToString(inputStream))
   }
 
-  private[this] def copyToString(inputStream: InputStream): String = {
+  private def copyToString(inputStream: InputStream): String = {
     val result = new ByteArrayOutputStream()
     val buffer = new Array[Byte](1024)
     var length = inputStream.read(buffer)
@@ -78,10 +77,10 @@ object ApiBuilderService {
     result.toString(StandardCharsets.UTF_8.name())
   }
 
-  def toService(contents: String): Either[Seq[String], ApiBuilderService] = {
+  def toService(contents: String): ValidatedNec[String, ApiBuilderService] = {
     Json.parse(contents).validate[Service] match {
-      case s: JsSuccess[Service] => Right(ApiBuilderService(s.get))
-      case e: JsError => Left(Seq(s"Error parsing service: $e"))
+      case JsSuccess(s: Service, _) => ApiBuilderService(s).validNec
+      case e: JsError => s"Error parsing service: $e".invalidNec
     }
   }
 

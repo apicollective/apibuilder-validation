@@ -1,16 +1,14 @@
 package io.apibuilder.validation
 
 import io.apibuilder.builders.ApiBuilderServiceBuilders
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.funspec.AnyFunSpec
+import io.apibuilder.helpers.{Helpers, TestHelpers}
+import org.scalatest.matchers.must.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json.Json
 
-class MultipleTypesWithSameNameSpec extends AnyFunSpec with Matchers
-  with helpers.Helpers
-  with ApiBuilderServiceBuilders
-{
+class MultipleTypesWithSameNameSpec extends AnyWordSpec with Matchers with Helpers with TestHelpers with ApiBuilderServiceBuilders {
 
-  it("validates type found in multiple services") {
+  "validates type found in multiple services" in {
     // service1: item.price has an amount
     // service2: product.price has an amount and a currency
     val service1 = makeService(
@@ -53,19 +51,19 @@ class MultipleTypesWithSameNameSpec extends AnyFunSpec with Matchers
       )
     )
 
-    multi.upcast(
-      mustFindModel(multi, service1.namespace, "item"),
-      Json.obj("value" -> Json.obj())
-    ) should equal(
-      Left(Seq("Missing required field for price: amount"))
-    )
+    expectInvalidNec {
+      multi.upcast(
+        mustFindModel(multi, service1.namespace, "item"),
+        Json.obj("value" -> Json.obj())
+      )
+    } mustBe Seq("Missing required field for price: amount")
 
-    multi.upcast(
-      mustFindModel(multi, service2.namespace, "product"),
-      Json.obj("value" -> Json.obj())
-    ) should equal(
-      Left(Seq("Missing required fields for price: amount, currency"))
-    )
+    expectInvalidNec {
+      multi.upcast(
+        mustFindModel(multi, service2.namespace, "product"),
+        Json.obj("value" -> Json.obj())
+      )
+    } mustBe Seq("Missing required fields for price: amount, currency")
   }
 
 }

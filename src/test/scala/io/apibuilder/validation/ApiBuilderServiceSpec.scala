@@ -1,42 +1,29 @@
 package io.apibuilder.validation
 
-import io.apibuilder.spec.v0.models.Method
-import io.apibuilder.validation.helpers.Helpers
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.funspec.AnyFunSpec
+import io.apibuilder.builders.ApiBuilderServiceBuilders
+import io.apibuilder.helpers.{ApiBuilderServiceValidatorHelpers, FileHelpers, Helpers, TestHelpers}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.must.Matchers
+import play.api.libs.json.Json
+import io.apibuilder.spec.v0.models.json._
 
-class ApiBuilderServiceSpec extends AnyFunSpec with Matchers with Helpers {
+class ApiBuilderServiceSpec extends AnyWordSpec with Matchers with Helpers with FileHelpers with TestHelpers with ApiBuilderServiceBuilders {
 
-  private[this] lazy val service = loadService("flow-api-service.json")
-
-  it("fromUrl") {
-    ApiBuilderService.fromUrl("file://non-existent-tmp").left.getOrElse {
-      sys.error("Expected error from invalid url")
+  "from non existent url" must {
+    "invalid" in {
+      val url = s"file://${randomString()}"
+      expectInvalidNec {
+        ApiBuilderService.fromUrl(url)
+      }.head.contains("Error downloading URL") mustBe true
     }
 
-    rightOrErrors {
-      ApiBuilderService.toService(readFile("apibuilder-common-service.json"))
-    }.service.name should be("apibuilder common")
+    "valid" in {
+      val service = makeService()
+      val file = writeToTempFile(Json.toJson(service).toString)
+      expectValid {
+        ApiBuilderService.fromUrl(s"file://${file.getAbsolutePath}")
+      }
+    }
   }
 
-  it("operation") {
-    service.findOperation(Method.Post, "/foo") should be(None)
-
-    val op = service.findOperation(Method.Post, "/users").get
-    op.method should equal(Method.Post)
-    op.path should equal("/users")
-    op.parameters should be(Nil)
-
-    service.findOperation(Method.Get, "/users").get.parameters.map(_.name) should be(
-      Seq("id", "email", "status", "limit", "offset", "sort")
-    )
-  }
-
-  it("findType can resolve a scalar") {
-    service.findType("string").get should equal(ScalarType.StringType)
-    service.findType("STRING").get should equal(ScalarType.StringType)
-    ScalarType.all.forall { t =>
-      service.findType(t.name).isDefined
-    } should be(true)
-  }
 }

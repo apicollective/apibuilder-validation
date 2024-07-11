@@ -1,66 +1,63 @@
 package io.apibuilder.validation.zip
 
+import io.apibuilder.helpers.FileHelpers
 import java.io.File
+import org.scalatest.matchers.must.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-import io.apibuilder.validation.helpers
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.funspec.AnyFunSpec
-
-class ZipFileSpec extends AnyFunSpec with Matchers
-  with helpers.FileHelpers
-{
-  it("isZipFile") {
-    ZipFileReader.isZipFile("foo.zip") should be(true)
-    ZipFileReader.isZipFile("foo.ZIP") should be(true)
-    ZipFileReader.isZipFile(" foo.zip ") should be(true)
-    ZipFileReader.isZipFile(" foo.csv ") should be(false)
+class ZipFileSpec extends AnyWordSpec with Matchers with FileHelpers {
+  "isZipFile" in {
+    ZipFileReader.isZipFile("foo.zip") mustBe true
+    ZipFileReader.isZipFile("foo.ZIP") mustBe true
+    ZipFileReader.isZipFile(" foo.zip ") mustBe true
+    ZipFileReader.isZipFile(" foo.csv ") mustBe false
   }
 
-  it("isJsonFile") {
-    ZipFileReader.isJsonFile("foo.json") should be(true)
-    ZipFileReader.isJsonFile("foo.JSON") should be(true)
-    ZipFileReader.isJsonFile(" foo.json ") should be(true)
-    ZipFileReader.isJsonFile(" foo.csv ") should be(false)
+  "isJsonFile" in {
+    ZipFileReader.isJsonFile("foo.json") mustBe true
+    ZipFileReader.isJsonFile("foo.JSON") mustBe true
+    ZipFileReader.isJsonFile(" foo.json ") mustBe true
+    ZipFileReader.isJsonFile(" foo.csv ") mustBe false
   }
 
-  it("withFile defaults to file name") {
+  "withFile defaults to file name" in {
     val tmp = File.createTempFile("foo", "json")
     val zip = ZipFileBuilder().withFile(tmp).build()
-    ZipFileReader.fromFile(zip).entries.map(_.name) should equal(
+    ZipFileReader.fromFile(zip).entries.map(_.name) must equal(
       Seq(tmp.getName)
     )
   }
 
-  it("withFile respects given name") {
+  "withFile respects given name" in {
     val tmp = File.createTempFile("foo", "json")
     val zip = ZipFileBuilder().withFile("bar.json", tmp).build()
-    ZipFileReader.fromFile(zip).entries.map(_.name) should equal(
+    ZipFileReader.fromFile(zip).entries.map(_.name) must equal(
       Seq("bar.json")
     )
   }
 
-  it("withTextFile") {
+  "withTextFile" in {
     val zip = ZipFileBuilder().withTextFile("order.txt", "a\nb").build()
     val reader = ZipFileReader.fromFile(zip)
-    reader.entries.map(_.name) should equal(
+    reader.entries.map(_.name) must equal(
       Seq("order.txt")
     )
-    readFileAsString(reader.entries.head.file).split("\n") should equal(Seq("a", "b"))
+    readFileAsString(reader.entries.head.file).split("\n") must equal(Seq("a", "b"))
   }
 
-  it("files are preserved") {
+  "files are preserved" in {
     val zip = ZipFileBuilder()
       .withFile("foo.json", writeToTempFile("foo"))
       .withFile("bar.json", writeToTempFile("bar"))
       .build()
     val entries = ZipFileReader.fromFile(zip).entries
-    entries.map(_.name).sorted should equal(
+    entries.map(_.name).sorted must equal(
       Seq("bar.json", "foo.json")
     )
     def read(name: String): String = {
       readFileAsString(entries.find(_.name == name).get.file)
     }
-    read("bar.json") should equal("bar")
-    read("foo.json") should equal("foo")
+    read("bar.json") must equal("bar")
+    read("foo.json") must equal("foo")
   }
 }

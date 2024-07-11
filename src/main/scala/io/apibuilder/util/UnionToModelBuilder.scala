@@ -11,8 +11,8 @@ case class UnionModel(
   discriminatorEnum: Enum,
   model: Model,
 ) {
-  private[this] val discriminatorEnumApiBuilderType = ApiBuilderType.Enum(service, discriminatorEnum)
-  private[this] val modelApiBuilderType = ApiBuilderType.Model(service, model)
+  private val discriminatorEnumApiBuilderType = ApiBuilderType.Enum(service, discriminatorEnum)
+  private val modelApiBuilderType = ApiBuilderType.Model(service, model)
   val apiBuilderTypes = Seq(discriminatorEnumApiBuilderType, modelApiBuilderType)
 }
 
@@ -31,7 +31,7 @@ case class UnionModel(
  **/
 case class UnionToModelBuilder(multiService: MultiService) {
 
-  private[this] val helper: ApiBuilderHelper = ApiBuilderHelperImpl(multiService)
+  private val helper: ApiBuilderHelper = ApiBuilderHelperImpl(multiService)
 
   def toModel(union: ApiBuilderType.Union): ValidatedNec[String, UnionModel] = {
     (
@@ -44,12 +44,12 @@ case class UnionToModelBuilder(multiService: MultiService) {
     }
   }
 
-  private[this] def buildModel(union: ApiBuilderType.Union, discriminator: String, fields: Seq[Field]): UnionModel = {
-    val `enum` = buildDiscriminatorEnum(union, discriminator)
-    val allFields = Seq(buildDiscriminatorField(union, enum, discriminator)) ++ fields
+  private def buildModel(union: ApiBuilderType.Union, discriminator: String, fields: Seq[Field]): UnionModel = {
+    val e = buildDiscriminatorEnum(union, discriminator)
+    val allFields = Seq(buildDiscriminatorField(union, e, discriminator)) ++ fields
     UnionModel(
       service = union.service,
-      discriminatorEnum = enum,
+      discriminatorEnum = e,
       model = Model(
         name = union.union.name,
         plural = union.union.plural,
@@ -58,7 +58,7 @@ case class UnionToModelBuilder(multiService: MultiService) {
     )
   }
 
-  private[this] def buildDiscriminatorEnum(union: ApiBuilderType.Union, discriminator: String): Enum = {
+  private def buildDiscriminatorEnum(union: ApiBuilderType.Union, discriminator: String): Enum = {
     Enum(
       name = union.name + "_" + discriminator,
       plural = union.name + "_" + pluralize(discriminator),
@@ -66,13 +66,13 @@ case class UnionToModelBuilder(multiService: MultiService) {
     )
   }
 
-  private[this] def pluralize(value: String): String = value + "s"
+  private def pluralize(value: String): String = value + "s"
 
-  private[this] def buildEnumValue(typ: UnionType): EnumValue = {
+  private def buildEnumValue(typ: UnionType): EnumValue = {
     EnumValue(name = typ.`type`, value = typ.discriminatorValue)
   }
 
-  private[this] def validateFields(
+  private def validateFields(
     union: ApiBuilderType.Union,
     models: Seq[ApiBuilderType.Model],
   ): ValidatedNec[String, Seq[Field]] = {
@@ -101,7 +101,7 @@ case class UnionToModelBuilder(multiService: MultiService) {
     }.traverse(identity).map(_.flatten)
   }
 
-  private[this] def buildField(name: String, typ: String, required: Boolean, default: Option[String]): Field = {
+  private def buildField(name: String, typ: String, required: Boolean, default: Option[String]): Field = {
     Field(
       name = name,
       `type` = typ,
@@ -110,11 +110,11 @@ case class UnionToModelBuilder(multiService: MultiService) {
     )
   }
 
-  private[this] def hasDefaultType(union: ApiBuilderType.Union): Boolean = {
+  private def hasDefaultType(union: ApiBuilderType.Union): Boolean = {
     union.union.types.exists(_.default.getOrElse(false))
   }
 
-  private[this] def buildDiscriminatorField(union: ApiBuilderType.Union, discriminatorEnum: Enum, name: String): Field = {
+  private def buildDiscriminatorField(union: ApiBuilderType.Union, discriminatorEnum: Enum, name: String): Field = {
     Field(
       name = name,
       `type` = discriminatorEnum.name,
@@ -126,7 +126,7 @@ case class UnionToModelBuilder(multiService: MultiService) {
    * sometimes we see fields where the type is 'string' and 'long' => in these cases convert to 'string'
    * as a universal type
    */
-  private[this] def toCommonTypes(types: Seq[String]): Seq[String] = {
+  private def toCommonTypes(types: Seq[String]): Seq[String] = {
     types.distinct.toList match {
       case one :: Nil => Seq(one)
       case _ if types.forall { t => ScalarType.fromName(t).isDefined } => Seq(ScalarType.StringType.name)
@@ -134,11 +134,11 @@ case class UnionToModelBuilder(multiService: MultiService) {
     }
   }
 
-  private[this] def validateTypes(types: Seq[ApiBuilderUnionType]): ValidatedNec[String, Seq[ApiBuilderType.Model]] = {
+  private def validateTypes(types: Seq[ApiBuilderUnionType]): ValidatedNec[String, Seq[ApiBuilderType.Model]] = {
     types.map(validate).toList.traverse(identity)
   }
 
-  private[this] def validate(unionType: ApiBuilderUnionType): ValidatedNec[String, ApiBuilderType.Model] = {
+  private def validate(unionType: ApiBuilderUnionType): ValidatedNec[String, ApiBuilderType.Model] = {
     helper.resolveType(unionType) match {
       case None => s"Could not resolve type '${unionType.`type`}'".invalidNec
       case Some(t) => {
@@ -153,7 +153,7 @@ case class UnionToModelBuilder(multiService: MultiService) {
     }
   }
 
-  private[this] def validateDiscriminator(union: ApiBuilderType.Union): ValidatedNec[String, String] = {
+  private def validateDiscriminator(union: ApiBuilderType.Union): ValidatedNec[String, String] = {
     union.union.discriminator match {
       case None => s"Union '${union.qualified}' must have a 'discriminator' defined'".invalidNec
       case Some(d) => d.validNec

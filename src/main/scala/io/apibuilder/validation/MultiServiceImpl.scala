@@ -1,5 +1,6 @@
 package io.apibuilder.validation
 
+import cats.data.ValidatedNec
 import io.apibuilder.spec.v0.models.Method
 import play.api.libs.json.JsValue
 
@@ -12,8 +13,8 @@ case class MultiServiceImpl(
   override val services: List[ApiBuilderService]
 ) extends MultiService {
 
-  private[this] val validator = JsonValidator(services)
-  private[this] val serviceResolver = ServiceOperationResolver(services)
+  private val validator = JsonValidator(services)
+  private val serviceResolver = ServiceOperationResolver(services)
 
   override def findOperation(method: Method, path: String): Option[ApiBuilderOperation] = {
     serviceResolver.findOperation(method, path)
@@ -26,7 +27,7 @@ case class MultiServiceImpl(
     ).headOption
   }
 
-  override def upcast(typ: AnyType, js: JsValue): Either[Seq[String], JsValue] = {
+  override def upcast(typ: AnyType, js: JsValue): ValidatedNec[String, JsValue] = {
     validator.validateType(typ, js)
   }
 

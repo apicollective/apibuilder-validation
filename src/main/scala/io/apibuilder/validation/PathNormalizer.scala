@@ -1,5 +1,7 @@
 package io.apibuilder.validation
 
+import cats.data.ValidatedNec
+import cats.implicits.*
 import io.apibuilder.spec.v0.models.{Method, Operation, Service}
 import io.apibuilder.validation.util.StandardErrors
 
@@ -11,7 +13,7 @@ object PathNormalizer {
 
   def apply(multi: MultiService): PathNormalizer = {
     apply(
-      multi.services().flatMap(_.service.resources.flatMap(_.operations))
+      multi.services.flatMap(_.service.resources.flatMap(_.operations))
     )
   }
 
@@ -39,7 +41,7 @@ case class PathNormalizer(operations: Seq[Operation]) {
     *   - static routes are simple lookups by path (Map[String, Route])
     *   - dynamic routes is a map from the HTTP Method to a list of routes to try (Seq[Route])
     */
-  private[this] val (staticRouteMap: StaticRouteMap, dynamicRouteMap: DynamicRouteMap) = {
+  private val (staticRouteMap: StaticRouteMap, dynamicRouteMap: DynamicRouteMap) = {
     val opsWithRoute = operations.map { op => OperationWithRoute(op) }
 
     // Map from method name to list of operations
@@ -56,27 +58,26 @@ case class PathNormalizer(operations: Seq[Operation]) {
     )
   }
 
-  final def resolve(method: Method, path: String): Either[Seq[String], Operation] = {
+  final def resolve(method: Method, path: String): ValidatedNec[String, Operation] = {
     method match {
       case Method.UNDEFINED(m) => {
-        Left(Seq(StandardErrors.invalidMethodError(m)))
+        StandardErrors.invalidMethodError(m).invalidNec
       }
       case _ => {
         staticRouteMap.find(method, path) match {
           case Some(opWithRoute) => {
-            Right(opWithRoute.op)
+            opWithRoute.op.validNec
           }
           case None => {
             dynamicRouteMap.find(method, path) match {
-              case None => Left(Seq(s"HTTP Operation '$method $path' is not defined"))
-              case Some(route) => Right(route.op)
+              case None => s"HTTP Operation '$method $path' is not defined".invalidNec
+              case Some(route) => route.op.validNec
             }
           }
         }
       }
     }
   }
-
 }
 
 private[validation] case class OperationWithRoute(

@@ -18,7 +18,7 @@ case class MinimalTypesRewriter(types: Iterable[ApiBuilderType]) extends Default
     val all = expand(helper, types.toSeq, Set.empty).groupBy(_.namespace)
 
     MultiService(
-      multiService.services().map { s =>
+      multiService.services.map { s =>
         val svcTypes = all.getOrElse(s.namespace, Nil).toSeq
         s.copy(
           service = s.service.copy(
@@ -36,7 +36,7 @@ case class MinimalTypesRewriter(types: Iterable[ApiBuilderType]) extends Default
    * or the types of a union
    */
   @tailrec
-  private[this] def expand(helper: ApiBuilderHelper, incoming: Seq[ApiBuilderType], resolved: Set[ApiBuilderType]): Set[ApiBuilderType] = {
+  private def expand(helper: ApiBuilderHelper, incoming: Seq[ApiBuilderType], resolved: Set[ApiBuilderType]): Set[ApiBuilderType] = {
     incoming.toList match {
       case Nil => resolved
       case one :: rest => {

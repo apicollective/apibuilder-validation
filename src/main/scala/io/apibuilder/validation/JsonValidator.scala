@@ -1,5 +1,6 @@
 package io.apibuilder.validation
 
+import cats.implicits._
 import java.util.concurrent.ConcurrentHashMap
 
 import cats.implicits._
@@ -37,44 +38,44 @@ case class JsonValidator(validator: ValidatedJsonValidator) {
   def findType(defaultNamespace: String, name: String): Seq[AnyType] =
     validator.findType(defaultNamespace, name)
 
-  def validate(typeName: String, js: JsValue, defaultNamespace: Option[String], prefix: Option[String] = None): Either[Seq[String], JsValue] =
-    validator.validate(typeName, js, defaultNamespace, prefix).toEither.leftToSeq
+  def validate(typeName: String, js: JsValue, defaultNamespace: Option[String], prefix: Option[String] = None): ValidatedNec[String, JsValue] =
+    validator.validate(typeName, js, defaultNamespace, prefix)
 
-  def validateType(typ: AnyType, js: JsValue, prefix: Option[String] = None): Either[Seq[String], JsValue] =
-    validator.validateType(typ, js, prefix).toEither.leftToSeq
+  def validateType(typ: AnyType, js: JsValue, prefix: Option[String] = None): ValidatedNec[String, JsValue] =
+    validator.validateType(typ, js, prefix)
 
-  def validateString(prefix: String, js: JsValue): Either[Seq[String], JsString] =
-    validator.validateString(prefix, js).toEither.leftToSeq
+  def validateString(prefix: String, js: JsValue): ValidatedNec[String, JsString] =
+    validator.validateString(prefix, js)
 
-  def validateArray(prefix: String, internalType: String, js: JsValue, defaultNamespace: Option[String]): Either[Seq[String], JsArray] =
-    validator.validateArray(prefix, internalType, js, defaultNamespace).toEither.leftToSeq
+  def validateArray(prefix: String, internalType: String, js: JsValue, defaultNamespace: Option[String]): ValidatedNec[String, JsArray] =
+    validator.validateArray(prefix, internalType, js, defaultNamespace)
 
-  def validateObject(prefix: String, internalType: String, js: JsValue, defaultNamespace: Option[String]): Either[Seq[String], JsObject] =
-    validator.validateObject(prefix, internalType, js, defaultNamespace).toEither.leftToSeq
+  def validateObject(prefix: String, internalType: String, js: JsValue, defaultNamespace: Option[String]): ValidatedNec[String, JsObject] =
+    validator.validateObject(prefix, internalType, js, defaultNamespace)
 
-  def validateInteger(prefix: String, js: JsValue): Either[Seq[String], JsNumber] =
-    validator.validateInteger(prefix, js).toEither.leftToSeq
+  def validateInteger(prefix: String, js: JsValue): ValidatedNec[String, JsNumber] =
+    validator.validateInteger(prefix, js)
 
-  def validateDouble(prefix: String, js: JsValue): Either[Seq[String], JsNumber] =
-    validator.validateDouble(prefix, js).toEither.leftToSeq
+  def validateDouble(prefix: String, js: JsValue): ValidatedNec[String, JsNumber] =
+    validator.validateDouble(prefix, js)
 
-  def validateDecimal(prefix: String, js: JsValue): Either[Seq[String], JsNumber] =
-    validator.validateDecimal(prefix, js).toEither.leftToSeq
+  def validateDecimal(prefix: String, js: JsValue): ValidatedNec[String, JsNumber] =
+    validator.validateDecimal(prefix, js)
 
-  def validateLong(prefix: String, js: JsValue): Either[Seq[String], JsNumber] =
-    validator.validateLong(prefix, js).toEither.leftToSeq
+  def validateLong(prefix: String, js: JsValue): ValidatedNec[String, JsNumber] =
+    validator.validateLong(prefix, js)
 
-  def validateUuid(prefix: String, js: JsValue): Either[Seq[String], JsString] =
-    validator.validateUuid(prefix, js).toEither.leftToSeq
+  def validateUuid(prefix: String, js: JsValue): ValidatedNec[String, JsString] =
+    validator.validateUuid(prefix, js)
 
-  def validateDateIso8601(prefix: String, js: JsValue): Either[Seq[String], JsString] =
-    validator.validateDateIso8601(prefix, js).toEither.leftToSeq
+  def validateDateIso8601(prefix: String, js: JsValue): ValidatedNec[String, JsString] =
+    validator.validateDateIso8601(prefix, js)
 
-  def validateDateTimeIso8601(prefix: String, js: JsValue): Either[Seq[String], JsString] =
-    validator.validateDateTimeIso8601(prefix, js).toEither.leftToSeq
+  def validateDateTimeIso8601(prefix: String, js: JsValue): ValidatedNec[String, JsString] =
+    validator.validateDateTimeIso8601(prefix, js)
 
-  def validateBoolean(prefix: String, js: JsValue): Either[Seq[String], JsBoolean] =
-    validator.validateBoolean(prefix, js).toEither.leftToSeq
+  def validateBoolean(prefix: String, js: JsValue): ValidatedNec[String, JsBoolean] =
+    validator.validateBoolean(prefix, js)
 }
 
 object ValidatedJsonValidator {
@@ -108,9 +109,9 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
     findType(TypeName.parse(defaultNamespace = defaultNamespace, name = name))
   }
 
-  private[this] val cache = new ConcurrentHashMap[TypeName, Seq[AnyType]]()
+  private val cache = new ConcurrentHashMap[TypeName, Seq[AnyType]]()
 
-  private[this] def findType(typeName: TypeName): Seq[AnyType] = {
+  private def findType(typeName: TypeName): Seq[AnyType] = {
     cache.computeIfAbsent(
       typeName,
       _ => {
@@ -126,7 +127,7 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
     )
   }
 
-  private[this] def findType(service: ApiBuilderService, typeName: String): Option[AnyType] = {
+  private def findType(service: ApiBuilderService, typeName: String): Option[AnyType] = {
     service.enums.find(_.name.equalsIgnoreCase(typeName)) orElse {
       service.models.find(_.name.equalsIgnoreCase(typeName)) orElse {
         service.unions.find(_.name.equalsIgnoreCase(typeName))
@@ -194,7 +195,7 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
     }
   }
 
-  private[this] def toObject(prefix: String, js: JsValue): ValidatedNec[String, JsObject] = {
+  private def toObject(prefix: String, js: JsValue): ValidatedNec[String, JsObject] = {
     js match {
       case _: JsArray => {
         s"$prefix must be an object and not an array".invalidNec
@@ -216,26 +217,26 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
     }
   }
 
-  private[this] def validateEnum(
+  private def validateEnum(
     prefix: String,
     typ: ApiBuilderType.Enum,
     js: JsValue
   ): ValidatedNec[String, JsValue] = {
     validateString(prefix, js).andThen { jsString =>
         val incomingValue = jsString.value.trim
-        val valid = typ.enum.values.flatMap { e =>
+        val valid = typ.`enum`.values.flatMap { e =>
           Seq(e.name) ++ e.value.toSeq
         }
         valid.find { _.toLowerCase.trim == incomingValue.toLowerCase } match {
           case None =>
-            (s"$prefix invalid value '${incomingValue}'. Valid values for the enum '${typ.enum.name}' are: " + valid.distinct.mkString("'", "', '", "'")).invalidNec
+            (s"$prefix invalid value '${incomingValue}'. Valid values for the enum '${typ.`enum`.name}' are: " + valid.distinct.mkString("'", "', '", "'")).invalidNec
           case Some(validValue) =>
             JsString(validValue).validNec
         }
     }
   }
 
-  private[this] def validateModel(
+  private def validateModel(
     typ: ApiBuilderType.Model,
     js: JsObject,
     prefix: Option[String]
@@ -243,7 +244,7 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
     validateFields(typ.name, typ.fields, js, prefix)
   }
 
-  private[this] def validateInterface(
+  private def validateInterface(
     typ: ApiBuilderType.Interface,
     js: JsObject,
     prefix: Option[String]
@@ -251,7 +252,7 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
     validateFields(typ.name, typ.fields, js, prefix)
   }
 
-  private[this] def validateFields(
+  private def validateFields(
     parentTypeName: String,
     fields: Seq[ApiBuilderField],
     js: JsObject,
@@ -295,7 +296,7 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
     }
   }
 
-  private[this] def validateUnion(
+  private def validateUnion(
     typ: ApiBuilderType.Union,
     js: JsObject,
     prefix: Option[String]
@@ -339,13 +340,13 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
     }
   }
 
-  private[this] val ArrayPattern = """^\[(.+)\]$""".r
-  private[this] val ObjectPattern = """^map\[(.+)\]$""".r
+  private val ArrayPattern = """^\[(.+)\]$""".r
+  private val ObjectPattern = """^map\[(.+)\]$""".r
 
   /**
     * Validates the JS Value based on the expected API Builder type.
     */
-  private[this] def validateTypeFromName(
+  private def validateTypeFromName(
     prefix: String,
     typ: String,
     js: JsValue,
@@ -363,13 +364,16 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
     }
   }
 
-  private[this] def validateScalar(prefix: String, scalarType: ScalarType, js: JsValue): ValidatedNec[String, JsValue] = {
+  private def validateScalar(prefix: String, scalarType: ScalarType, js: JsValue): ValidatedNec[String, JsValue] = {
     import ScalarType._
     scalarType match {
-      case FloatType | JsonType | ObjectType | UnitType => {
-        // TODO: Add validation for these types
+      case UnitType => {
+        // TODO: is there anything to validate?
         js.validNec
       }
+      case FloatType => validateFloat(prefix, js)
+      case JsonType => js.validNec
+      case ObjectType => validateObject(prefix, js)
       case StringType => validateString(prefix, js)
       case IntegerType => validateInteger(prefix, js)
       case LongType => validateLong(prefix, js)
@@ -395,6 +399,17 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
       case v: JsNumber => JsString(v.value.toString).validNec
       case _: JsObject => s"$prefix must be a string and not an object".invalidNec
       case v: JsString => v.validNec
+    }
+  }
+
+  def validateObject(prefix: String, js: JsValue): ValidatedNec[String, JsObject] = {
+    js match {
+      case _: JsArray => s"$prefix must be an object and not an array".invalidNec
+      case _: JsBoolean => s"$prefix must be an object and not a boolean".invalidNec
+      case JsNull => s"$prefix must be an object and not null".invalidNec
+      case _: JsNumber => s"$prefix must be an object and not a number".invalidNec
+      case o: JsObject => o.validNec
+      case _: JsString => s"$prefix must be an object and not a string".invalidNec
     }
   }
 
@@ -488,27 +503,35 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
     }
   }
 
+  def validateFloat(prefix: String, js: JsValue): ValidatedNec[String, JsNumber] = {
+    validateNumber("float")(prefix, js)
+  }
+
   def validateDecimal(prefix: String, js: JsValue): ValidatedNec[String, JsNumber] = {
+    validateNumber("decimal")(prefix, js)
+  }
+
+  private def validateNumber(typeName: String)(prefix: String, js: JsValue): ValidatedNec[String, JsNumber] = {
     js match {
       case v: JsArray => {
         v.value.size match {
           case 1 => validateDecimal(prefix, v.value.head)
-          case _ => s"$prefix must be a decimal and not an array".invalidNec
+          case _ => s"$prefix must be a $typeName and not an array".invalidNec
         }
       }
-      case _: JsBoolean => s"$prefix must be a decimal and not a boolean".invalidNec
-      case JsNull => s"$prefix must be a decimal and not null".invalidNec
+      case _: JsBoolean => s"$prefix must be a $typeName and not a boolean".invalidNec
+      case JsNull => s"$prefix must be a $typeName and not null".invalidNec
       case v: JsNumber => v.asOpt[BigDecimal] match {
-        case None => s"$prefix must be a valid decimal".invalidNec
+        case None => s"$prefix must be a valid $typeName".invalidNec
         case Some(_) => v.validNec
       }
-      case _: JsObject => s"$prefix must be a decimal and not an object".invalidNec
+      case _: JsObject => s"$prefix must be a $typeName and not an object".invalidNec
       case v: JsString => {
         Try {
           BigDecimal.apply(v.value)
         } match {
           case Success(num) => JsNumber(num).validNec
-          case Failure(_) => s"$prefix must be a valid decimal".invalidNec
+          case Failure(_) => s"$prefix must be a valid $typeName".invalidNec
         }
       }
     }

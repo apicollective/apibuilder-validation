@@ -1,8 +1,9 @@
-package io.apibuilder.util
+package io.apibuilder.validation.util
 
 import cats.data.Validated.{Invalid, Valid}
 import io.apibuilder.builders.{ApiBuilderServiceBuilders, MultiServiceBuilders}
-import io.apibuilder.spec.v0.models._
+import io.apibuilder.spec.v0.models.*
+import io.apibuilder.util.{UnionModel, UnionToModelBuilder}
 import io.apibuilder.validation.{ApiBuilderService, ApiBuilderType}
 import org.scalatest.Assertion
 import org.scalatest.matchers.must.Matchers
@@ -12,7 +13,7 @@ class UnionToModelBuilderSpec extends AnyWordSpec with Matchers
   with ApiBuilderServiceBuilders
   with MultiServiceBuilders
 {
-  private[this] def setup(
+  private def setup(
     discriminator: Option[String] = Some("discriminator"),
     enums: Seq[Enum],
     models: Seq[Model],
@@ -35,7 +36,7 @@ class UnionToModelBuilderSpec extends AnyWordSpec with Matchers
     UnionToModelBuilder(makeMultiService(service)).toModel(ApiBuilderType.Union(ApiBuilderService(service), union))
   }
 
-  private[this] def setupValid(
+  private def setupValid(
     enums: Seq[Enum] = Nil,
     models: Seq[Model],
     unions: Seq[Union] = Nil,
@@ -52,7 +53,7 @@ class UnionToModelBuilderSpec extends AnyWordSpec with Matchers
     }
   }
 
-  private[this] def setupInvalid(
+  private def setupInvalid(
     discriminator: Option[String] = Some("discriminator"),
     enums: Seq[Enum] = Nil,
     models: Seq[Model] = Nil,
@@ -78,7 +79,7 @@ class UnionToModelBuilderSpec extends AnyWordSpec with Matchers
   "validates all types are models" must {
     "enum" in {
       val `enum` = makeEnum("test")
-      setupInvalid(enums = Seq(enum)) must equal(
+      setupInvalid(enums = Seq(`enum`)) must equal(
         Seq("Type 'test' is an enum. A model is required")
       )
     }
@@ -107,9 +108,7 @@ class UnionToModelBuilderSpec extends AnyWordSpec with Matchers
         model("string"),
         model("foo"),
         model("long"),
-      )) mustEqual(
-        Seq("Union type 'test.unions.example_union' Field 'id' has incompatible types: foo, long, string - all union types must have a common type")
-      )
+      )) mustEqual Seq("Union type 'test.unions.example_union' Field 'id' has incompatible types: foo, long, string - all union types must have a common type")
     }
 
     "upcast to string if necessary and all types are scalars" in {

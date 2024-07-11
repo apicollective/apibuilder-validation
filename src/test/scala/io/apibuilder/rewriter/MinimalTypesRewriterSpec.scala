@@ -9,7 +9,7 @@ class MinimalTypesRewriterSpec extends AnyWordSpec with Matchers
   with ApiBuilderServiceBuilders
   with MultiServiceBuilders {
 
-  private[this] def rewrite(
+  private def rewrite(
     enums: Seq[Enum] = Nil,
     models: Seq[Model] = Nil,
     unions: Seq[Union] = Nil,

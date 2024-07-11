@@ -24,7 +24,7 @@ object EncodingOptions {
   */
 object FormData {
 
-  private[this] val Encoding: String = "UTF-8"
+  private val Encoding: String = "UTF-8"
 
   /**
     * Given a url encoded string, parses it and then reformats as url
@@ -79,11 +79,10 @@ object FormData {
       case o: JsBoolean => encodeIt(o.value.toString, keys)
       case o: JsNumber => encodeIt(o.value.toString, keys)
       case JsNull => encodeIt("", keys)
-      case other => encodeIt(other.toString, keys)
     }
   }
 
-  private[this] def encode(value: String, keys: Seq[String]): String = {
+  private def encode(value: String, keys: Seq[String]): String = {
     keys.toList match {
       case Nil => value
       case one :: rest => {
@@ -93,7 +92,7 @@ object FormData {
   }
 
   @scala.annotation.tailrec
-  private[this] def buildKey(result: String, values: Seq[String]): String = {
+  private def buildKey(result: String, values: Seq[String]): String = {
     values.toList match {
       case Nil => result
       case one :: rest => buildKey(s"$result[$one]", rest)
@@ -160,7 +159,7 @@ object FormData {
   }
 
   @tailrec
-  private[this] def toJson(
+  private def toJson(
     keys: Seq[String],
     data: Map[String, Seq[String]],
     finalObject: JsObject = Json.obj()
@@ -194,7 +193,7 @@ object FormData {
   }
 
   // Based on play deepMerge method, but also merges values of underlying arrays
-  private[this] def mergeObjects(existingObject: JsObject, otherObject: JsObject): JsObject = {
+  private def mergeObjects(existingObject: JsObject, otherObject: JsObject): JsObject = {
     val result = existingObject.value ++ otherObject.value.map {
       case (otherKey, otherValue) =>
         val maybeExistingValue = existingObject.value.get(otherKey)
@@ -217,7 +216,7 @@ object FormData {
     *   two: [null, 2]
     * in this case we return [1, 2]
     */
-  private[this] def mergeArrays(one: JsArray, two: JsArray): JsArray = {
+  private def mergeArrays(one: JsArray, two: JsArray): JsArray = {
     val length = Seq(one.value.length, two.value.length).max
     JsArray(
       0.until(length).map { i =>
@@ -235,9 +234,9 @@ object FormData {
     )
   }
 
-  private[this] val EndsWithIndexInBrackets = """^(.+)\[(\d+)\]$""".r
-  private[this] val EndsWithEmptyBrackets = """^(.+)\[\]$""".r
-  private[this] val EndsWithFieldNameInBrackets = """^(.+)\[(.+)\]$""".r
+  private val EndsWithIndexInBrackets = """^(.+)\[(\d+)\]$""".r
+  private val EndsWithEmptyBrackets = """^(.+)\[\]$""".r
+  private val EndsWithFieldNameInBrackets = """^(.+)\[(.+)\]$""".r
 
   // Given input of:
   //   locations[0][city] => Paris
@@ -247,7 +246,7 @@ object FormData {
   //   ]
   // }
   @tailrec
-  private[this] def toJsonObject(key: String, value: JsValue): JsObject = {
+  private def toJsonObject(key: String, value: JsValue): JsObject = {
     key match {
       case EndsWithIndexInBrackets(prefix, index) => {
         // Fill in JsNull up to our desired index to preserve the explicit
@@ -277,7 +276,7 @@ object FormData {
     }
   }
 
-  private[this] def toJsPrimitive(value: String): JsValue = {
+  private def toJsPrimitive(value: String): JsValue = {
     value match {
       case null => JsNull
       case "true" => JsBoolean(true)
@@ -291,7 +290,7 @@ object FormData {
     }
   }
 
-  private[this] val AcceptableRegexp = """^\-?[0-9]+$""".r
+  private val AcceptableRegexp = """^\-?[0-9]+$""".r
 
   def toLong(value: String): Option[Long] = {
     value match {

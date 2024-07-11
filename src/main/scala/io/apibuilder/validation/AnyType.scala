@@ -29,7 +29,7 @@ object ScalarType {
 
   val all: scala.List[ScalarType] = scala.List(BooleanType, DoubleType, IntegerType, StringType, DecimalType, FloatType, LongType, JsonType, ObjectType, DateIso8601Type, DateTimeIso8601Type, UnitType, UuidType)
 
-  private[this] val byName: Map[String, ScalarType] = all.map(x => x.name.toLowerCase -> x).toMap
+  private val byName: Map[String, ScalarType] = all.map(x => x.name.toLowerCase -> x).toMap
 
   def fromName(typeName: String): Option[ScalarType] = byName.get(typeName.toLowerCase)
 }
@@ -61,7 +61,7 @@ case class ApiBuilderUnionType(union: ApiBuilderType.Union, `type`: UnionType)
 
 object ApiBuilderType {
   case class Enum(override val service: ApiBuilderService, `enum`: models.Enum) extends ApiBuilderType {
-    override val name: String = enum.name
+    override val name: String = `enum`.name
     override val typeDiscriminator: TypeDiscriminator = TypeDiscriminator.Enums
   }
   case class Interface(override val service: ApiBuilderService, interface: models.Interface) extends ApiBuilderType {

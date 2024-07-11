@@ -9,7 +9,7 @@ class UnionsToModelsRewriterSpec extends AnyWordSpec with Matchers
   with ApiBuilderServiceBuilders
   with MultiServiceBuilders {
 
-  private[this] def rewrite(models: Seq[Model], unions: Seq[Union]) = {
+  private def rewrite(models: Seq[Model], unions: Seq[Union]) = {
     UnionsToModelsRewriter.rewrite(
       makeMultiService(
         makeService(models = models, unions = unions)
@@ -17,7 +17,7 @@ class UnionsToModelsRewriterSpec extends AnyWordSpec with Matchers
     )
   }
 
-  private[this] def union(name: String, discriminator: String, types: Seq[String]): Union = {
+  private def union(name: String, discriminator: String, types: Seq[String]): Union = {
     makeUnion(
       name,
       types = types.map { t => makeUnionType(t) },

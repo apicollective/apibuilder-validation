@@ -86,12 +86,6 @@
 
     "browser_bundle_form": {
       "fields": [
-        { "name": "feature", "type": "browser_bundle_feature_form", "required": false }
-      ]
-    },
-
-    "browser_bundle_form": {
-      "fields": [
         { "name": "optin", "type": "browser_bundle_optin_form", "required": false },
         { "name": "country_picker", "type": "browser_bundle_country_picker_form", "required": false },
         { "name": "feature", "type": "browser_bundle_feature_form", "required": false },

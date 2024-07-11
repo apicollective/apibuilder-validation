@@ -1,10 +1,12 @@
 package io.apibuilder.validation.zip
 
+import cats.implicits._
+import cats.data.ValidatedNec
+
 import java.io.{BufferedInputStream, File, FileInputStream, FileOutputStream, InputStream}
 import java.nio.file.Files
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
-
 import io.apibuilder.validation.util.UrlDownloader
 
 object ZipFileReader {
@@ -19,13 +21,13 @@ object ZipFileReader {
     */
   def isJsonFile(name: String): Boolean = endsWithSuffix(name, "json")
 
-  private[this] def endsWithSuffix(name: String, suffix: String) = {
+  private def endsWithSuffix(name: String, suffix: String) = {
     name.trim.split("\\?").head.trim.toLowerCase().endsWith(s".$suffix")
   }
 
-  def fromUrl(url: String): Either[Seq[String], ZipFileReader] = {
+  def fromUrl(url: String): ValidatedNec[String, ZipFileReader] = {
     UrlDownloader.withInputStream(url) { is =>
-      Right(ZipFileReader(is))
+      ZipFileReader(is).validNec
     }
   }
 
@@ -36,7 +38,7 @@ object ZipFileReader {
 
 case class ZipFileReader(inputStream: InputStream) {
 
-  private[this] val destDir: File = Files.createTempDirectory("zipfilereader").toFile
+  private val destDir: File = Files.createTempDirectory("zipfilereader").toFile
 
   /**
     * Returns a list of the entries of the zip file (all files ending with .json)
@@ -65,7 +67,7 @@ case class ZipFileReader(inputStream: InputStream) {
     all.toSeq
   }
 
-  private[this] def newFile(zipEntry: ZipEntry): File = {
+  private def newFile(zipEntry: ZipEntry): File = {
     val file = new File(destDir, zipEntry.getName)
     assert(
       file.getCanonicalPath.startsWith(destDir.getCanonicalPath + File.separator),

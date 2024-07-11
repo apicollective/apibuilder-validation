@@ -1,30 +1,30 @@
 package io.apibuilder.validation
 
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.must.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class TypeNameSpec extends AnyFunSpec with Matchers {
+class TypeNameSpec extends AnyWordSpec with Matchers {
 
-  it("flat type name") {
-    TypeName.parse("person", defaultNamespace = "io.flow") should equal(TypeName("person", "io.flow"))
-    TypeName.parse("foo", defaultNamespace = "io.flow") should equal(TypeName("foo", "io.flow"))
+  "flat type name" in {
+    TypeName.parse("person", defaultNamespace = "io.flow") must equal(TypeName("person", "io.flow"))
+    TypeName.parse("foo", defaultNamespace = "io.flow") must equal(TypeName("foo", "io.flow"))
   }
 
-  it("type name with namespace  ") {
+  "type name with namespace" in {
     TypeName.parse(
       "io.apibuilder.explicit.validation.core.v0.enums.gender",
       defaultNamespace = "foo"
-    ) should equal(
+    ) must equal(
       TypeName("gender", "io.apibuilder.explicit.validation.core.v0")
     )
   }
 
-  it("type name without namespace  ") {
-    TypeName.parse("foo") should be(None)
+  "type name without namespace" in {
+    TypeName.parse("foo") must be(None)
 
     TypeName.parse(
       "io.apibuilder.explicit.validation.core.v0.enums.gender"
-    ) should equal(
+    ) must equal(
       Some(TypeName("gender", "io.apibuilder.explicit.validation.core.v0"))
     )
   }

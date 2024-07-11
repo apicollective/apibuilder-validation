@@ -57,7 +57,7 @@ case class ZipFileBuilder(
     fos.close()
   }
 
-  private[this] def writeToZipFile(entry: ZipFileEntry, zip: ZipOutputStream): Unit = {
+  private def writeToZipFile(entry: ZipFileEntry, zip: ZipOutputStream): Unit = {
     val fis = new FileInputStream(entry.file)
     val zipEntry = new ZipEntry(entry.name)
     zip.putNextEntry(zipEntry)

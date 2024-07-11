@@ -1,42 +1,67 @@
 package io.apibuilder.validation
 
-import io.apibuilder.spec.v0.models.Method
-import io.apibuilder.validation.helpers.Helpers
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.funspec.AnyFunSpec
+import io.apibuilder.builders.ApiBuilderServiceBuilders
+import io.apibuilder.helpers.{Helpers, TestHelpers}
+import io.apibuilder.spec.v0.models.{Method, Operation}
+import org.scalatest.matchers.must.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class PathNormalizerSpec extends AnyFunSpec with Matchers with Helpers {
+class PathNormalizerSpec extends AnyWordSpec with Matchers with Helpers with TestHelpers with ApiBuilderServiceBuilders{
 
-  private[this] lazy val apibuilderApiService = loadService("apibuilder-api-service.json")
-
-  private[this] val normalizer = PathNormalizer(apibuilderApiService)
-
-  it("parse static routes") {
-    normalizer.resolve(Method.Get, "/non/existent/route/should/not/match") should be(
-      Left(Seq("HTTP Operation 'GET /non/existent/route/should/not/match' is not defined"))
+  private val normalizer = PathNormalizer(ApiBuilderService(
+    makeService(
+      models = Seq(
+        makeModel("user"),
+        makeModel("organization"),
+        makeModel("application"),
+      ),
+      resources = Seq(
+        makeResource("user", operations = Seq(
+          makeOperation(Method.Get, "/users"),
+          makeOperation(Method.Get, "/users/:guid"),
+        )),
+        makeResource("organization", operations = Seq(
+          makeOperation(Method.Post, "/organizations")
+        )),
+        makeResource("application", operations = Seq(
+          makeOperation(Method.Put, "/:orgKey/:applicationKey"),
+        ))
+      )
     )
-
-    val getUsers = normalizer.resolve(Method.Get, "/users").toOption.get
-    getUsers.method should equal(Method.Get)
-    getUsers.path should equal("/users")
-
-    val postOrganizations = normalizer.resolve(Method.Post, "/organizations").toOption.get
-    postOrganizations.method should equal(Method.Post)
-    postOrganizations.path should equal("/organizations")
+  ))
+  private def resolveValid(method: Method, path: String): Operation = {
+    expectValidNec {
+      normalizer.resolve(method, path)
+    }
+  }
+  private def resolveInvalid(method: Method, path: String): Seq[String] = {
+    expectInvalidNec {
+      normalizer.resolve(method, path)
+    }
   }
 
-  it("parse dynamic routes") {
-    normalizer.resolve(Method.Get, "/non/:foo/route/should/not/match") should be(
-      Left(Seq("HTTP Operation 'GET /non/:foo/route/should/not/match' is not defined"))
-    )
+  "parse static routes" in {
+    resolveInvalid(Method.Get, "/non/existent/route/must/not/match") mustBe Seq("HTTP Operation 'GET /non/existent/route/must/not/match' is not defined")
 
-    val getUsersByGuid = normalizer.resolve(Method.Get, "/users/123").toOption.get
-    getUsersByGuid.method should equal(Method.Get)
-    getUsersByGuid.path should equal("/users/:guid")
+    val getUsers = resolveValid(Method.Get, "/users")
+    getUsers.method must equal(Method.Get)
+    getUsers.path must equal("/users")
 
-    val putOrganizationsByGuid = normalizer.resolve(Method.Put, "/apicollective/apibuilder-api").toOption.get
-    putOrganizationsByGuid.method should equal(Method.Put)
-    putOrganizationsByGuid.path should equal("/:orgKey/:applicationKey")
+    val postOrganizations = resolveValid(Method.Post, "/organizations")
+    postOrganizations.method must equal(Method.Post)
+    postOrganizations.path must equal("/organizations")
+  }
+
+  "parse dynamic routes" in {
+    resolveInvalid(Method.Get, "/non/:foo/route/must/not/match") mustBe Seq("HTTP Operation 'GET /non/:foo/route/must/not/match' is not defined")
+
+    val getUsersByGuid = resolveValid(Method.Get, "/users/123")
+    getUsersByGuid.method must equal(Method.Get)
+    getUsersByGuid.path must equal("/users/:guid")
+
+    val putOrganizationsByGuid = resolveValid(Method.Put, "/apicollective/apibuilder-api")
+    putOrganizationsByGuid.method must equal(Method.Put)
+    putOrganizationsByGuid.path must equal("/:orgKey/:applicationKey")
   }
 
 }

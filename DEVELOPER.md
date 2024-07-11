@@ -13,10 +13,6 @@ apibuilder download apicollective apibuilder-explicit-validation-core latest ser
 
 apibuilder download apicollective apibuilder-explicit-validation latest service > ./src/test/resources/apibuilder-explicit-validation-service.json
 
-apibuilder download flow api latest service > ./src/test/resources/flow-api-service.json
-
-apibuilder download flow api-internal latest service > ./src/test/resources/flow-api-internal-service.json
-
 apibuilder download apicollective apibuilder-api latest service > ./src/test/resources/apibuilder-api-service.json
 
 apibuilder download apicollective apibuilder-common latest service > ./src/test/resources/apibuilder-common-service.json
