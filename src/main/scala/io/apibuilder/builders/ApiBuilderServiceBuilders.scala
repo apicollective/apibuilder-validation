@@ -56,12 +56,20 @@ trait ApiBuilderServiceBuilders {
   def makeModel(
     name: String = random(),
     plural: String = random(),
+    description: Option[String] = None,
+    deprecation: Option[Deprecation] = None,
     fields: Seq[Field] = Nil,
+    attributes: Seq[Attribute] = Nil,
+    interfaces: Seq[String] = Nil
   ): Model = {
     Model(
       name = name,
       plural = plural,
-      fields = fields
+      description = description,
+      deprecation = deprecation,
+      fields = fields,
+      attributes = attributes,
+      interfaces = interfaces
     )
   }
 
