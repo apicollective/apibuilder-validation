@@ -28,3 +28,4 @@ lazy val root = project
     ),
     scalacOptions ++= allScalacOptions,
   )
+version := "0.5.1"
