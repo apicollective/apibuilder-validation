@@ -30,7 +30,6 @@ object JsonValidator {
 }
 
 case class JsonValidator(validator: ValidatedJsonValidator) {
-  import io.apibuilder.validation.util.Implicits._
 
   def findType(name: String, defaultNamespace: Option[String]): Seq[AnyType] =
     validator.findType(name, defaultNamespace)

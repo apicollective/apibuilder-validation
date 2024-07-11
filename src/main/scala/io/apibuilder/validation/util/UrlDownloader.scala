@@ -45,7 +45,6 @@ object ValidatedUrlDownloader {
 }
 
 object UrlDownloader {
-  import io.apibuilder.validation.util.Implicits._
 
   def withInputStream[T](url: String)(f: InputStream => ValidatedNec[String, T]): ValidatedNec[String, T] =
     ValidatedUrlDownloader.validateUrl(url).andThen { url =>
