@@ -85,7 +85,6 @@ trait MultiService extends ResponseHelpers {
 
   final def upcastOperationBody(method: Method, path: String, js: JsValue): ValidatedNec[String, JsValue] = {
     validateOperation(method, path).andThen { op =>
-      println(s"op: $op")
       upcast(op, js)
     }
   }
