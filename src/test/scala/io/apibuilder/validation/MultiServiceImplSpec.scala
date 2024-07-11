@@ -3,10 +3,9 @@ package io.apibuilder.validation
 import io.apibuilder.builders.ApiBuilderServiceBuilders
 import io.apibuilder.helpers.{Helpers, TestHelpers}
 import io.apibuilder.spec.v0.models.Method
-import play.api.libs.json.*
-import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+import play.api.libs.json.*
 
 class MultiServiceImplSpec extends AnyWordSpec with Matchers with Helpers with TestHelpers with ApiBuilderServiceBuilders {
 
@@ -97,13 +96,30 @@ class MultiServiceImplSpec extends AnyWordSpec with Matchers with Helpers with T
   }
 
   "url query example" in {
-    val form = FormData.parseEncoded("name=John%20Doe&expiration_month=12&expiration_year=2017&cvv=123&cipher=VnHzBw%2BbaGrKZL0fimklhKupHJeowxK2Mqa9LbECCnb3R%2FxIgS1vr0sFg2mUGsXR7bsNV61UURB91VrWr19V1g%3D%3D&challenge%5Btext%5D=Flow&challenge%5Bcipher%5D=df2BQZykhnTfIVIX6Vg9yjUmyEprz3dLmUYU0O8GeyCZ0t3pn1nXSP7DRDfsZAASwtNupqyYx3G4W%2BmGlWQreg%3D%3D&callback=__flowjsonp0&method=post")
+    val multi = MultiService(List(ApiBuilderService(makeService(
+      models = Seq(
+        makeModel("card"),
+        makeModel("card_form", fields = Seq(
+          makeField("name"),
+          makeField("expiration_month", `type` = "integer"),
+          makeField("expiration_year", `type` = "integer"),
+          makeField("cvv"),
+        )),
+      ),
+      resources = Seq(makeResource("card", operations = Seq(
+        makeOperation(Method.Post, "/cards")
+      )))
+    ))))
 
-    val js = multi.upcastOperationBody(
-      "POST",
-      "/:organization/cards",
-      Json.toJson(form)
-    ).toOption.get
+    val js = expectValidNec {
+      multi.upcastOperationBody(
+        "POST",
+        "/cards",
+        Json.toJson(
+          FormData.parseEncoded("name=John%20Doe&expiration_month=12&expiration_year=2017&cvv=123&cipher=VnHzBw%2BbaGrKZL0fimklhKupHJeowxK2Mqa9LbECCnb3R%2FxIgS1vr0sFg2mUGsXR7bsNV61UURB91VrWr19V1g%3D%3D&challenge%5Btext%5D=Flow&challenge%5Bcipher%5D=df2BQZykhnTfIVIX6Vg9yjUmyEprz3dLmUYU0O8GeyCZ0t3pn1nXSP7DRDfsZAASwtNupqyYx3G4W%2BmGlWQreg%3D%3D&callback=__flowjsonp0&method=post")
+        )
+      )
+    }
 
     (js \ "name").as[JsString].value must equal("John Doe")
     (js \ "expiration_month").as[JsNumber].value must equal(12)
@@ -112,54 +128,77 @@ class MultiServiceImplSpec extends AnyWordSpec with Matchers with Helpers with T
   }
 
   "simple number example" in {
-    val form = Json.obj(
-      "url" -> 123,
-      "events" -> 456
-    )
-
-    val js = multi.upcastOperationBody(
-      "POST",
-      "/:organization/webhooks",
-      Json.toJson(form)
-    ).toOption.get
+    val js = expectValidNec {
+      multi.upcastOperationBody(
+        "POST",
+        "/:organization/webhooks",
+        Json.obj(
+          "url" -> 123,
+          "events" -> 456
+        )
+      )
+    }
 
     (js \ "url").as[JsString].value must equal("123")
     (js \ "events").as[JsArray] must equal(JsArray(Seq(JsString("456"))))
   }
 
   "offers validation error w/ verb replacement" in {
-    multi.upcastOperationBody(
-      "OPTIONS",
-      "/:organization/webhooks",
-      Json.obj("url" -> "https://test.flow.io", "events" -> "*")
-    ) must equal(
-      Left(Seq(
-        "HTTP method 'OPTIONS' not defined for path '/:organization/webhooks' - Available methods: GET, POST, PUT, DELETE"
-      ))
-    )
-  }
-
-  "validate union type discriminator" in {
     expectInvalidNec {
       multi.upcastOperationBody(
-        "POST",
-        "/:organization/authorizations",
-        Json.obj("discriminator" -> "authorization_form")
+        "OPTIONS",
+        "/:organization/webhooks",
+        Json.obj("url" -> "https://test.flow.io", "events" -> "*")
       )
-    }.head.contains("Invalid discriminator 'authorization_form'") mustBe(true)
+    } mustBe Seq("HTTP method 'OPTIONS' not defined for path '/:organization/webhooks' - Available methods: POST")
   }
 
-  "validate union type" in {
-    expectInvalidNec {
-      multi.upcastOperationBody(
-        "POST",
-        "/:organization/authorizations",
-        Json.obj(
-          "order_number" -> "123",
-          "discriminator" -> "merchant_of_record_authorization_form"
+  "union type" must {
+    val multi = MultiService(List(ApiBuilderService(makeService(
+      models = Seq(
+        makeModel("card_authorization"),
+        makeModel("card_authorization_form", fields = Seq(
+          makeField("number"),
+          makeField("order_number"),
+        )),
+      ),
+      unions = Seq(
+        makeUnion("authorization", types = Seq(
+          makeUnionType("card_authorization")
+        )),
+        makeUnion("authorization_form", types = Seq(
+          makeUnionType("card_authorization_form")
+        ))
+      ),
+      resources = Seq(
+        makeResource("authorization", operations = Seq(
+          makeOperation(Method.Post, "/authorizations", body = Some(makeBody("authorization_form")))
+        ))
+      )
+    ))))
+
+    "validate discriminator" in {
+      expectInvalidNec {
+        multi.upcastOperationBody(
+          "POST",
+          "/authorizations",
+          Json.obj("discriminator" -> "foo")
         )
-      )
-    } mustBe Seq("Missing required field for merchant_of_record_authorization_form: token")
+      } mustBe Seq("TODO")
+    }
+
+    "validate union type" in {
+      expectInvalidNec {
+        multi.upcastOperationBody(
+          "POST",
+          "/authorizations",
+          Json.obj(
+            "order_number" -> "123",
+            "discriminator" -> "card_authorization_form"
+          )
+        )
+      } mustBe Seq("Missing required field for card_authorization_form: number")
+    }
   }
 
 }
