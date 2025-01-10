@@ -5,7 +5,7 @@ import io.apibuilder.helpers.{Helpers, TestHelpers}
 import io.apibuilder.spec.v0.models.Method
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import play.api.libs.json.*
+import play.api.libs.json._
 
 class MultiServiceImplSpec extends AnyWordSpec with Matchers with Helpers with TestHelpers with ApiBuilderServiceBuilders {
 

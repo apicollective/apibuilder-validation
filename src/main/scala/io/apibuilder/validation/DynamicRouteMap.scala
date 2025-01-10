@@ -7,11 +7,11 @@ case class StaticRouteMap(routes: Seq[OperationWithRoute]) {
     s"$method$path"
   }
 
-  private val lookup: Map[String, OperationWithRoute] = Map(
+  private val lookup: Map[String, OperationWithRoute] = {
     routes.map { op =>
       key(op.route.method, op.route.path) -> op
-    }*
-  )
+    }.toMap
+  }
 
   def find(method: Method, path: String): Option[OperationWithRoute] = {
     lookup.get(key(method, path))

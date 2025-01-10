@@ -3,4 +3,5 @@ code:
     apibuilder-spec:
       version: latest
       generators:
-        play_2_x_scala_3_standalone_json: src/main/scala/io/apibuilder/generated
+        play_2_x_standalone_json: src/main/scala-2.13/io/apibuilder/generated
+        play_2_x_scala_3_standalone_json: src/main/scala-3/io/apibuilder/generated

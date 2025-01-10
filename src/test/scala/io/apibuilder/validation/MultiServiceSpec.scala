@@ -3,7 +3,7 @@ package io.apibuilder.validation
 import io.apibuilder.builders.ApiBuilderServiceBuilders
 import io.apibuilder.helpers.{Helpers, TestHelpers}
 import io.apibuilder.spec.v0.models.{Method, ResponseCodeInt, Operation}
-import play.api.libs.json.*
+import play.api.libs.json._
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 

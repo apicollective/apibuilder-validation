@@ -5,11 +5,11 @@ import cats.data.ValidatedNec
 
 import java.io.{BufferedInputStream, ByteArrayOutputStream, File, FileInputStream, InputStream}
 import io.apibuilder.spec.v0.models.{Method, Operation, Service}
-import io.apibuilder.spec.v0.models.json.*
+import io.apibuilder.spec.v0.models.json._
 
 import java.nio.charset.StandardCharsets
 import io.apibuilder.validation.util.UrlDownloader
-import play.api.libs.json.*
+import play.api.libs.json._
 
 /**
   * Wraps a single API Builder service, providing helpers to validate

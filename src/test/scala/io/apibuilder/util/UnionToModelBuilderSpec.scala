@@ -2,7 +2,7 @@ package io.apibuilder.validation.util
 
 import cats.data.Validated.{Invalid, Valid}
 import io.apibuilder.builders.{ApiBuilderServiceBuilders, MultiServiceBuilders}
-import io.apibuilder.spec.v0.models.*
+import io.apibuilder.spec.v0.models._
 import io.apibuilder.util.{UnionModel, UnionToModelBuilder}
 import io.apibuilder.validation.{ApiBuilderService, ApiBuilderType}
 import org.scalatest.Assertion

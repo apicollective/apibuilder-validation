@@ -7,7 +7,7 @@ import io.apibuilder.spec.v0.models.Service
 import org.joda.time.DateTime
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import play.api.libs.json.*
+import play.api.libs.json._
 
 class JsonValidatorSpec extends AnyWordSpec with Matchers with Helpers with TestHelpers with ApiBuilderServiceBuilders {
 

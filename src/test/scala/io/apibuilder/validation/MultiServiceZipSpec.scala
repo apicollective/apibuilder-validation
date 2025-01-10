@@ -2,11 +2,11 @@ package io.apibuilder.validation
 
 import java.io.File
 import io.apibuilder.builders.ApiBuilderServiceBuilders
-import io.apibuilder.spec.v0.models.json.*
+import io.apibuilder.spec.v0.models.json._
 import io.apibuilder.spec.v0.models.{Method, Service}
 import io.apibuilder.validation.zip.ZipFileBuilder
-import io.apibuilder.helpers.*
-import play.api.libs.json.*
+import io.apibuilder.helpers._
+import play.api.libs.json._
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
