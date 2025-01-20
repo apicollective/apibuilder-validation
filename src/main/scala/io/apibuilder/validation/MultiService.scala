@@ -2,10 +2,10 @@ package io.apibuilder.validation
 
 import cats.implicits._
 import cats.data.ValidatedNec
-import io.apibuilder.spec.v0.models.*
+import io.apibuilder.spec.v0.models._
 import io.apibuilder.validation.util.{FileOrder, StandardErrors}
 import io.apibuilder.validation.zip.ZipFileReader
-import play.api.libs.json.*
+import play.api.libs.json._
 
 /**
   * Wrapper to work with multiple API Builder services.

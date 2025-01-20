@@ -1,7 +1,7 @@
 package apibuilder
 
-import io.apibuilder.spec.v0.models.*
-import io.apibuilder.validation.*
+import io.apibuilder.spec.v0.models._
+import io.apibuilder.validation._
 
 import scala.annotation.tailrec
 import scala.util.matching.Regex

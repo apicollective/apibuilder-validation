@@ -1,6 +1,6 @@
 package io.apibuilder.validation.util
 
-import cats.implicits.*
+import cats.implicits._
 import io.apibuilder.helpers.{FileHelpers, TestHelpers}
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec

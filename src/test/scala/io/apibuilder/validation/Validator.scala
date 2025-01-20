@@ -10,7 +10,7 @@ import cats.implicits._
 import io.apibuilder.spec.v0.models.Service
 import play.api.libs.json.{JsArray, JsBoolean, JsValue, Json}
 import io.apibuilder.spec.v0.models.json._
-import org.apache.commons.compress.utils.IOUtils
+import org.apache.commons.io.IOUtils
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._

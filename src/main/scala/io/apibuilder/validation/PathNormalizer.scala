@@ -1,7 +1,7 @@
 package io.apibuilder.validation
 
 import cats.data.ValidatedNec
-import cats.implicits.*
+import cats.implicits._
 import io.apibuilder.spec.v0.models.{Method, Operation, Service}
 import io.apibuilder.validation.util.StandardErrors
 

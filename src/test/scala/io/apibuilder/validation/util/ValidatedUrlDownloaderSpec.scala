@@ -2,7 +2,7 @@ package io.apibuilder.validation.util
 
 import cats.data.NonEmptyChain
 import cats.data.Validated.{Invalid, Valid}
-import cats.implicits.*
+import cats.implicits._
 import io.apibuilder.helpers.FileHelpers
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec

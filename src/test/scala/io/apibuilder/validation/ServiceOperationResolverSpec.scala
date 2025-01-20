@@ -3,8 +3,8 @@ package io.apibuilder.validation
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import io.apibuilder.builders.ApiBuilderServiceBuilders
-import io.apibuilder.spec.v0.models.json.*
-import io.apibuilder.helpers.*
+import io.apibuilder.spec.v0.models.json._
+import io.apibuilder.helpers._
 import io.apibuilder.spec.v0.models.Method
 import io.apibuilder.validation.zip.ZipFileBuilder
 import play.api.libs.json.Json
