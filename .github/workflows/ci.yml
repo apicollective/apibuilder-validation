@@ -16,12 +16,13 @@ jobs:
         java: [ '13' ]
         scala: [ '2.13.10' ]
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Set up JDK
-      uses: actions/setup-java@v2
-      with:
-        java-version: ${{ matrix.java }}
-        distribution: 'zulu'
+      uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{matrix.java}}
+          cache: sbt
     - name: print Java version
       run: java -version
     - name: Setup sbt launcher

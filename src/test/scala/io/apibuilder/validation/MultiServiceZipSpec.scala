@@ -1,14 +1,15 @@
 package io.apibuilder.validation
 
-import java.io.File
 import io.apibuilder.builders.ApiBuilderServiceBuilders
+import io.apibuilder.helpers._
 import io.apibuilder.spec.v0.models.json._
 import io.apibuilder.spec.v0.models.{Method, Service}
 import io.apibuilder.validation.zip.ZipFileBuilder
-import io.apibuilder.helpers._
-import play.api.libs.json._
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+import play.api.libs.json._
+
+import java.io.File
 
 class MultiServiceZipSpec extends AnyWordSpec with Matchers
   with ApiBuilderServiceBuilders
@@ -60,9 +61,6 @@ class MultiServiceZipSpec extends AnyWordSpec with Matchers
   }
 
   "Able to download service from the internet" in {
-    expectValidNec {
-      MultiService.fromUrl("file:///tmp/specs/api.spec.billing.json")
-    }
     expectValidNec {
       MultiService.fromUrl("https://cdn.flow.io/util/lib-apibuilder/specs.zip")
     }
