@@ -19,10 +19,10 @@ jobs:
     - uses: actions/checkout@v4
     - name: Set up JDK
       uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: ${{matrix.java}}
-          cache: sbt
+      with:
+        distribution: temurin
+        java-version: ${{matrix.java}}
+        cache: sbt
     - name: print Java version
       run: java -version
     - name: Setup sbt launcher
