@@ -24,6 +24,8 @@ jobs:
         distribution: 'zulu'
     - name: print Java version
       run: java -version
+    - name: Setup sbt launcher
+      uses: sbt/setup-sbt@v1
     - name: setup apibuilder config
       run: mkdir ~/.apibuilder && echo "[default]" > ~/.apibuilder/config
     - name: Build
