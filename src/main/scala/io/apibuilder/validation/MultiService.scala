@@ -167,14 +167,20 @@ object MultiService {
     }
   }
 
+  /**
+   * Allow a client to read from for example s3 by providing a reader already constructed from the
+   * stream.
+   */
+  def fromZipFileReader(reader: ZipFileReader): ValidatedNec[String, Seq[ApiBuilderService]] = {
+    val fileSorter = FileOrder(reader.entries.find(_.name.toLowerCase() == OrderByFileName).map(_.file))
+    reader.entries
+      .filter { e => ZipFileReader.isJsonFile(e.name) }
+      .sortBy { e => fileSorter.sortOrder(e.name) }
+      .map { e => ApiBuilderService.fromFile(e.file) }
+      .sequence
+  }
+
   private def servicesFromZip(url: String): ValidatedNec[String, Seq[ApiBuilderService]] = {
-    ZipFileReader.fromUrl(url).andThen { reader =>
-      val fileSorter = FileOrder(reader.entries.find(_.name.toLowerCase() == OrderByFileName).map(_.file))
-      reader.entries
-        .filter { e => ZipFileReader.isJsonFile(e.name) }
-        .sortBy { e => fileSorter.sortOrder(e.name) }
-        .map { e => ApiBuilderService.fromFile(e.file) }
-        .sequence
-    }
+    ZipFileReader.fromUrl(url).andThen(fromZipFileReader)
   }
 }
