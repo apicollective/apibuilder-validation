@@ -7,6 +7,8 @@ import io.apibuilder.validation.util.{FileOrder, StandardErrors}
 import io.apibuilder.validation.zip.ZipFileReader
 import play.api.libs.json._
 
+import scala.util.Using
+
 /**
   * Wrapper to work with multiple API Builder services.
   * Takes an ordered list of services. If multiple
@@ -169,7 +171,8 @@ object MultiService {
 
   /**
    * Allow a client to read from for example s3 by providing a reader already constructed from the
-   * stream.
+   * stream. Note that the caller is responsible for ensuring that close() is called on the reader
+   * when done.
    */
   def fromZipFileReader(reader: ZipFileReader): ValidatedNec[String, Seq[ApiBuilderService]] = {
     val fileSorter = FileOrder(reader.entries.find(_.name.toLowerCase() == OrderByFileName).map(_.file))
@@ -181,6 +184,10 @@ object MultiService {
   }
 
   private def servicesFromZip(url: String): ValidatedNec[String, Seq[ApiBuilderService]] = {
-    ZipFileReader.fromUrl(url).andThen(fromZipFileReader)
+    ZipFileReader
+      .fromUrl(url)
+      .andThen { zfr =>
+        Using.resource(zfr)(fromZipFileReader)
+      }
   }
 }
