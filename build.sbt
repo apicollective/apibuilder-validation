@@ -38,4 +38,13 @@ lazy val root = project
   )
 
 
-version := "0.5.4"
+version := "0.5.5"
+
+ThisBuild / publishTo := {
+  val host = "https://flow.jfrog.io/flow"
+  if (isSnapshot.value)
+    Some("Artifactory Realm" at s"$host/libs-snapshot-local;build.timestamp=" + new java.util.Date().getTime)
+  else
+    Some("Artifactory Realm" at s"$host/libs-release-local")
+}
+
