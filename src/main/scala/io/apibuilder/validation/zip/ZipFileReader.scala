@@ -8,6 +8,7 @@ import java.nio.file.Files
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import io.apibuilder.validation.util.UrlDownloader
+import org.apache.commons.io.FileUtils
 
 object ZipFileReader {
 
@@ -36,9 +37,13 @@ object ZipFileReader {
   }
 }
 
-case class ZipFileReader(inputStream: InputStream) {
+case class ZipFileReader(inputStream: InputStream) extends AutoCloseable {
 
   private val destDir: File = Files.createTempDirectory("zipfilereader").toFile
+
+  override def close(): Unit = {
+    FileUtils.deleteQuietly(destDir)
+  }
 
   /**
     * Returns a list of the entries of the zip file (all files ending with .json)
