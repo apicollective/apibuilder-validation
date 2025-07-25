@@ -33,12 +33,18 @@ lazy val root = project
       "org.typelevel" %% "cats-core" % "2.12.0",
       "org.scalatest" %% "scalatest" % "3.2.19" % Test,
     ),
+    credentials += Credentials(
+      "Artifactory Realm",
+      "flow.jfrog.io",
+      System.getenv("ARTIFACTORY_USERNAME"),
+      System.getenv("ARTIFACTORY_PASSWORD"),
+    ),
     scalacOptions ++= allScalacOptions,
     crossScalaVersions := supportedScalaVersions,
   )
 
 
-version := "0.5.5"
+version := "0.5.6"
 
 ThisBuild / publishTo := {
   val host = "https://flow.jfrog.io/flow"
