@@ -8,7 +8,9 @@ import java.nio.file.Files
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import io.apibuilder.validation.util.UrlDownloader
-import org.apache.commons.io.FileUtils
+import org.apache.commons.io.FileDeleteStrategy
+
+import scala.util.control.NonFatal
 
 object ZipFileReader {
 
@@ -42,7 +44,8 @@ case class ZipFileReader(inputStream: InputStream) extends AutoCloseable {
   private val destDir: File = Files.createTempDirectory("zipfilereader").toFile
 
   override def close(): Unit = {
-    FileUtils.deleteQuietly(destDir)
+    try FileDeleteStrategy.FORCE.delete(destDir)
+    catch { case NonFatal(ex) => println(s"Error deleting zipfilereader folder '${ex.getMessage}', ignoring") }
   }
 
   /**
