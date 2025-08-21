@@ -1,7 +1,7 @@
 package io.apibuilder.rewriter
 
 import apibuilder.{ApiBuilderHelper, ApiBuilderHelperImpl}
-import io.apibuilder.validation.{ApiBuilderType, MultiService}
+import io.apibuilder.validation.{ApiBuilderService, ApiBuilderType, MultiService, ScalarType}
 
 import scala.annotation.tailrec
 
@@ -24,6 +24,7 @@ case class MinimalTypesRewriter(types: Iterable[ApiBuilderType]) extends Default
           service = s.service.copy(
             enums = svcTypes.collect { case t: ApiBuilderType.Enum => t }.map(_.`enum`),
             models = svcTypes.collect { case t: ApiBuilderType.Model => t }.map(_.model),
+            interfaces = svcTypes.collect { case t: ApiBuilderType.Interface => t }.map(_.interface),
             unions = svcTypes.collect { case t: ApiBuilderType.Union => t }.map(_.union),
           )
         )

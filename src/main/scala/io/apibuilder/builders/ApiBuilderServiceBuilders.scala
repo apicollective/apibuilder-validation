@@ -1,8 +1,7 @@
 package io.apibuilder.builders
 
 import java.util.UUID
-
-import io.apibuilder.spec.v0.models.{Annotation, Apidoc, Application, Attribute, Body, Contact, Deprecation, Enum, EnumValue, Field, Header, Import, Info, License, Method, Model, Operation, Organization, Parameter, ParameterLocation, Resource, Response, ResponseCode, ResponseCodeInt, Service, Union, UnionType}
+import io.apibuilder.spec.v0.models.{Annotation, Apidoc, Application, Attribute, Body, Contact, Deprecation, Enum, EnumValue, Field, Header, Import, Info, Interface, License, Method, Model, Operation, Organization, Parameter, ParameterLocation, Resource, Response, ResponseCode, ResponseCodeInt, Service, Union, UnionType}
 import io.apibuilder.validation.{ApiBuilderType, MultiService}
 import play.api.libs.json.{JsObject, Json}
 
@@ -26,6 +25,7 @@ trait ApiBuilderServiceBuilders {
     headers: Seq[Header] = Nil,
     imports: Seq[Import] = Nil,
     enums: Seq[Enum] = Nil,
+    interfaces: Seq[Interface] = Nil,
     unions: Seq[Union] = Nil,
     models: Seq[Model] = Nil,
     resources: Seq[Resource] = Nil,
@@ -45,6 +45,7 @@ trait ApiBuilderServiceBuilders {
       headers = headers,
       imports = imports,
       enums = enums,
+      interfaces = interfaces,
       unions = unions,
       models = models,
       resources = resources,
@@ -145,6 +146,24 @@ trait ApiBuilderServiceBuilders {
     contact: Option[Contact] = None,
   ): Info = {
     Info(license = license, contact = contact)
+  }
+
+  def makeInterface(
+    name: String,
+    plural: String,
+    fields: Seq[Field],
+    description: Option[String] = None,
+    deprecation: Option[Deprecation] = None,
+    attributes: Seq[Attribute] = Nil
+  ): Interface = {
+    Interface(
+      name = name,
+      plural = plural,
+      description = description,
+      deprecation = deprecation,
+      fields = fields,
+      attributes = attributes
+    )
   }
 
   def makeUnion(
