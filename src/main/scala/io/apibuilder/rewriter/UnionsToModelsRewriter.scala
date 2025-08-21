@@ -26,6 +26,7 @@ object UnionsToModelsRewriter extends DefaultRewriter {
         unions = newTypes.collect { case e: ApiBuilderType.Union => e.union },
         enums = service.service.enums ++ newTypes.collect { case e: ApiBuilderType.Enum => e.`enum` },
         models = service.service.models ++ newTypes.collect { case m: ApiBuilderType.Model => m.model },
+        interfaces = service.service.interfaces ++ newTypes.collect { case m: ApiBuilderType.Interface => m.interface },
       )
     )
   }
