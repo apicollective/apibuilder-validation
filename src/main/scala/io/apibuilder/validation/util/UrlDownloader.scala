@@ -1,7 +1,7 @@
 package io.apibuilder.validation.util
 
 import java.io.{BufferedInputStream, InputStream}
-import java.net.URL
+import java.net.{URI, URL}
 
 import cats.data.ValidatedNec
 import cats.implicits._
@@ -11,7 +11,7 @@ import scala.util.{Failure, Success, Try}
 object ValidatedUrlDownloader {
   def validateUrl(url: String): ValidatedNec[String, URL] = {
     Try {
-      new URL(url)
+      new URI(url).toURL
     } match {
       case Success(u) => u.validNec
       case Failure(ex) => s"Invalid URL: ${ex.getMessage}".invalidNec
