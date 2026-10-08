@@ -259,8 +259,8 @@ case class ValidatedJsonValidator(services: List[ApiBuilderService]) {
     js: JsObject,
     prefix: Option[String]
   ): ValidatedNec[String, JsValue] = {
-    val missingFields = fields.map(_.field).filter(_.required).filter { f =>
-      (js \ f.name).toOption.isEmpty
+    val missingFields = fields.map(_.field).filter { f =>
+      f.required && f.default.isEmpty && (js \ f.name).toOption.isEmpty
     }.map(_.name).toList
 
     val missingFieldsV = missingFields match {
