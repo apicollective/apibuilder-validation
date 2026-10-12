@@ -334,6 +334,20 @@ class JsonValidatorSpec extends AnyWordSpec with Matchers with Helpers with Test
     validateError("user", Json.obj())(service) mustBe Seq("Missing required field for user: emails")
   }
 
+  "required field with a default is not reported as missing" in {
+    val service = makeService(
+      models = Seq(
+        makeModel("user", fields = Seq(
+          makeField("emails", `type` = "[string]"),
+          makeField("status", `type` = "string", default = Some("active"))
+        ))
+      )
+    )
+
+    validateError("user", Json.obj())(service) mustBe Seq("Missing required field for user: emails")
+    validateValid("user", Json.obj("emails" -> Seq("jean@test.io")))(service) mustBe Json.obj("emails" -> Seq("jean@test.io"))
+  }
+
   "integer" in {
     val service = makeService(
       models = Seq(
