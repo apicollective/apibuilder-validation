@@ -27,8 +27,8 @@ lazy val root = project
     testOptions += Tests.Argument("-oF"),
     libraryDependencies ++= Seq(
       "com.github.apicollective" % "apibuilder-commons" % (if (scalaVersion.value.startsWith("3")) "0.1.0" else "0.0.6"),
-      "com.typesafe.play" %% "play-json" % (if (scalaVersion.value.startsWith("3")) "2.10.6" else "2.9.4") % Provided,
-      "com.typesafe.play" %% "play-json-joda" % (if (scalaVersion.value.startsWith("3")) "2.10.6" else "2.9.4") % Provided,
+      "com.typesafe.play" %% "play-json" % "2.10.8" % Provided,
+      "com.typesafe.play" %% "play-json-joda" % "2.10.8" % Provided,
       "org.apache.commons" % "commons-compress" % "1.26.2",
       "org.typelevel" %% "cats-core" % "2.12.0",
       "org.scalatest" %% "scalatest" % "3.2.19" % Test,
