@@ -9,6 +9,12 @@ providing human understandable error messages. Also handles safe
 conversions of types (e.g. number to string) based on the API Builder
 schema definition.
 
+# Dependencies
+
+play-json and play-json-joda are `Provided` dependencies, so add both to your own build.
+play-json 2.x (`com.typesafe.play`) and 3.x (`org.playframework`) contain the same classes
+and cannot share a classpath; the application decides which one it runs on.
+
 # Usage
 
 ```
