@@ -37,5 +37,5 @@ lazy val root = project
     crossScalaVersions := supportedScalaVersions,
   )
 
-version := "0.5.9"
+version := "0.6.0"
 
